@@ -62,6 +62,9 @@ select = [
   "S101",  # assert is how pytest checks things
   "ARG",   # fakes keep the real signatures, so some arguments go unused
 ]
+"tests/unit/test_gate_static.py" = [
+  "E501",  # one adversarial sample per table row reads better unwrapped
+]
 
 [tool.mypy]
 python_version = "3.12"
