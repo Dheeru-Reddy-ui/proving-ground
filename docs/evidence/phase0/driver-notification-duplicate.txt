@@ -1,0 +1,30 @@
+# AltTester-Driver 2.3.2: duplicate LOG notification delivery
+# Captured by script on 2026-10-07T12:06:09Z. No device involved: exercises the driver's own NotificationHandler.
+
+## Driver source (alttester/_websocket.py, NotificationHandler.add_notification_listener)
+    def add_notification_listener(self, notification_type, callback, overwrite=False):
+        if overwrite:
+            self._notification_callbacks[notification_type] = [callback]
+
+        self._notification_callbacks[notification_type].append(callback)
+
+## Default in AltDriver.add_notification_listener
+904:    def add_notification_listener(self, notification_type, notification_callback, overwrite=True):
+
+## Repro script
+"""Repro: AltTester-Driver 2.3.2 NotificationHandler delivers a LOG notification twice
+when a listener is added with overwrite=True (the AltDriver.add_notification_listener default)."""
+from alttester._websocket import NotificationHandler
+from alttester.commands.Notifications.notification_type import NotificationType
+
+msg = {"commandName": "logNotification", "data": '{"message": "hi", "stack_trace": "", "level": 3}'}
+for overwrite in (True, False):
+    handler = NotificationHandler()
+    got = []
+    handler.add_notification_listener(NotificationType.LOG, got.append, overwrite=overwrite)
+    handler.handle_notification(msg)
+    print(f"overwrite={overwrite}: callbacks registered={len(handler._notification_callbacks[NotificationType.LOG])}, deliveries of ONE log={len(got)}")
+
+## Output
+overwrite=True: callbacks registered=2, deliveries of ONE log=2
+overwrite=False: callbacks registered=1, deliveries of ONE log=1
