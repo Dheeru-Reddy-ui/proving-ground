@@ -10,6 +10,7 @@ Raw evidence for the values below: [`docs/evidence/phase0/environment.txt`](evid
 |---|---|---|
 | Unity Editor | 2021.3.45f2 (`88f88f591b2e`) | `ProjectVersion.txt` of the game project |
 | Unity Android modules | Android Build Support; OpenJDK 11.0.14.1; SDK build-tools 34.0.0, platforms android-33/34/35, platform-tools 32.0.0; NDK r21d (21.3.6528147) | files under the editor's `PlaybackEngines/AndroidPlayer` |
+| Endless Runner sample (Asset Store) | `Endless Runner Mobile Sample Project.unitypackage`, 66,105,424 bytes, sha256 `669522542709b43deaefecd78a502d7a69fe89db7fddd920a9b269a96c58164c` | Asset Store download cache, imported 2026-10-07 |
 | AltTester Unity SDK | 2.3.2, GPL-3.0 `.unitypackage` (to be imported in M0.2) | alttester.com downloads page, 2026-10-07 |
 | AltTester Desktop | 2.3.3; its built-in server reports **2.3.2.0** | Desktop log line `AltTester(R) Server version: 2.3.2.0` |
 | AltTester Python driver | 2.3.2 (`AltTester-Driver` on PyPI) | `uv.lock`; `importlib.metadata` |

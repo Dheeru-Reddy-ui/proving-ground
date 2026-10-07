@@ -10,8 +10,8 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 
 | Milestone | State | Evidence |
 |---|---|---|
-| M0.1 Repository scaffold | Done locally; CI pending first push | commits `5999222`..HEAD; local checks below |
-| M0.2 Build checklist (`game/BUILD_TRASHCAT.md`) | Not started | |
+| M0.1 Repository scaffold | Done | commits `5999222`..`5864dc3`; local checks below; first CI run green: [run 37616434447](https://github.com/Dheeru-Reddy-ui/proving-ground/actions/runs/37616434447) |
+| M0.2 Build checklist (`game/BUILD_TRASHCAT.md`) | Checklist written; Dheeru's build not done yet | [`game/BUILD_TRASHCAT.md`](../game/BUILD_TRASHCAT.md) |
 | M0.3 `pg doctor` | Not started | |
 | M0.4 Connectivity and introspection spike | Not started | |
 | M0.5 Game model | Not started | |
@@ -47,14 +47,13 @@ Raw output: [`docs/evidence/phase0/environment.txt`](evidence/phase0/environment
 
 ### Not done or not verified
 
-- M0.2 to M0.8.
-- CI on GitHub has not run yet.
+- M0.2 build (Dheeru), and M0.3 to M0.8.
 - The AltTester SDK is not imported into the game yet, and no APK exists.
 - License: options in ADR-0003; Dheeru decides.
 
 ### Known risks carried forward
 
 - **First-run tutorial.** After `pm clear`, `PlayerData.tutorialDone` is false: the loadout screen shows a `tutorialBlocker` and the first run is the tutorial (game scripts `LoadoutState.cs`, `GameState.cs`). Every test starts from `pm clear`, so M0.4/M0.5 must establish what the blocker blocks.
-- **Player settings to change in M0.2:** managed stripping is Low (AltTester's known issue requires Minimal for IL2CPP); target architectures are ARMv7 + ARM64 + x86 (the phone only needs ARM64).
+- **Player settings to change in M0.2** (both covered by the checklist): managed stripping is Low (AltTester's known issue requires Minimal for IL2CPP); target architectures are ARMv7 + ARM64 + x86 (the phone only needs ARM64).
 - **Phone "Stay awake" is off.** A sleeping screen pauses the game; Dheeru to enable it before automated runs.
 - **Licence window.** The driver may only be used with a valid AltTester subscription; continuing past the trial depends on the Lite request.
