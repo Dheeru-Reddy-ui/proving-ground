@@ -51,16 +51,7 @@ def fresh_launch(
     after_clear = clock()
     launched = adb.am_start(activity, serial)
     after_launch = clock()
-
-    dismissed = False
-    deadline = after_launch + dialog_timeout_s
-    while clock() < deadline:
-        point = compat_dialog_ok(adb.ui_dump(serial))
-        if point is not None:
-            adb.input_tap(point.x, point.y, serial)
-            dismissed = True
-            break
-        sleep(POLL_S)
+    dismissed = _dismiss_compat_dialog(adb, serial, clock, sleep, after_launch + dialog_timeout_s)
     after_dialog = clock()
 
     return LaunchReport(
@@ -73,3 +64,43 @@ def fresh_launch(
             "dialog": round(after_dialog - after_launch, 2),
         },
     )
+
+
+class RelaunchAdb(LaunchAdb, Protocol):
+    def force_stop(self, package: str, serial: str | None) -> AdbResult: ...
+
+
+RELAUNCH_DIALOG_TIMEOUT_S = 3.0
+
+
+def relaunch(
+    adb: RelaunchAdb,
+    package: str,
+    activity: str,
+    serial: str | None,
+    *,
+    clock: Callable[[], float],
+    sleep: Callable[[float], None],
+    dialog_timeout_s: float = RELAUNCH_DIALOG_TIMEOUT_S,
+) -> bool:
+    """Stop the app and start it again with its data kept; returns whether the compatibility
+    warning had to be dismissed (observed: it does not show after a plain force-stop)."""
+    adb.force_stop(package, serial)
+    adb.am_start(activity, serial)
+    return _dismiss_compat_dialog(adb, serial, clock, sleep, clock() + dialog_timeout_s)
+
+
+def _dismiss_compat_dialog(
+    adb: LaunchAdb,
+    serial: str | None,
+    clock: Callable[[], float],
+    sleep: Callable[[float], None],
+    deadline: float,
+) -> bool:
+    while clock() < deadline:
+        point = compat_dialog_ok(adb.ui_dump(serial))
+        if point is not None:
+            adb.input_tap(point.x, point.y, serial)
+            return True
+        sleep(POLL_S)
+    return False

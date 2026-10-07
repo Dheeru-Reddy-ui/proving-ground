@@ -6,13 +6,16 @@ driver can be faked in unit tests. Generated tests never import it.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
 from pg_core.doctor import AppProbe, AppProbeError
+from pg_sdk._ui import Element
+from pg_sdk.errors import PGInfraError
 
 DEFAULT_APP_NAME = "__default__"
 
@@ -96,12 +99,16 @@ class AltTesterSession:
     def call_static_method(
         self, type_name: str, method: str, assembly: str, parameters: list[str] | None = None
     ) -> Any:
-        return self._driver.call_static_method(type_name, method, assembly, parameters=parameters)
+        with _infra_errors():
+            return self._driver.call_static_method(
+                type_name, method, assembly, parameters=parameters
+            )
 
     def get_static_property(
         self, component: str, path: str, assembly: str, max_depth: int = 2
     ) -> Any:
-        return self._driver.get_static_property(component, path, assembly, max_depth=max_depth)
+        with _infra_errors():
+            return self._driver.get_static_property(component, path, assembly, max_depth=max_depth)
 
     def screen_size(self) -> tuple[int, int]:
         width, height = self._driver.get_application_screensize()
@@ -118,10 +125,14 @@ class AltTesterSession:
             return None
         return float(obj.x), float(obj.y)
 
-    def tap(self, path: str) -> None:
-        from alttester import By
-
-        self._driver.find_object(By.PATH, path).tap()
+    def tap(self, path: str) -> bool:
+        """Tap the active object at `path`; False when there is none."""
+        obj = self._find_object(path)
+        if obj is None:
+            return False
+        with _infra_errors():
+            obj.tap()
+        return True
 
     def time_scale(self) -> float:
         return float(self._driver.get_time_scale())
@@ -131,6 +142,96 @@ class AltTesterSession:
 
     def close(self) -> None:
         self._driver.stop()
+
+    # --- pg_sdk._ui.Driver ----------------------------------------------------------------
+
+    def find(self, path: str) -> Element | None:
+        obj = self._find_object(path)
+        return None if obj is None else _element(obj)
+
+    def find_all(self, path: str) -> list[Element]:
+        from alttester import By
+
+        with _infra_errors():
+            return [_element(obj) for obj in self._driver.find_objects(By.PATH, path)]
+
+    def text(self, path: str) -> str | None:
+        from alttester import exceptions as alt
+
+        obj = self._find_object(path)
+        if obj is None:
+            return None
+        with _infra_errors():
+            try:
+                return str(obj.get_text())
+            except alt.NotFoundException:
+                return None
+
+    def component_property(self, path: str, component: str, prop: str, assembly: str) -> Any:
+        from alttester import exceptions as alt
+
+        obj = self._find_object(path)
+        if obj is None:
+            raise LookupError(f"no active object at {path}")
+        with _infra_errors():
+            try:
+                return obj.get_component_property(component, prop, assembly)
+            except alt.NotFoundException as exc:
+                raise LookupError(f"{component}.{prop} at {path}: {exc}") from exc
+
+    def set_component_property(
+        self, path: str, component: str, prop: str, assembly: str, value: Any
+    ) -> None:
+        obj = self._find_object(path)
+        if obj is None:
+            raise LookupError(f"no active object at {path}")
+        with _infra_errors():
+            obj.set_component_property(component, prop, assembly, value)
+
+    def static_property(self, type_name: str, member: str, assembly: str) -> Any:
+        with _infra_errors():
+            return self._driver.get_static_property(type_name, member, assembly, max_depth=2)
+
+    def set_static_property(self, type_name: str, member: str, assembly: str, value: Any) -> None:
+        with _infra_errors():
+            self._driver.set_static_property(type_name, member, assembly, value)
+
+    def swipe(
+        self, start: tuple[float, float], end: tuple[float, float], duration_s: float
+    ) -> None:
+        with _infra_errors():
+            self._driver.swipe(start, end, duration=duration_s, wait=True)
+
+    def _find_object(self, path: str) -> Any:
+        from alttester import By
+        from alttester import exceptions as alt
+
+        with _infra_errors():
+            try:
+                return self._driver.find_object(By.PATH, path)
+            except alt.NotFoundException:
+                return None
+
+
+def _element(obj: Any) -> Element:
+    return Element(id=int(obj.id), name=str(obj.name), x=float(obj.x), y=float(obj.y))
+
+
+@contextmanager
+def _infra_errors() -> Iterator[None]:
+    """Report a broken device chain as PGInfraError, so it is never mistaken for a test result."""
+    from alttester import exceptions as alt
+    from websocket import WebSocketException
+
+    try:
+        yield
+    except (
+        alt.ConnectionError,
+        alt.CommandResponseTimeoutException,
+        WebSocketException,
+        ConnectionError,
+    ) as exc:
+        raise PGInfraError(f"driver connection failed: {type(exc).__name__}: {exc}") from exc
 
 
 def connect(

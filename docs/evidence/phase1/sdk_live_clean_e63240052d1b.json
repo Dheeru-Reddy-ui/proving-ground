@@ -1,0 +1,268 @@
+{
+  "tests/device/test_sdk_live.py::test_fresh_game_main_menu": {
+    "phases": {
+      "setup": {
+        "outcome": "passed",
+        "duration_s": 8.792,
+        "failure_kind": null,
+        "message": null
+      },
+      "call": {
+        "outcome": "passed",
+        "duration_s": 1.804,
+        "failure_kind": null,
+        "message": null
+      },
+      "teardown": {
+        "outcome": "passed",
+        "duration_s": 0.049,
+        "failure_kind": null,
+        "message": null
+      }
+    },
+    "run_id": "sdklive4",
+    "spec_ids": [],
+    "flags_supported": false,
+    "flags_active": null,
+    "launch": {
+      "seconds": {
+        "pm_clear": 0.2,
+        "launch": 0.25,
+        "dialog": 2.36
+      },
+      "dialog_dismissed": true
+    },
+    "game_errors": [],
+    "allowed_game_errors": [],
+    "actions": [
+      "tap START button"
+    ]
+  },
+  "tests/device/test_sdk_live.py::test_store_reads_and_buys": {
+    "phases": {
+      "setup": {
+        "outcome": "passed",
+        "duration_s": 8.48,
+        "failure_kind": null,
+        "message": null
+      },
+      "call": {
+        "outcome": "passed",
+        "duration_s": 20.741,
+        "failure_kind": null,
+        "message": null
+      },
+      "teardown": {
+        "outcome": "passed",
+        "duration_s": 0.061,
+        "failure_kind": null,
+        "message": null
+      }
+    },
+    "run_id": "sdklive4",
+    "spec_ids": [],
+    "flags_supported": false,
+    "flags_active": null,
+    "launch": {
+      "seconds": {
+        "pm_clear": 0.17,
+        "launch": 0.22,
+        "dialog": 2.31
+      },
+      "dialog_dismissed": true
+    },
+    "game_errors": [],
+    "allowed_game_errors": [],
+    "actions": [
+      "tap START button",
+      "setup coins = 60000",
+      "setup premium = 30",
+      "tap store button",
+      "tap Buy on 'Magnet'",
+      "tap characters tab",
+      "tap Buy on 'Rubbish Raccoon'",
+      "tap accessories tab",
+      "tap store close button",
+      "tap character arrow"
+    ]
+  },
+  "tests/device/test_sdk_live.py::test_unaffordable_item_is_refused": {
+    "phases": {
+      "setup": {
+        "outcome": "passed",
+        "duration_s": 8.52,
+        "failure_kind": null,
+        "message": null
+      },
+      "call": {
+        "outcome": "passed",
+        "duration_s": 7.768,
+        "failure_kind": null,
+        "message": null
+      },
+      "teardown": {
+        "outcome": "passed",
+        "duration_s": 0.058,
+        "failure_kind": null,
+        "message": null
+      }
+    },
+    "run_id": "sdklive4",
+    "spec_ids": [],
+    "flags_supported": false,
+    "flags_active": null,
+    "launch": {
+      "seconds": {
+        "pm_clear": 0.17,
+        "launch": 0.25,
+        "dialog": 2.28
+      },
+      "dialog_dismissed": true
+    },
+    "game_errors": [],
+    "allowed_game_errors": [],
+    "actions": [
+      "tap START button",
+      "setup coins = 100",
+      "tap store button",
+      "tap Buy on 'Magnet'"
+    ]
+  },
+  "tests/device/test_sdk_live.py::test_mission_claim_and_settings": {
+    "phases": {
+      "setup": {
+        "outcome": "passed",
+        "duration_s": 8.613,
+        "failure_kind": null,
+        "message": null
+      },
+      "call": {
+        "outcome": "passed",
+        "duration_s": 7.676,
+        "failure_kind": null,
+        "message": null
+      },
+      "teardown": {
+        "outcome": "passed",
+        "duration_s": 0.028,
+        "failure_kind": null,
+        "message": null
+      }
+    },
+    "run_id": "sdklive4",
+    "spec_ids": [],
+    "flags_supported": false,
+    "flags_active": null,
+    "launch": {
+      "seconds": {
+        "pm_clear": 0.2,
+        "launch": 0.27,
+        "dialog": 2.3
+      },
+      "dialog_dismissed": true
+    },
+    "game_errors": [],
+    "allowed_game_errors": [],
+    "actions": [
+      "tap START button",
+      "setup complete mission 0",
+      "tap missions button",
+      "tap claim button of mission 0",
+      "tap missions close button",
+      "tap settings button",
+      "set settings.music to 0.25",
+      "tap settings close button"
+    ]
+  },
+  "tests/device/test_sdk_live.py::test_restart_keeps_purchases": {
+    "phases": {
+      "setup": {
+        "outcome": "passed",
+        "duration_s": 8.641,
+        "failure_kind": null,
+        "message": null
+      },
+      "call": {
+        "outcome": "passed",
+        "duration_s": 16.277,
+        "failure_kind": null,
+        "message": null
+      },
+      "teardown": {
+        "outcome": "passed",
+        "duration_s": 0.038,
+        "failure_kind": null,
+        "message": null
+      }
+    },
+    "run_id": "sdklive4",
+    "spec_ids": [],
+    "flags_supported": false,
+    "flags_active": null,
+    "launch": {
+      "seconds": {
+        "pm_clear": 0.19,
+        "launch": 0.28,
+        "dialog": 2.3
+      },
+      "dialog_dismissed": true
+    },
+    "game_errors": [],
+    "allowed_game_errors": [],
+    "actions": [
+      "tap START button",
+      "setup coins = 2000",
+      "tap store button",
+      "tap Buy on 'Magnet'",
+      "tap store close button",
+      "restart the game",
+      "tap START button"
+    ]
+  },
+  "tests/device/test_sdk_live.py::test_run_to_game_over": {
+    "phases": {
+      "setup": {
+        "outcome": "passed",
+        "duration_s": 8.901,
+        "failure_kind": null,
+        "message": null
+      },
+      "call": {
+        "outcome": "passed",
+        "duration_s": 20.048,
+        "failure_kind": null,
+        "message": null
+      },
+      "teardown": {
+        "outcome": "passed",
+        "duration_s": 0.038,
+        "failure_kind": null,
+        "message": null
+      }
+    },
+    "run_id": "sdklive4",
+    "spec_ids": [],
+    "flags_supported": false,
+    "flags_active": null,
+    "launch": {
+      "seconds": {
+        "pm_clear": 0.19,
+        "launch": 0.25,
+        "dialog": 2.58
+      },
+      "dialog_dismissed": true
+    },
+    "game_errors": [],
+    "allowed_game_errors": [],
+    "actions": [
+      "tap START button",
+      "setup complete tutorial",
+      "tap run button",
+      "tap pause button",
+      "tap resume button",
+      "play until out of lives",
+      "tap game over button",
+      "tap main menu button"
+    ]
+  }
+}

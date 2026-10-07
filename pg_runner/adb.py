@@ -70,6 +70,10 @@ class Adb:
     def pidof(self, package: str, serial: str | None) -> int | None:
         return parse_pidof(self.run("shell", "pidof", package, serial=serial).stdout)
 
+    def force_stop(self, package: str, serial: str | None) -> AdbResult:
+        """Stop the app without touching its data (a player closing the game)."""
+        return self.run("shell", "am", "force-stop", package, serial=serial)
+
     def pm_clear(self, package: str, serial: str | None) -> AdbResult:
         """Delete the app's data (save file, PlayerPrefs) and stop it: a first-launch state."""
         return self.run("shell", "pm", "clear", package, serial=serial)

@@ -1,0 +1,93 @@
+# Locator map for TrashCat build e63240052d1b (ARM64-only rebuild, 2026-10-07).
+# Paths come from the Phase 0 scene dumps (docs/evidence/phase0/scenes/) and the live probes of
+# 2026-10-07. Keys are stable names used by pg_sdk; Phase 3 repairs change values, never keys.
+# `row.*` and `mission.*` paths are relative to one row/entry object.
+build_tag: e63240052d1b
+locators:
+  start.button: /Canvas/StartButton
+
+  main_menu.store_button: /UICamera/Loadout/StoreButton
+  main_menu.run_button: /UICamera/Loadout/StartButton
+  main_menu.missions_button: /UICamera/Loadout/MissionButton
+  main_menu.settings_button: /UICamera/Loadout/SettingButton
+  main_menu.leaderboard_button: /UICamera/Loadout/OpenLeaderboard
+  main_menu.tutorial_overlay: /UICamera/Loadout/TutorialOverlay
+  main_menu.character_name: /UICamera/Loadout/CharZone/CharName
+  main_menu.character_left: /UICamera/Loadout/CharZone/CharName/CharSelector/ButtonLeft
+  main_menu.character_right: /UICamera/Loadout/CharZone/CharName/CharSelector/ButtonRight
+  main_menu.theme_name: /UICamera/Loadout/ThemeZone/Image/ThemeName
+  main_menu.theme_left: /UICamera/Loadout/ThemeZone/ThemeSelector/ButtonLeft
+  main_menu.theme_right: /UICamera/Loadout/ThemeZone/ThemeSelector/ButtonRight
+  main_menu.accessory_name: /UICamera/Loadout/AccessoriesSelector/Border/AccessoryName
+  main_menu.accessory_up: /UICamera/Loadout/AccessoriesSelector/ButtonTop
+  main_menu.accessory_down: /UICamera/Loadout/AccessoriesSelector/ButtonBottom
+  main_menu.power_up_amount: /UICamera/Loadout/PowerupZone/Image/Amount
+  main_menu.power_up_left: /UICamera/Loadout/PowerupZone/ButtonLeft
+  main_menu.power_up_right: /UICamera/Loadout/PowerupZone/ButtonRight
+
+  store.close: /Canvas/Background/Button
+  store.coins: /Canvas/Background/Coin/CoinsCounter
+  store.premium: /Canvas/Background/Premium/PremiumCounter
+  store.tab_labels: /Canvas/Background/TabsSwitch/*/Text
+  store.tab.power_ups: /Canvas/Background/TabsSwitch/Item
+  store.tab.characters: /Canvas/Background/TabsSwitch/Character
+  store.tab.accessories: /Canvas/Background/TabsSwitch/Accesories
+  store.tab.themes: /Canvas/Background/TabsSwitch/Themes
+  store.list.power_ups: /Canvas/Background/ItemsList
+  store.list.characters: /Canvas/Background/CharacterList
+  store.list.accessories: /Canvas/Background/CharacterAccessoriesList
+  store.list.themes: /Canvas/Background/ThemeList
+  store.list_entries: Container/*
+  store.row_name_prefix: ItemEntry
+  store.header_name_prefix: Header
+  store.header.name: Name
+  row.name: NamePriceButtonZone/Name
+  row.coin_price: NamePriceButtonZone/PriceButtonZone/PriceZone/PriceCoin/Amount
+  row.premium_price: NamePriceButtonZone/PriceButtonZone/PriceZone/PricePremium/Amount
+  row.count: Icon/Count
+  row.buy_button: NamePriceButtonZone/PriceButtonZone/BuyButton
+  row.buy_label: NamePriceButtonZone/PriceButtonZone/BuyButton/Text
+
+  missions.main_menu.root: /UICamera/Loadout/MissionPopup
+  missions.game_over.root: /UICamera/GameOver/MissionPopup
+  missions.close: MissionBackground/CloseButton
+  missions.entries: MissionBackground/MissionsContainer/Scroll View/Viewport/Content/MissionEntry(Clone)
+  mission.description: Image/DescText
+  mission.reward: Image/Reward/RewardText
+  mission.progress: Image/Reward/Text
+  mission.claim: Image/ClaimButton
+
+  settings.close: /UICamera/Loadout/SettingPopup/Background/CloseButton
+  settings.master: /UICamera/Loadout/SettingPopup/Background/MasterSlider
+  settings.music: /UICamera/Loadout/SettingPopup/Background/MusicSlider
+  settings.sound_effects: /UICamera/Loadout/SettingPopup/Background/MasterSFXSlider
+  settings.delete_data: /UICamera/Loadout/SettingPopup/Background/DeleteData
+  settings.confirm_yes: /UICamera/Loadout/SettingPopup/ConfirmPopup/Image/YESButton
+  settings.confirm_no: /UICamera/Loadout/SettingPopup/ConfirmPopup/Image/NOButton
+
+  leaderboard.close: /UICamera/Leaderboard/Background/Button
+  leaderboard.entries: /UICamera/Leaderboard/Background/Display/*
+  leaderboard.entry.number: Number
+  leaderboard.entry.name: Name
+  leaderboard.entry.score: Score
+
+  run.pause: /UICamera/Game/WholeUI/pauseButton
+  run.score: /UICamera/Game/WholeUI/ScoreZone/ScoreLabel/ScoreText
+  run.multiplier: /UICamera/Game/WholeUI/ScoreZone/ScoreLabel/ScoreText/MultiplierText
+  run.distance: /UICamera/Game/WholeUI/DistanceZone/DistanceText
+  run.coins: /UICamera/Game/WholeUI/CoinZone/CoinText
+  run.premium: /UICamera/Game/WholeUI/PremiumZone/PremiumText
+  run.hearts: /UICamera/Game/WholeUI/Life/*
+  run.resume: /UICamera/Game/PauseMenu/Resume
+  run.exit: /UICamera/Game/PauseMenu/Exit
+  run.death.game_over: /UICamera/Game/DeathPopup/GameOver
+  run.death.premium_button: /UICamera/Game/DeathPopup/ButtonLayout/Premium Button
+  run.death.cost: /UICamera/Game/DeathPopup/ButtonLayout/Premium Button/PremiumCost
+  run.death.premium_owned: /UICamera/Game/DeathPopup/PremiumDisplay/PremiumOwnCount
+
+  game_over.run_again: /UICamera/GameOver/RunButton
+  game_over.store: /UICamera/GameOver/StoreButton
+  game_over.main_menu: /UICamera/GameOver/Loadout
+  game_over.leaderboard: /UICamera/GameOver/OpenLeaderboard
+  game_over.missions: /UICamera/GameOver/MissionsButton
+  game_over.score: /UICamera/GameOver/Highscore/PlayerEntry/score
