@@ -67,21 +67,24 @@ The adb serial is kept in the local `.env` (`PG_ADB_SERIAL`), not in the repo.
 
 ## Game build
 
-First instrumented build: Dheeru, 2026-10-07 19:05, `Build Finished, Result: Success.` (Unity editor log). Checked with `aapt dump badging` from Unity's SDK build-tools 34.0.0, `unzip`, and `adb`.
+Current build: **ARM64-only rebuild** by Dheeru, 2026-10-07 22:08 (`Build Finished, Result: Success.`), installed 22:11. Checked with `aapt dump badging` from Unity's SDK build-tools 34.0.0, `unzip`, and `adb`. Rows not marked otherwise are unchanged from the first build.
 
 | Field | Value |
 |---|---|
-| APK | `C:\Users\dheer\pg_game\Builds\TrashCat.apk`, 121,941,454 bytes |
-| APK sha256 | `cf86374974de0964efb33bdf9d78664c28f4c4032276501f7b1c800603616bc2` (build tag `cf86374974de`) |
+| APK | `C:\Users\dheer\pg_game\Builds\TrashCat.apk`, 64,108,498 bytes |
+| APK sha256 | `e63240052d1b6c889eb2f33a102db25ab123728670a9805a06ac12404b7c324b` (build tag `e63240052d1b`) |
 | Android package name | `com.DefaultCompany.TrashCat`. Unity's default `com.<Company>.<Product>`, because "Override Default Package Name" is off in Player settings; adopted as-is. |
 | Launch activity | `com.DefaultCompany.TrashCat/com.unity3d.player.UnityPlayerActivity` (`cmd package resolve-activity --brief`) |
 | Version | versionCode 350, versionName 1.0; minSdk 22, targetSdk 35 |
 | Scripting backend / stripping | IL2CPP / Managed Stripping Level **Minimal** |
-| Native code | `arm64-v8a`, `armeabi-v7a`, `x86`. ARM64-only was not applied; the phone installs and runs `arm64-v8a` (`primaryCpuAbi`). Next rebuild: ARM64 only. |
+| Native code | `arm64-v8a` only (Target Architectures = ARM64) |
 | Development build | yes (`application-debuggable`) |
 | AltTester SDK inside | 2.3.2: `AltRunner`, `AltTesterPrefab` and `AltTester.AltTesterUnitySDK.*` present in the IL2CPP metadata |
 | Permissions | INTERNET, ACCESS_NETWORK_STATE, AD_ID, BILLING (the last two come from the Ads and IAP packages) |
-| Installed | 2026-10-07 19:06 with `adb install -r` (about 11 s) |
+| Installed | 2026-10-07 22:11 with `adb install -r` |
+| Checks on this build | `pg doctor` 8/8 ([evidence](evidence/phase0/doctor_all_pass_arm64.txt)); smoke 10/10, p50 8.25 s, p95 8.58 s (`smoke-20261007T1641590000-e2bea7`) |
+
+Earlier build, used for the Phase 0 spike and the 20-run baseline: sha256 `cf86374974de0964efb33bdf9d78664c28f4c4032276501f7b1c800603616bc2`, 121,941,454 bytes, built 2026-10-07 19:05, same settings except native code `arm64-v8a`, `armeabi-v7a` and `x86`.
 
 ## Other tools on the device host (not used by this project)
 
