@@ -15,7 +15,7 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M0.3 `pg doctor` | Done: 8/8 PASS live on 2026-10-07 | [`docs/evidence/phase0/doctor_all_pass.txt`](evidence/phase0/doctor_all_pass.txt); rules in `pg_core/doctor.py` (100% line and branch coverage) |
 | M0.4 Connectivity and introspection spike | Done, all six steps live on 2026-10-07: connect; dumps + screenshots; log capture in both channels; reset (`pm clear` + relaunch to `Start`) 8.0 s / 12.1 s / 10.4 s over 3 runs, first-launch save verified each time, including after the save held 2,000,000 coins; time scale ×2.00 game time and ×2.07 distance on a normal run. Side effects: the game's Pause/Resume and tutorial prompts reset the time scale. Driver/server issues recorded in `docs/VERSIONS.md` | [`spike/`](evidence/phase0/spike/), [`logs_check.json`](evidence/phase0/logs_check.json), [`scenes/`](evidence/phase0/scenes/) |
 | M0.5 Game model | Done pending review: every screen visited on the phone with a dump and screenshot (Start, main menu first launch and after a run, missions, settings, leaderboard, store x4 tabs, run HUD, second chance, game over). Buying and mission claiming not exercised yet | [`docs/game/GAME_MODEL.md`](game/GAME_MODEL.md), [`scenes/`](evidence/phase0/scenes/) |
-| M0.6 Feature specs | Drafts written (6 files, 59 statements, 4 marked `[confirm]`), left uncommitted for Dheeru to review, edit and commit | `specs/` (Dheeru's commit pending) |
+| M0.6 Feature specs | Done: 6 files, 58 statements (4 marked `[confirm]`), committed `a60b9d2` at Dheeru's request, before any bug catalog | [`specs/`](../specs/) |
 | M0.7 Reliability baseline (20 smoke runs) | Done: **20/20 passed**, p50 8.31 s, p95 8.55 s (run `smoke-20261007T1620250000-b47a01`, 2026-10-07). Earlier attempt failed 0/3 at `connect` because Android 16's compatibility dialog blocked Unity; fixed by ADR-0008 | [`smoke/`](evidence/phase0/smoke/), [ADR-0008](adr/0008-android-compat-dialog.md) |
 | M0.8 ADRs 0001–0003 | Written: 0001 (target game and tooling), 0002 (free-plan limits), 0003 (license options; decision pending), plus 0008 (Android 16 compatibility dialog) | `docs/adr/` |
 
@@ -38,7 +38,7 @@ Scenario: `pm clear` + launch (dismissing the compatibility dialog) → Start �
 | Log capture verified in both channels | ✅ | [`logs_check.json`](evidence/phase0/logs_check.json) |
 | Reset verified; time measured | ✅ 7.5–12.1 s across runs | [`spike/`](evidence/phase0/spike/) |
 | Smoke test ≥ 19/20, numbers in PROGRESS.md | ✅ 20/20 | above |
-| Specs committed (`git log --oneline -- specs/`) | ⏳ waiting for Dheeru's review and commit | `specs/` (uncommitted drafts) |
+| Specs committed (`git log --oneline -- specs/`) | ✅ commit `a60b9d2`, before any bug catalog | `specs/` |
 | CI green on GitHub | ✅ on every push so far | GitHub Actions |
 | VERSIONS.md complete, including confirmed driver API | ✅ | [`VERSIONS.md`](VERSIONS.md) |
 
@@ -70,7 +70,6 @@ Raw output: [`docs/evidence/phase0/environment.txt`](evidence/phase0/environment
 
 ### Not done or not verified
 
-- M0.6: Dheeru's review and commit of the specs (the last open exit-gate item).
 - License decision (ADR-0003).
 - License: options in ADR-0003; Dheeru decides.
 
