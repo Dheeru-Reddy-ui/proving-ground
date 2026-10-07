@@ -7,6 +7,8 @@ requires-python = ">=3.12,<3.13"
 authors = [{ name = "Dheeru Reddy" }]
 dependencies = [
     "alttester-driver==2.3.2",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
     "typer>=0.27.3",
 ]
 
@@ -53,7 +55,10 @@ select = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101"]  # assert is how pytest checks things
+"tests/**" = [
+  "S101",  # assert is how pytest checks things
+  "ARG",   # fakes keep the real signatures, so some arguments go unused
+]
 
 [tool.mypy]
 python_version = "3.12"
@@ -71,6 +76,10 @@ testpaths = ["tests"]
 addopts = ["--import-mode=importlib", "-ra", "--strict-markers", "--strict-config"]
 markers = [
   "device: needs the phone and AltTester Desktop; never runs in CI",
+]
+filterwarnings = [
+  # pure-python-adb (a dependency of the AltTester driver) has invalid escapes in its regexes
+  "ignore:invalid escape sequence:SyntaxWarning",
 ]
 
 [tool.coverage.run]
