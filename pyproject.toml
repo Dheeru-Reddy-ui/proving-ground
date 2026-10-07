@@ -8,12 +8,15 @@ license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Dheeru Reddy" }]
 dependencies = [
+    "alembic>=1.20.0",
     "alttester-driver==2.3.2",
     "defusedxml>=0.7.1",
     "psutil>=7.2.2",
+    "psycopg[binary]>=3.3.6",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
     "pyyaml>=6.0.3",
+    "sqlalchemy>=2.0",
     "typer>=0.27.3",
 ]
 
@@ -35,6 +38,7 @@ packages = [
   "pg_worker",
   "pg_dashboard",
   "pg_cli",
+  "pg_db",
 ]
 
 [tool.ruff]
@@ -66,6 +70,9 @@ select = [
 ]
 "tests/unit/test_gate_static.py" = [
   "E501",  # one adversarial sample per table row reads better unwrapped
+]
+"tests/integration/test_db.py" = [
+  "E501",  # long table-name sets read better on one line
 ]
 "tests/unit/test_classify.py" = [
   "E501",  # one observation per table row reads better unwrapped

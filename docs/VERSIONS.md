@@ -17,6 +17,8 @@ Raw evidence for the values below: [`docs/evidence/phase0/environment.txt`](evid
 | Python | 3.12.5 | `uv run python --version` |
 | uv | 0.11.28 | `uv --version` |
 | adb on the device host | platform-tools 37.0.1 (adb 1.0.41) | `adb version` |
+| Postgres (Phase 1, local) | `postgres:16` image, digest `sha256:65b16a8b326e0cfbdf33fa7e783f2a0cb352a61448616ccccfd616ef42aa0f65`; container `pg-proving-ground` on `127.0.0.1:5433`, volume `pg_proving_ground_data` | `docker run` output, 2026-10-07 |
+| SQLAlchemy / Alembic / psycopg | 2.1.4 / 1.20.0 / 3.3.6 | `uv.lock` |
 | AltTester licence | Pro 30-day trial, activated 2026-10-07 (local time); Lite requested 2026-10-07, answer pending | Desktop log `Successful license activation!`, `License type: Pro` |
 
 ## Python driver
