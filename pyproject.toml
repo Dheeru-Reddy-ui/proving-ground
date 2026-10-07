@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "A trust layer for AI-generated game tests: a generated test enters the suite only after it runs, is deterministic and catches seeded bugs."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Dheeru Reddy" }]
 dependencies = [
     "alttester-driver==2.3.2",

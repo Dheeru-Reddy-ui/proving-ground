@@ -28,4 +28,4 @@ uv run pytest tests/unit -q
 
 ## License
 
-Not chosen yet; see [ADR-0003](docs/adr/0003-license.md). Until a license is added, all rights are reserved.
+[MIT](LICENSE), for this repository's own code and docs (see [ADR-0003](docs/adr/0003-license.md)). The AltTester driver and SDK and Unity's Endless Runner sample are not part of this repository and keep their own licenses.

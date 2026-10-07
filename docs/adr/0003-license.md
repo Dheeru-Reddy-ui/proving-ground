@@ -1,6 +1,6 @@
 # ADR-0003: License for this repository
 
-- **Status:** Proposed. Options only; the decision is Dheeru's.
+- **Status:** Accepted: MIT (decided by Dheeru on 2026-10-07)
 - **Date:** 2026-10-07
 - **Deciders:** Dheeru (owner)
 
@@ -68,7 +68,9 @@ All rights reserved.
 
 ## Decision
 
-Pending. No LICENSE file is added until Dheeru decides.
+**MIT** (option A), chosen by Dheeru on 2026-10-07. The repository root has a `LICENSE` file (MIT, copyright 2026 Dheeru Reddy), and `pyproject.toml` declares `license = "MIT"`.
+
+The licence covers only this repository's own files. The AltTester driver and SDK and Unity's Endless Runner sample keep their own terms; the README says so.
 
 ## References
 
