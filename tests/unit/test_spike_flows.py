@@ -105,6 +105,12 @@ class FakeAdb:
     def pm_clear(self, package: str, serial: str | None) -> AdbResult:
         return AdbResult(("adb",), 0, "Success\n", "")
 
+    def ui_dump(self, serial: str | None) -> str:
+        return '<?xml version="1.0" ?><hierarchy rotation="0"></hierarchy>'
+
+    def input_tap(self, x: int, y: int, serial: str | None) -> AdbResult:
+        return AdbResult(("adb",), 0, "", "")
+
     def am_start(self, component: str, serial: str | None) -> AdbResult:
         return AdbResult(("adb",), 0, "Status: ok\nTotalTime: 812\n", "")
 

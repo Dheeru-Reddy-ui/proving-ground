@@ -86,6 +86,17 @@ class Adb:
             "shell", "am", "start", "-W", "-n", component, serial=serial, timeout_s=LAUNCH_TIMEOUT_S
         )
 
+    def ui_dump(self, serial: str | None) -> str:
+        """The current screen's accessibility tree (`uiautomator dump`) as XML text."""
+        self.run("shell", "uiautomator", "dump", UI_DUMP_PATH, serial=serial)
+        return self.run("exec-out", "cat", UI_DUMP_PATH, serial=serial).stdout
+
+    def input_tap(self, x: int, y: int, serial: str | None) -> AdbResult:
+        return self.run("shell", "input", "tap", str(x), str(y), serial=serial)
+
+
+UI_DUMP_PATH = "/sdcard/pg_ui.xml"
+
 
 def parse_pidof(output: str) -> int | None:
     """`pidof` prints the process id(s); the game runs as a single process."""

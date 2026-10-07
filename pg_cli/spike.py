@@ -24,6 +24,7 @@ from pg_cli.settings import Settings
 from pg_core.scene import build_scene_dump
 from pg_core.spike import TimeScaleSample, build_tag, check_time_scale, diff_expected, lines_with
 from pg_runner.adb import Adb, LogcatCapture
+from pg_runner.launch import fresh_launch
 from pg_sdk._driver import AltTesterSession, LogLine, connect
 
 ARTIFACTS = Path("artifacts/spike")
@@ -221,16 +222,15 @@ def _total_time_ms(am_start_output: str) -> int | None:
 
 
 def run_reset(env: SpikeEnv, expect_scene: str, timeout_s: float) -> dict[str, Any]:
-    """`pm clear`, relaunch, wait for the first screen, and compare the save with first launch."""
+    """`pm clear`, relaunch (dismissing Android's 16 KB warning), wait for the first screen,
+    and compare the save with first launch."""
     package = env.package()
     activity = env.adb.resolve_activity(package, env.serial)
     if activity is None:
         raise typer.BadParameter(f"could not resolve the launch activity of {package}")
 
     started = env.clock()
-    cleared = env.adb.pm_clear(package, env.serial)
-    after_clear = env.clock()
-    launched = env.adb.am_start(activity, env.serial)
+    launch = fresh_launch(env.adb, package, activity, env.serial, clock=env.clock, sleep=env.sleep)
     after_launch = env.clock()
 
     player_data: dict[str, Any] = {}
@@ -251,11 +251,11 @@ def run_reset(env: SpikeEnv, expect_scene: str, timeout_s: float) -> dict[str, A
     result = {
         "package": package,
         "activity": activity,
-        "pm_clear": cleared.stdout.strip(),
-        "am_start_total_time_ms": _total_time_ms(launched.stdout),
+        "pm_clear": launch.pm_clear,
+        "am_start_total_time_ms": _total_time_ms(launch.am_start),
+        "compat_dialog_dismissed": launch.dialog_dismissed,
         "seconds": {
-            "pm_clear": round(after_clear - started, 2),
-            "launch": round(after_launch - after_clear, 2),
+            **launch.seconds,
             "driver_connected": round(after_connect - after_launch, 2),
             "first_scene": round(after_scene - after_connect, 2),
             "total": round(after_scene - started, 2),

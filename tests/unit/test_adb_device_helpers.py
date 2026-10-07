@@ -125,3 +125,16 @@ def test_logcat_capture_kills_a_process_that_will_not_stop(
     with LogcatCapture(Adb("adb.exe"), 1, None, tmp_path / "l.txt"):
         pass
     assert FakePopen.instances[0].killed  # type: ignore[attr-defined]
+
+
+def test_ui_dump_and_tap_commands(monkeypatch: pytest.MonkeyPatch) -> None:
+    rec = Recorder("<hierarchy/>")
+    monkeypatch.setattr(adb_mod.subprocess, "run", rec)
+    adb = Adb("adb.exe")
+    assert adb.ui_dump("SER") == "<hierarchy/>"
+    adb.input_tap(328, 2947, "SER")
+    assert [argv[3:] for argv, _ in rec.calls] == [
+        ["shell", "uiautomator", "dump", adb_mod.UI_DUMP_PATH],
+        ["exec-out", "cat", adb_mod.UI_DUMP_PATH],
+        ["shell", "input", "tap", "328", "2947"],
+    ]

@@ -22,6 +22,7 @@ class SmokeRun(BaseModel):
     failed_step: str | None = None
     error: str | None = None
     error_logs: int = 0  # error-level log notifications from the game during the run
+    compat_dialog_dismissed: bool = False  # Android's 16 KB warning was tapped away (ADR-0008)
 
 
 class SmokeSummary(BaseModel):

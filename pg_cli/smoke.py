@@ -1,6 +1,7 @@
 """`pg smoke`: the Phase 0 reliability baseline (M0.7).
 
-One iteration: `pm clear` + launch -> Start -> tap START -> main menu -> open store -> close store.
+One iteration: `pm clear` + launch (dismissing Android's 16 KB warning, ADR-0008) -> Start
+-> tap START -> main menu -> open store -> close store.
 This is infrastructure, not part of any test suite. Results go to `artifacts/smoke/<build>/`.
 """
 
@@ -14,6 +15,7 @@ import typer
 
 from pg_cli.spike import ARTIFACTS, SpikeEnv, default_env
 from pg_core.smoke import SmokeRun, summarize
+from pg_runner.launch import fresh_launch
 from pg_sdk._driver import AltTesterSession, LogLine
 
 START_BUTTON = "/Canvas/StartButton"
@@ -56,9 +58,12 @@ def run_once(env: SpikeEnv, index: int, activity: str) -> SmokeRun:
         mark = now
 
     session: AltTesterSession | None = None
+    dialog_dismissed = False
     try:
-        env.adb.pm_clear(package, env.serial)
-        env.adb.am_start(activity, env.serial)
+        launch = fresh_launch(
+            env.adb, package, activity, env.serial, clock=env.clock, sleep=env.sleep
+        )
+        dialog_dismissed = launch.dialog_dismissed
         done("reset")
         current = "connect"
         session = env.open_session(CONNECT_TIMEOUT_S)
@@ -110,6 +115,7 @@ def run_once(env: SpikeEnv, index: int, activity: str) -> SmokeRun:
         failed_step=failed_step,
         error=error,
         error_logs=error_logs,
+        compat_dialog_dismissed=dialog_dismissed,
     )
 
 
