@@ -1,0 +1,21 @@
+# Hooks run through `uv run`, so they use the exact tool versions pinned in uv.lock.
+# Install once with: uv run pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check --fix --exit-non-zero-on-fix
+        language: unsupported
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: unsupported
+        types_or: [python, pyi]
+      - id: mypy-strict
+        name: mypy (strict packages)
+        entry: uv run mypy pg_core pg_sdk pg_generator pg_runner
+        language: unsupported
+        pass_filenames: false
+        types_or: [python, pyi]

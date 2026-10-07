@@ -1,0 +1,47 @@
+# Secrets and local config (keep .env.example current instead)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+dist/
+*.egg-info/
+
+# Run artifacts (dumps, screenshots, logs). Evidence worth keeping is copied to docs/evidence/.
+artifacts/
+
+# Android and Unity binaries. The Unity project lives outside this repo (PG_GAME_PROJECT_DIR).
+*.apk
+*.aab
+*.unitypackage
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+*.csproj
+*.sln
+
+# game/: only our own hook scripts and docs are tracked, never Asset Store or AltTester code
+game/*
+!game/unity_scripts/
+!game/HOOKS.md
+!game/BUILD_TRASHCAT.md
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
