@@ -11,6 +11,7 @@ dependencies = [
     "alttester-driver==2.3.2",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
+    "pyyaml>=6.0.3",
     "typer>=0.27.3",
 ]
 
@@ -98,4 +99,5 @@ dev = [
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "ruff>=0.16.10",
+    "types-pyyaml>=6.0.12.20260906",
 ]

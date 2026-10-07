@@ -1,0 +1,126 @@
+# Seeded-bug catalog. EVALUATION MATERIAL: never put this file, a bug ID or a flag name into an
+# LLM prompt (CLAUDE.md rule 3). Hook points: game/HOOKS.md.
+#
+# The split is not hand-picked: pg_core.catalog.stratified_split draws it from split_seed, the
+# hash of the commit that added specs/ (a60b9d2), and `pg bugs check` fails if the `split`
+# fields differ from that draw. Holdout bugs are used only for final measurement (Phase 4);
+# they are frozen in benchmark/HOLDOUT_FREEZE.md.
+#
+# pages: the pg_sdk pages where the bug shows (pg_core.pages). G3 runs a test against a dev
+# bug only if the test touches one of these pages.
+version: 1
+split_seed: a60b9d2c9a75532a4f4bf3f6aed2eb898f7eb0aa
+holdout_share: 0.4
+bugs:
+  - id: SB01
+    flag: sb_item_double_charge
+    category: price_charged_wrong
+    feature: store
+    pages: [store]
+    symptom: Buying a power-up takes twice its coin price.
+    split: holdout
+  - id: SB02
+    flag: sb_character_premium_not_charged
+    category: price_charged_wrong
+    feature: store
+    pages: [store]
+    symptom: Buying a character leaves the premium balance unchanged.
+    split: dev
+  - id: SB03
+    flag: sb_theme_not_granted
+    category: purchase_not_granted
+    feature: store
+    pages: [store, main_menu]
+    symptom: Buying a theme charges the price but the theme is not owned or selectable.
+    split: holdout
+  - id: SB04
+    flag: sb_accessory_not_granted
+    category: purchase_not_granted
+    feature: store
+    pages: [store, main_menu]
+    symptom: Buying an accessory charges the price but the accessory is not owned.
+    split: dev
+  - id: SB05
+    flag: sb_character_coin_check_skipped
+    category: purchase_insufficient_funds
+    feature: store
+    pages: [store]
+    symptom: An unaffordable character has an enabled Buy button and a non-red price; buying drives coins negative.
+    split: dev
+  - id: SB06
+    flag: sb_item_affordable_one_short
+    category: purchase_insufficient_funds
+    feature: store
+    pages: [store]
+    symptom: A power-up can be bought with one coin less than its price, leaving coins at -1.
+    split: holdout
+  - id: SB07
+    flag: sb_character_purchase_not_saved
+    category: progress_not_persisted
+    feature: persistence
+    pages: [store, app]
+    symptom: A bought character and the coins spent revert after the game is closed and reopened.
+    split: holdout
+  - id: SB08
+    flag: sb_tutorial_done_not_loaded
+    category: progress_not_persisted
+    feature: persistence
+    pages: [app, main_menu, run]
+    symptom: The tutorial is shown again after the game is closed and reopened.
+    split: dev
+  - id: SB09
+    flag: sb_settings_not_saved_on_close
+    category: settings_not_persisted
+    feature: settings
+    pages: [settings, app]
+    symptom: Volume changes are lost when the game is closed and reopened.
+    split: dev
+  - id: SB10
+    flag: sb_volumes_swapped_on_load
+    category: settings_not_persisted
+    feature: settings
+    pages: [settings, app]
+    symptom: After reopening the game the music and sound-effects volumes are swapped.
+    split: holdout
+  - id: SB11
+    flag: sb_mission_reward_doubled
+    category: mission_reward
+    feature: missions
+    pages: [missions]
+    symptom: Claiming a mission adds twice its premium reward.
+    split: dev
+  - id: SB12
+    flag: sb_mission_reward_not_granted
+    category: mission_reward
+    feature: missions
+    pages: [missions]
+    symptom: Claiming a mission removes it but adds no premium.
+    split: holdout
+  - id: SB13
+    flag: sb_gameover_shows_coins
+    category: gameover_wrong_value
+    feature: run_and_gameover
+    pages: [game_over]
+    symptom: The game-over screen shows the run's coin count instead of its score.
+    split: dev
+  - id: SB14
+    flag: sb_run_ignores_selected_character
+    category: selection_not_applied
+    feature: character_select
+    pages: [run, main_menu]
+    symptom: The run uses the first owned character whatever the main menu selected.
+    split: dev
+  - id: SB15
+    flag: sb_missions_close_locked
+    category: soft_lock
+    feature: missions
+    pages: [missions]
+    symptom: The missions popup cannot be closed.
+    split: dev
+  - id: SB16
+    flag: sb_accessories_tab_throws
+    category: error_log
+    feature: store
+    pages: [store]
+    symptom: Opening the store's Accessories tab logs an exception.
+    split: dev
