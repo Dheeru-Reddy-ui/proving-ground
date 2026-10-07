@@ -17,7 +17,7 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M0.5 Game model | Not started | |
 | M0.6 Feature specs | Not started | |
 | M0.7 Reliability baseline (20 smoke runs) | Not started | |
-| M0.8 ADRs 0001–0003 | ADR-0003 (options) written; 0001 and 0002 not started | `docs/adr/` |
+| M0.8 ADRs 0001–0003 | Written: 0001 (target game and tooling), 0002 (free-plan limits), 0003 (license options; decision pending) | `docs/adr/` |
 
 ### M0.1 verification (local, 2026-10-07)
 
