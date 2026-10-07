@@ -33,3 +33,9 @@ class Settings(BaseSettings):
     pg_llm_model: str | None = None
     pg_llm_api_key: SecretStr | None = None
     pg_max_cost_per_run_usd: Decimal | None = None
+    # Prices per million tokens from the provider's pricing page; 0 on a free tier.
+    pg_llm_input_usd_per_mtok: Decimal = Decimal(0)
+    pg_llm_output_usd_per_mtok: Decimal = Decimal(0)
+    pg_llm_temperature: float = 0.4
+    pg_llm_max_output_tokens: int = 16000
+    pg_llm_timeout_s: float = 180.0
