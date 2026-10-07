@@ -1,0 +1,84 @@
+{
+  "run_id": "smoke-20261007T1611210000-4631ed",
+  "build": "cf86374974de",
+  "started_at": "2026-10-07T16:14:24+00:00",
+  "scenario": "pm clear + launch -> Start -> START -> main menu -> open store -> close store",
+  "summary": {
+    "runs": 3,
+    "passed": 0,
+    "pass_rate": 0.0,
+    "p50_seconds": null,
+    "p95_seconds": null,
+    "meets_bar": false,
+    "failures": [
+      {
+        "index": 1,
+        "passed": false,
+        "seconds": 61.58,
+        "steps": {
+          "reset": 0.45
+        },
+        "failed_step": "connect",
+        "error": "NoAppConnected: No app connected that has the given tags.",
+        "error_logs": 0
+      },
+      {
+        "index": 2,
+        "passed": false,
+        "seconds": 61.06,
+        "steps": {
+          "reset": 0.45
+        },
+        "failed_step": "connect",
+        "error": "NoAppConnected: No app connected that has the given tags.",
+        "error_logs": 0
+      },
+      {
+        "index": 3,
+        "passed": false,
+        "seconds": 61.05,
+        "steps": {
+          "reset": 0.42
+        },
+        "failed_step": "connect",
+        "error": "NoAppConnected: No app connected that has the given tags.",
+        "error_logs": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "index": 1,
+      "passed": false,
+      "seconds": 61.58,
+      "steps": {
+        "reset": 0.45
+      },
+      "failed_step": "connect",
+      "error": "NoAppConnected: No app connected that has the given tags.",
+      "error_logs": 0
+    },
+    {
+      "index": 2,
+      "passed": false,
+      "seconds": 61.06,
+      "steps": {
+        "reset": 0.45
+      },
+      "failed_step": "connect",
+      "error": "NoAppConnected: No app connected that has the given tags.",
+      "error_logs": 0
+    },
+    {
+      "index": 3,
+      "passed": false,
+      "seconds": 61.05,
+      "steps": {
+        "reset": 0.42
+      },
+      "failed_step": "connect",
+      "error": "NoAppConnected: No app connected that has the given tags.",
+      "error_logs": 0
+    }
+  ]
+}

@@ -63,6 +63,8 @@ Each call below is used by our code, matches the installed package's signature, 
 
 The adb serial is kept in the local `.env` (`PG_ADB_SERIAL`), not in the repo.
 
+**Android 16 compatibility warning.** Launching the debuggable build shows "Android app compatibility: this app isn't 16 KB-compatible". Unity 2021.3.45f2's libraries are not 16 KB-aligned, but the phone uses 4 KB pages, so the game runs. The dialog blocks Unity from starting, and `pm clear` resets "Don't show again", so every reset taps its OK (ADR-0008).
+
 ## Game build
 
 First instrumented build: Dheeru, 2026-10-07 19:05, `Build Finished, Result: Success.` (Unity editor log). Checked with `aapt dump badging` from Unity's SDK build-tools 34.0.0, `unzip`, and `adb`.

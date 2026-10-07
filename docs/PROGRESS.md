@@ -16,8 +16,31 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M0.4 Connectivity and introspection spike | Done, all six steps live on 2026-10-07: connect; dumps + screenshots; log capture in both channels; reset (`pm clear` + relaunch to `Start`) 8.0 s / 12.1 s / 10.4 s over 3 runs, first-launch save verified each time, including after the save held 2,000,000 coins; time scale ×2.00 game time and ×2.07 distance on a normal run. Side effects: the game's Pause/Resume and tutorial prompts reset the time scale. Driver/server issues recorded in `docs/VERSIONS.md` | [`spike/`](evidence/phase0/spike/), [`logs_check.json`](evidence/phase0/logs_check.json), [`scenes/`](evidence/phase0/scenes/) |
 | M0.5 Game model | Done pending review: every screen visited on the phone with a dump and screenshot (Start, main menu first launch and after a run, missions, settings, leaderboard, store x4 tabs, run HUD, second chance, game over). Buying and mission claiming not exercised yet | [`docs/game/GAME_MODEL.md`](game/GAME_MODEL.md), [`scenes/`](evidence/phase0/scenes/) |
 | M0.6 Feature specs | Drafts written (6 files, 59 statements, 4 marked `[confirm]`), left uncommitted for Dheeru to review, edit and commit | `specs/` (Dheeru's commit pending) |
-| M0.7 Reliability baseline (20 smoke runs) | Not started | |
-| M0.8 ADRs 0001–0003 | Written: 0001 (target game and tooling), 0002 (free-plan limits), 0003 (license options; decision pending) | `docs/adr/` |
+| M0.7 Reliability baseline (20 smoke runs) | Done: **20/20 passed**, p50 8.31 s, p95 8.55 s (run `smoke-20261007T1620250000-b47a01`, 2026-10-07). Earlier attempt failed 0/3 at `connect` because Android 16's compatibility dialog blocked Unity; fixed by ADR-0008 | [`smoke/`](evidence/phase0/smoke/), [ADR-0008](adr/0008-android-compat-dialog.md) |
+| M0.8 ADRs 0001–0003 | Written: 0001 (target game and tooling), 0002 (free-plan limits), 0003 (license options; decision pending), plus 0008 (Android 16 compatibility dialog) | `docs/adr/` |
+
+### M0.7 reliability baseline
+
+Scenario: `pm clear` + launch (dismissing the compatibility dialog) → Start → tap START → main menu → open store → close store. Each run starts from a fresh reset. Durations are nearest-rank percentiles over passing runs.
+
+| Run ID | Result | p50 | p95 | Notes |
+|---|---|---|---|---|
+| `smoke-20261007T1620250000-b47a01` | **20/20 passed** | 8.31 s | 8.55 s | dialog dismissed 20/20; 0 error logs. Step medians: reset 2.75 s, connect 4.73 s, START → menu 0.34 s, open store 0.23 s, close store 0.23 s |
+| `smoke-20261007T1611210000-4631ed` | 0/3 passed | – | – | all 3 failed at `connect` after 60 s (`NoAppConnected`): Android 16's 16 KB compatibility dialog blocked Unity from starting. Fixed by ADR-0008 |
+| (unrecorded) | stopped | – | – | first 20-run attempt, stopped by Claude after the same dialog appeared on the phone; no result file was written |
+
+### Phase 0 exit gate
+
+| Item | State | Evidence |
+|---|---|---|
+| `uv run pg doctor` all PASS | ✅ | [`doctor_all_pass.txt`](evidence/phase0/doctor_all_pass.txt) |
+| Scene dumps and screenshots for every screen in GAME_MODEL.md | ✅ dumps committed; screenshots kept locally in `artifacts/spike/cf86374974de/` (game imagery is not committed until Dheeru decides) | [`scenes/`](evidence/phase0/scenes/) |
+| Log capture verified in both channels | ✅ | [`logs_check.json`](evidence/phase0/logs_check.json) |
+| Reset verified; time measured | ✅ 7.5–12.1 s across runs | [`spike/`](evidence/phase0/spike/) |
+| Smoke test ≥ 19/20, numbers in PROGRESS.md | ✅ 20/20 | above |
+| Specs committed (`git log --oneline -- specs/`) | ⏳ waiting for Dheeru's review and commit | `specs/` (uncommitted drafts) |
+| CI green on GitHub | ✅ on every push so far | GitHub Actions |
+| VERSIONS.md complete, including confirmed driver API | ✅ | [`VERSIONS.md`](VERSIONS.md) |
 
 ### M0.1 verification (local, 2026-10-07)
 
@@ -47,7 +70,8 @@ Raw output: [`docs/evidence/phase0/environment.txt`](evidence/phase0/environment
 
 ### Not done or not verified
 
-- M0.6: Dheeru's review and commit of the specs; M0.7: smoke baseline (20 runs); screenshots stay local (not committed) until a decision on game imagery.
+- M0.6: Dheeru's review and commit of the specs (the last open exit-gate item).
+- License decision (ADR-0003).
 - License: options in ADR-0003; Dheeru decides.
 
 ### Known risks carried forward

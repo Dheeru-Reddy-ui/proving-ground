@@ -1,0 +1,337 @@
+{
+  "run_id": "smoke-20261007T1620250000-b47a01",
+  "build": "cf86374974de",
+  "started_at": "2026-10-07T16:23:11+00:00",
+  "scenario": "pm clear + launch -> Start -> START -> main menu -> open store -> close store",
+  "summary": {
+    "runs": 20,
+    "passed": 20,
+    "pass_rate": 1.0,
+    "p50_seconds": 8.31,
+    "p95_seconds": 8.55,
+    "meets_bar": true,
+    "failures": []
+  },
+  "runs": [
+    {
+      "index": 1,
+      "passed": true,
+      "seconds": 8.33,
+      "steps": {
+        "reset": 2.77,
+        "connect": 4.72,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.23,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 2,
+      "passed": true,
+      "seconds": 8.23,
+      "steps": {
+        "reset": 2.7,
+        "connect": 4.73,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.22,
+        "close_store": 0.23
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 3,
+      "passed": true,
+      "seconds": 8.41,
+      "steps": {
+        "reset": 2.78,
+        "connect": 4.78,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.23,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 4,
+      "passed": true,
+      "seconds": 8.2,
+      "steps": {
+        "reset": 2.67,
+        "connect": 4.73,
+        "start_to_main_menu": 0.31,
+        "open_store": 0.23,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 5,
+      "passed": true,
+      "seconds": 8.22,
+      "steps": {
+        "reset": 2.69,
+        "connect": 4.7,
+        "start_to_main_menu": 0.33,
+        "open_store": 0.25,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 6,
+      "passed": true,
+      "seconds": 8.33,
+      "steps": {
+        "reset": 2.73,
+        "connect": 4.78,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.23
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 7,
+      "passed": true,
+      "seconds": 8.25,
+      "steps": {
+        "reset": 2.72,
+        "connect": 4.72,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.23
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 8,
+      "passed": true,
+      "seconds": 8.33,
+      "steps": {
+        "reset": 2.77,
+        "connect": 4.73,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.22,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 9,
+      "passed": true,
+      "seconds": 8.27,
+      "steps": {
+        "reset": 2.7,
+        "connect": 4.75,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.22,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 10,
+      "passed": true,
+      "seconds": 8.2,
+      "steps": {
+        "reset": 2.69,
+        "connect": 4.7,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.23,
+        "close_store": 0.22
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 11,
+      "passed": true,
+      "seconds": 8.31,
+      "steps": {
+        "reset": 2.75,
+        "connect": 4.75,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.22,
+        "close_store": 0.23
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 12,
+      "passed": true,
+      "seconds": 8.55,
+      "steps": {
+        "reset": 3.0,
+        "connect": 4.77,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.23,
+        "close_store": 0.19
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 13,
+      "passed": true,
+      "seconds": 8.45,
+      "steps": {
+        "reset": 2.89,
+        "connect": 4.78,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.2
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 14,
+      "passed": true,
+      "seconds": 8.39,
+      "steps": {
+        "reset": 2.78,
+        "connect": 4.73,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.25,
+        "close_store": 0.27
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 15,
+      "passed": true,
+      "seconds": 8.64,
+      "steps": {
+        "reset": 3.14,
+        "connect": 4.72,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.2
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 16,
+      "passed": true,
+      "seconds": 8.31,
+      "steps": {
+        "reset": 2.78,
+        "connect": 4.73,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.22
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 17,
+      "passed": true,
+      "seconds": 8.31,
+      "steps": {
+        "reset": 2.72,
+        "connect": 4.77,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 18,
+      "passed": true,
+      "seconds": 8.31,
+      "steps": {
+        "reset": 2.75,
+        "connect": 4.75,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.23,
+        "close_store": 0.22
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 19,
+      "passed": true,
+      "seconds": 8.28,
+      "steps": {
+        "reset": 2.75,
+        "connect": 4.75,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.22,
+        "close_store": 0.22
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 20,
+      "passed": true,
+      "seconds": 8.3,
+      "steps": {
+        "reset": 2.77,
+        "connect": 4.72,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.23
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    }
+  ]
+}
