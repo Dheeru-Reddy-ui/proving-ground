@@ -1,0 +1,177 @@
+{
+  "run_id": "smoke-20261007T1641590000-e2bea7",
+  "build": "e63240052d1b",
+  "started_at": "2026-10-07T16:43:22+00:00",
+  "scenario": "pm clear + launch -> Start -> START -> main menu -> open store -> close store",
+  "summary": {
+    "runs": 10,
+    "passed": 10,
+    "pass_rate": 1.0,
+    "p50_seconds": 8.25,
+    "p95_seconds": 8.58,
+    "meets_bar": true,
+    "failures": []
+  },
+  "runs": [
+    {
+      "index": 1,
+      "passed": true,
+      "seconds": 8.58,
+      "steps": {
+        "reset": 2.95,
+        "connect": 4.84,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.2
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 2,
+      "passed": true,
+      "seconds": 8.31,
+      "steps": {
+        "reset": 2.73,
+        "connect": 4.8,
+        "start_to_main_menu": 0.33,
+        "open_store": 0.23,
+        "close_store": 0.22
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 3,
+      "passed": true,
+      "seconds": 8.23,
+      "steps": {
+        "reset": 2.69,
+        "connect": 4.77,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.2
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 4,
+      "passed": true,
+      "seconds": 8.44,
+      "steps": {
+        "reset": 2.73,
+        "connect": 4.86,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.23,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 5,
+      "passed": true,
+      "seconds": 8.33,
+      "steps": {
+        "reset": 2.77,
+        "connect": 4.73,
+        "start_to_main_menu": 0.36,
+        "open_store": 0.22,
+        "close_store": 0.25
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 6,
+      "passed": true,
+      "seconds": 8.19,
+      "steps": {
+        "reset": 2.66,
+        "connect": 4.73,
+        "start_to_main_menu": 0.38,
+        "open_store": 0.22,
+        "close_store": 0.2
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 7,
+      "passed": true,
+      "seconds": 8.2,
+      "steps": {
+        "reset": 2.72,
+        "connect": 4.72,
+        "start_to_main_menu": 0.31,
+        "open_store": 0.23,
+        "close_store": 0.22
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 8,
+      "passed": true,
+      "seconds": 8.34,
+      "steps": {
+        "reset": 2.78,
+        "connect": 4.73,
+        "start_to_main_menu": 0.33,
+        "open_store": 0.23,
+        "close_store": 0.27
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 9,
+      "passed": true,
+      "seconds": 8.25,
+      "steps": {
+        "reset": 2.66,
+        "connect": 4.78,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.23,
+        "close_store": 0.23
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    },
+    {
+      "index": 10,
+      "passed": true,
+      "seconds": 8.25,
+      "steps": {
+        "reset": 2.69,
+        "connect": 4.78,
+        "start_to_main_menu": 0.34,
+        "open_store": 0.22,
+        "close_store": 0.22
+      },
+      "failed_step": null,
+      "error": null,
+      "error_logs": 0,
+      "compat_dialog_dismissed": true
+    }
+  ]
+}
