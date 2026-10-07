@@ -13,7 +13,7 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M0.1 Repository scaffold | Done | commits `5999222`..`5864dc3`; local checks below; first CI run green: [run 37616434447](https://github.com/Dheeru-Reddy-ui/proving-ground/actions/runs/37616434447) |
 | M0.2 Build checklist (`game/BUILD_TRASHCAT.md`) | Checklist written; Dheeru's build not done yet | [`game/BUILD_TRASHCAT.md`](../game/BUILD_TRASHCAT.md) |
 | M0.3 `pg doctor` | Implemented and unit-tested; live all-PASS run waits for the APK | 8 checks; rules in `pg_core/doctor.py` (100% line and branch coverage), adapters `pg_runner/adb.py` and `pg_sdk/_driver.py`; live run 2026-10-07: python, adb, AltTester Desktop and driver version PASS; device FAIL (phone attached but USB debugging off at the time), game/reverse/app SKIP |
-| M0.4 Connectivity and introspection spike | Paused: driver bug found (duplicate log notifications), workaround awaiting Dheeru's OK; live steps need the APK | [`docs/evidence/phase0/driver-notification-duplicate.txt`](evidence/phase0/driver-notification-duplicate.txt) |
+| M0.4 Connectivity and introspection spike | `pg spike connect/dump/screenshot/logs/reset/timescale` implemented and unit-tested against fakes; live runs need the APK. Driver bug (duplicate log notifications) worked around with `overwrite=False`, approved by Dheeru | [`docs/evidence/phase0/driver-notification-duplicate.txt`](evidence/phase0/driver-notification-duplicate.txt) |
 | M0.5 Game model | Not started | |
 | M0.6 Feature specs | Not started | |
 | M0.7 Reliability baseline (20 smoke runs) | Not started | |
@@ -53,7 +53,11 @@ Raw output: [`docs/evidence/phase0/environment.txt`](evidence/phase0/environment
 
 ### Known risks carried forward
 
-- **First-run tutorial.** After `pm clear`, `PlayerData.tutorialDone` is false: the loadout screen shows a `tutorialBlocker` and the first run is the tutorial (game scripts `LoadoutState.cs`, `GameState.cs`). Every test starts from `pm clear`, so M0.4/M0.5 must establish what the blocker blocks.
+- **First-launch flow after `pm clear`** (from the game's scripts; to be confirmed on the phone in M0.4/M0.5):
+  - The Start scene shows a licence popup until `PlayerData.licenceAccepted` (`LicenceDisplayer`). Its Refuse button calls `Application.Quit()`, so automation must never press it, and the Phase 3 crawler must blocklist it.
+  - The loadout screen shows a `tutorialBlocker` while `PlayerData.tutorialDone` is false (`LoadoutState`), and the first run is the tutorial (`GameState`).
+  - Every test starts from `pm clear`, so whether the blocker covers the store decides how the smoke test (M0.7) starts.
+- **Determinism lever for Phase 1:** `TrackManager.trackSeed` is a settable property (`TrackManager.cs`), so runs can be pinned to one track layout.
 - **Player settings to change in M0.2** (both covered by the checklist): managed stripping is Low (AltTester's known issue requires Minimal for IL2CPP); target architectures are ARMv7 + ARM64 + x86 (the phone only needs ARM64).
 - **Phone "Stay awake" is off.** A sleeping screen pauses the game; Dheeru to enable it before automated runs.
 - **Licence window.** The driver may only be used with a valid AltTester subscription; continuing past the trial depends on the Lite request.
