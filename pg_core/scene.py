@@ -21,7 +21,8 @@ class SceneElement(BaseModel):
     screen_y: float
     mobile_y: float
     camera_id: int | None
-    components: tuple[str, ...] | None  # None when components were not collected
+    # None when components were not collected, or the object vanished before they were read
+    components: tuple[str, ...] | None
 
 
 class SceneDump(BaseModel):
@@ -32,6 +33,7 @@ class SceneDump(BaseModel):
     build: str
     captured_at: str  # passed in by the caller: pg_core never reads the clock
     element_count: int
+    vanished_during_dump: int  # listed, but gone before their components could be read
     elements: tuple[SceneElement, ...]
 
 
@@ -61,13 +63,21 @@ def build_scene_dump(
     build: str,
     captured_at: str,
     raw: Sequence[Mapping[str, Any]],
-    components: Mapping[int, Sequence[str]] | None,
+    components: Mapping[int, Sequence[str] | None] | None,
 ) -> SceneDump:
     paths = element_paths(raw)
     elements = []
+    vanished = 0
     for item in raw:
         element_id = int(item["id"])
         camera = item.get("idCamera")
+        names: tuple[str, ...] | None = None
+        if components is not None:
+            found = components.get(element_id, ())
+            if found is None:
+                vanished += 1
+            else:
+                names = tuple(found)
         elements.append(
             SceneElement(
                 id=element_id,
@@ -80,9 +90,7 @@ def build_scene_dump(
                 screen_y=float(item["y"]),
                 mobile_y=float(item["mobileY"]),
                 camera_id=int(camera) if camera is not None else None,
-                components=(
-                    tuple(components.get(element_id, ())) if components is not None else None
-                ),
+                components=names,
             )
         )
     ordered = tuple(sorted(elements, key=lambda e: (e.path, e.id)))
@@ -92,5 +100,6 @@ def build_scene_dump(
         build=build,
         captured_at=captured_at,
         element_count=len(ordered),
+        vanished_during_dump=vanished,
         elements=ordered,
     )

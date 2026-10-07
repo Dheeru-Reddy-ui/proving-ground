@@ -72,6 +72,21 @@ def test_build_scene_dump_with_components_sorted_by_path() -> None:
     assert store.mobile_y == 30.0
 
 
+def test_objects_that_vanished_mid_dump_are_counted() -> None:
+    dump = build_scene_dump(
+        scene="Main",
+        label=None,
+        build="b",
+        captured_at="t",
+        raw=HIERARCHY,
+        components={1: ["Canvas"], 2: None, 3: ["Button"]},
+    )
+    assert dump.vanished_during_dump == 1
+    by_id = {e.id: e for e in dump.elements}
+    assert by_id[2].components is None
+    assert by_id[3].components == ("Button",)
+
+
 def test_build_scene_dump_without_components() -> None:
     no_camera = raw(1, "Canvas", transform=100, parent=0)
     no_camera["idCamera"] = None

@@ -71,6 +71,22 @@ def test_dump_includes_inactive_objects_and_components() -> None:
     assert components == {1: ["UnityEngine.RectTransform"], 2: ["UnityEngine.RectTransform"]}
 
 
+def test_dump_survives_objects_that_vanish_before_components_are_read() -> None:
+    from alttester import exceptions as alt
+
+    class Vanishing(FakeObject):
+        def get_all_components(self) -> list[dict[str, str]]:
+            raise alt.NotFoundException("Object not found")
+
+    class Driver(FakeDriver):
+        def get_all_elements(self, **kwargs: Any) -> list[FakeObject]:
+            return [FakeObject(1, "Canvas"), Vanishing(2, "CharacterPreview")]
+
+    raw, components = AltTesterSession(Driver()).dump_elements(with_components=True)
+    assert len(raw) == 2
+    assert components == {1: ["UnityEngine.RectTransform"], 2: None}
+
+
 def test_dump_without_components() -> None:
     _, components = AltTesterSession(FakeDriver()).dump_elements(with_components=False)
     assert components is None

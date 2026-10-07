@@ -147,6 +147,7 @@ def run_dump(env: SpikeEnv, label: str | None, with_components: bool) -> dict[st
     return {
         "scene": scene,
         "elements": dump.element_count,
+        "vanished_during_dump": dump.vanished_during_dump,
         "dump": str(path),
         "screenshot": str(screenshot),
     }

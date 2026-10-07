@@ -44,16 +44,25 @@ class AltTesterSession:
 
     def dump_elements(
         self, *, with_components: bool
-    ) -> tuple[list[dict[str, Any]], dict[int, list[str]] | None]:
-        """Every object in the loaded scenes, active or not, plus each one's component names."""
+    ) -> tuple[list[dict[str, Any]], dict[int, list[str] | None] | None]:
+        """Every object in the loaded scenes, active or not, plus each one's component names.
+
+        Scenes create and destroy objects while they load, so an object listed first can be
+        gone when its components are read. Its entry is then None instead of failing the dump.
+        """
+        from alttester import exceptions as alt
+
         objects = self._driver.get_all_elements(enabled=False)
         raw = [dict(obj.to_json()) for obj in objects]
         if not with_components:
             return raw, None
-        components = {
-            int(obj.id): [str(c.get("componentName")) for c in obj.get_all_components()]
-            for obj in objects
-        }
+        components: dict[int, list[str] | None] = {}
+        for obj in objects:
+            try:
+                names = [str(c.get("componentName")) for c in obj.get_all_components()]
+            except alt.NotFoundException:
+                names = None
+            components[int(obj.id)] = names
         return raw, components
 
     def screenshot(self, path: Path) -> None:
