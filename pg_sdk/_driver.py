@@ -6,11 +6,25 @@ driver can be faked in unit tests. Generated tests never import it.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
+
+from pydantic import BaseModel, ConfigDict
 
 from pg_core.doctor import AppProbe, AppProbeError
 
 DEFAULT_APP_NAME = "__default__"
+
+
+class LogLine(BaseModel):
+    """One log notification from the game (Debug.Log*, exceptions)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    message: str
+    stack_trace: str
+    level: int | str | None
 
 
 class AltTesterSession:
@@ -24,6 +38,67 @@ class AltTesterSession:
 
     def loaded_scenes(self) -> list[str]:
         return [str(scene) for scene in self._driver.get_all_loaded_scenes()]
+
+    def wait_for_scene(self, name: str, timeout_s: float) -> None:
+        self._driver.wait_for_current_scene_to_be(name, timeout=timeout_s, interval=0.5)
+
+    def dump_elements(
+        self, *, with_components: bool
+    ) -> tuple[list[dict[str, Any]], dict[int, list[str]] | None]:
+        """Every object in the loaded scenes, active or not, plus each one's component names."""
+        objects = self._driver.get_all_elements(enabled=False)
+        raw = [dict(obj.to_json()) for obj in objects]
+        if not with_components:
+            return raw, None
+        components = {
+            int(obj.id): [str(c.get("componentName")) for c in obj.get_all_components()]
+            for obj in objects
+        }
+        return raw, components
+
+    def screenshot(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._driver.get_png_screenshot(str(path))
+
+    def add_log_listener(self, callback: Callable[[LogLine], None]) -> None:
+        """Forward the game's log notifications to `callback`, once each.
+
+        `overwrite=False` on purpose: with the driver's default (True), AltTester-Driver 2.3.2
+        registers the callback twice and delivers every notification twice (docs/VERSIONS.md).
+        """
+        from alttester.commands.Notifications.notification_type import NotificationType
+
+        def relay(result: Any) -> None:
+            callback(
+                LogLine(
+                    message=str(result.message),
+                    stack_trace=str(result.stack_trace or ""),
+                    level=result.type,
+                )
+            )
+
+        self._driver.add_notification_listener(NotificationType.LOG, relay, overwrite=False)
+
+    def remove_log_listener(self) -> None:
+        from alttester.commands.Notifications.notification_type import NotificationType
+
+        self._driver.remove_notification_listener(NotificationType.LOG)
+
+    def call_static_method(
+        self, type_name: str, method: str, assembly: str, parameters: list[str] | None = None
+    ) -> Any:
+        return self._driver.call_static_method(type_name, method, assembly, parameters=parameters)
+
+    def get_static_property(
+        self, component: str, path: str, assembly: str, max_depth: int = 2
+    ) -> Any:
+        return self._driver.get_static_property(component, path, assembly, max_depth=max_depth)
+
+    def time_scale(self) -> float:
+        return float(self._driver.get_time_scale())
+
+    def set_time_scale(self, scale: float) -> None:
+        self._driver.set_time_scale(scale)
 
     def close(self) -> None:
         self._driver.stop()

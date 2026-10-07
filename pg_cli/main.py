@@ -5,10 +5,13 @@ from typing import Annotated
 
 import typer
 
+from pg_cli.spike import app as spike_app
+
 app = typer.Typer(
     help="Proving Ground: a trust layer for AI-generated game tests.",
     no_args_is_help=True,
 )
+app.add_typer(spike_app, name="spike")
 
 
 @app.callback()
