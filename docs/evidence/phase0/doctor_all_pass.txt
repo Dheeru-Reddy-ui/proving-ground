@@ -1,0 +1,17 @@
+# pg doctor, all checks
+# Captured by script on 2026-10-07T13:38:07Z; APK sha256 cf86374974de0964efb33bdf9d78664c28f4c4032276501f7b1c800603616bc2
+
+pg doctor: 8 checks
+
+PASS  python             Python 3.12.5
+PASS  adb                C:\Users\dheer\AppData\Local\Microsoft\WinGet\Packages\Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe\platform-tools\adb.EXE (Version 37.0.1-15733141)
+PASS  adb device         SM_S948B (RZGL...)
+PASS  game installed     com.DefaultCompany.TrashCat (1 APK file(s) on the device)
+PASS  reverse forward    device tcp:13000 -> this PC tcp:13000
+PASS  AltTester Desktop  server accepting connections on 127.0.0.1:13000
+PASS  app connects       current scene: Start (loaded: Start)
+PASS  driver version     AltTester-Driver 2.3.2 (pinned 2.3.2)
+
+8 passed, 0 failed, 0 skipped
+
+pg doctor exit code: 0

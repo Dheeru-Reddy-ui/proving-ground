@@ -38,7 +38,7 @@ Open **Edit → Project Settings → Player**, then the **Android** tab (the rob
 | [x] | Other Settings → Configuration → **Scripting Backend** | IL2CPP | IL2CPP | Unity's ARM64 option is only available with IL2CPP ("You can only interact with this setting if your project uses the IL2CPP … back-end") | [U3] |
 | [x] | Other Settings → Configuration → **Internet Access** | leave **Auto** | Auto | The SDK reaches AltTester Desktop over a WebSocket, which needs the INTERNET permission. Unity: "Set to Require by default for development builds", and the AltTester build is a development build (step 6). Step 7 checks the permission is in the APK. | [U2] |
 | [x] | Resolution and Presentation → **Run In Background** | ON | ON | AltTester's setup steps enable it | [A1] |
-| [x] | Other Settings → Identification → **Package Name** | `com.unity.trashdash` (leave as is) | `com.unity.trashdash` | Must match `PG_ANDROID_PACKAGE` in `.env` | [U2] |
+| [x] | Other Settings → Identification → **Package Name** | leave as is | `com.DefaultCompany.TrashCat` (first build) | "Override Default Package Name" is off, so Unity builds `com.<Company Name>.<Product Name>`. `PG_ANDROID_PACKAGE` in `.env` must equal the built APK's package, which step 7 checks. | [U2] |
 
 ## 4. Add the AltTester Unity SDK 2.3.2
 
@@ -65,7 +65,7 @@ Open **AltTester® → AltTester® Editor** [A1].
 - [ ] **Platform:** Android [A1].
 - [ ] **Build Location:** click **Browse** and choose `C:\Users\dheer\pg_game\builds`. The APK is written to `<Build Location>\<Product Name>.apk`, which here is `C:\Users\dheer\pg_game\builds\TrashCat.apk` [A6 L325–333].
 - [ ] **Settings:** keep the defaults: **AltTester® Server Host** `127.0.0.1`, **AltTester® Server Port** `13000`, **App Name** `__default__` [A7 L30–33]. These match `PG_ALTTESTER_HOST` / `PG_ALTTESTER_PORT` and the Python driver's default app name.
-- [ ] Leave **Append "Test"…** **unticked**. When ticked, the build appends `Test` to the product name and the package name (`com.unity.trashdashTest`) [A6 L48–50], which would no longer match `PG_ANDROID_PACKAGE`.
+- [ ] Leave **Append "Test"…** **unticked**. When ticked, the build appends `Test` to the product name and the package name (for example `com.DefaultCompany.TrashCatTest`) [A6 L48–50], which would no longer match `PG_ANDROID_PACKAGE`.
 - [ ] Leave **Reset Connection Data** and **Hide Green Popup** unticked. Leave **Keep ALTTESTER symbol defined** at its default (ticked) [A7 L53].
 - [ ] **Scenes:** select `Start`, `Main` and `Shop`, with **Start first**. AltTester inserts its prefab into "the first scene of the app" [A3]. Leave out `SampleScene`, which the Unity template left behind.
 - [ ] Click **Build Only**.
@@ -79,11 +79,11 @@ Claude can run these and fill `docs/VERSIONS.md` for you to review. `<serial>` i
 
 - [ ] Install: `adb -s <serial> install -r C:\Users\dheer\pg_game\builds\TrashCat.apk`
 - [ ] Inspect the APK with `aapt` from Unity's SDK (`…/AndroidPlayer/SDK/build-tools/34.0.0/aapt.exe dump badging TrashCat.apk`). Check that:
-  - `package: name='com.unity.trashdash'`
+  - `package: name='<PG_ANDROID_PACKAGE>'` (first build: `com.DefaultCompany.TrashCat`)
   - `native-code: 'arm64-v8a'`, and nothing else
   - `uses-permission: name='android.permission.INTERNET'`
   - the `launchable-activity` line is present
-- [ ] Record the launch activity: `adb -s <serial> shell cmd package resolve-activity --brief com.unity.trashdash`. The last line is `<package>/<activity>`. On this phone the same command for `com.android.settings` prints `com.android.settings/.Settings`.
+- [ ] Record the launch activity: `adb -s <serial> shell cmd package resolve-activity --brief <PG_ANDROID_PACKAGE>`. The last line is `<package>/<activity>`. On this phone the same command for `com.android.settings` prints `com.android.settings/.Settings`.
 - [ ] Record in `docs/VERSIONS.md` → "Game build": package name, launch activity, scripting backend / architectures / stripping, AltTester SDK version, APK sha256 (`certutil -hashfile TrashCat.apk SHA256`). Then set `PG_APK_PATH` in `.env`.
 
 ## 8. Connect over USB

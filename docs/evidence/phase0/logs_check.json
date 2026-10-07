@@ -1,0 +1,21 @@
+{
+  "trigger": "debug",
+  "call": "UnityEngine.Debug.LogError (UnityEngine.CoreModule)",
+  "marker": "PG_SPIKE_LOGERROR f178b6d076f1",
+  "trigger_error": null,
+  "pid": 3403,
+  "notifications_received": 3,
+  "notification_hits": [
+    {
+      "message": "PG_SPIKE_LOGERROR f178b6d076f1",
+      "stack_trace": "",
+      "level": 4
+    }
+  ],
+  "logcat_hits": [
+    "10-07 19:08:58.525  3403  4203 I Unity   :     \"\\\"PG_SPIKE_LOGERROR f178b6d076f1\\\"\"",
+    "10-07 19:08:58.550  3403  3457 I Unity   : 2026-10-07 19:08:58.5505|Tester|DEBUG|response sent: {\"messageId\":null,\"driverId\":null,\"commandName\":\"logNotification\",\"error\":null,\"data\":\"{\\\"message\\\":\\\"PG_SPIKE_LOGERROR f178b6d076f1\\\",\\\"stackTrace\\\":\\\"System.Reflection.RuntimeMethodInfo:Invoke(Object, BindingFlags, Binder, Object[], CultureInfo)\\\\nAltTester.AltTesterUnitySDK.Commands.AltCommand`2:ExecuteHandleErrors(Func`1)\\\\nAltTester.AltTesterUnitySDK.Commands.AltCommand`2:ExecuteAndSerialize(Func`1)\\\\nAltTester.AltTesterUnitySDK.Commands.<>c__DisplayClass20_0:<OnMessage>b__0()\\\\nAltTester.AltTesterSDK.Driver.AltResponseQueue:Cycle()\\\\n\\\",\\\"level\\\":4}\",\"isNotification\":true}",
+    "10-07 19:08:58.550  3403  3457 E Unity   : PG_SPIKE_LOGERROR f178b6d076f1"
+  ],
+  "in_both_channels": true
+}
