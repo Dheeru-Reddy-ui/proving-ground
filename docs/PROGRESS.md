@@ -2,6 +2,26 @@
 
 Status of each phase: what works, what was verified (with evidence) and what is not done. Numbers here come from evidence files or stored runs, never typed from memory.
 
+## Phase 1: Core trust loop
+
+Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
+
+### Decisions (2026-10-07)
+
+- **Order:** hooks (M1.1) → catalog (M1.2) → `pg_sdk` (M1.3) → gates (M1.5) → runner (M1.6) → persistence (M1.7) → generator (M1.4) → CLI (M1.8) → results (M1.9). The rebuild is the critical path; the generator needs the SDK manifest.
+- **Database:** local Postgres in Docker for Phase 1; the same Alembic migrations move to Supabase in Phase 2.
+- **LLM:** Google Gemini API free tier, model `gemini-3.8-flash` (listed "Free of charge" on [the pricing page](https://ai.google.dev/gemini-api/docs/pricing), checked 2026-10-07). Free-tier prompts are used by Google to improve its products; our prompts carry only specs, the SDK manifest and a game summary. LLM cost is recorded at the configured rate of 0.
+- **Hook edits:** Claude applies the edits listed in `game/HOOKS.md`; Dheeru reviews in Unity and builds.
+- **G4 novelty:** candidates of the same generation run count against each other, in trust-score order (to be recorded in ADR-0004).
+- **G5 budget:** 120 s median test runtime, excluding reset and connect.
+- **Seeded bugs:** the 16 proposed bugs, with one change: SB13 shows the run's coins instead of distance on the game-over screen, because score equals distance at multiplier 1 and the swap would be invisible (`TrackManager.AddScore`).
+
+### Milestones
+
+| Milestone | State | Evidence |
+|---|---|---|
+| M1.1 Game hooks | Scripts and 16 hooks written and applied to the Unity project (18 marked lines, `grep -rn "PG hook"`); waiting for Dheeru's build | [`game/HOOKS.md`](../game/HOOKS.md), [`game/unity_scripts/`](../game/unity_scripts/) |
+
 ## Phase 0: Foundation and feasibility spike
 
 Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
