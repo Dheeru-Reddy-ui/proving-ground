@@ -1,0 +1,45 @@
+# Phase 0 environment evidence
+# Captured by script on 2026-10-07T11:45:09Z. Raw command output; the device serial is masked.
+
+## Unity project version (PG_GAME_PROJECT_DIR/ProjectSettings/ProjectVersion.txt)
+m_EditorVersion: 2021.3.45f2
+m_EditorVersionWithRevision: 2021.3.45f2 (88f88f591b2e)
+
+## Unity Android modules (PlaybackEngines/AndroidPlayer)
+SDK: build-tools cmdline-tools platform-tools platforms tools 
+SDK/platforms: android-33 android-34 android-35 
+SDK/build-tools: 34.0.0 
+SDK/platform-tools adb: Version 32.0.0-8006631
+NDK: Pkg.Revision = 21.3.6528147
+OpenJDK: openjdk version "11.0.14.1" 2022-02-08
+
+## AltTester Desktop log (licence + server lines)
+2026-10-07 11:45:23: Successful license activation!
+2026-10-07 11:45:23.7126| Security: Disabled (WS)
+2026-10-07 11:45:23.7142| Waiting for instrumented app on ws://0.0.0.0:13000/altws/app
+2026-10-07 11:45:23.7142| Waiting for driver on ws://0.0.0.0:13000/altws
+2026-10-07 11:45:23.7208| AltTester(R) Server version: 2.3.2.0
+2026-10-07 11:45:23.7213| License type: Pro
+
+## Python driver (uv run python)
+AltTester-Driver 2.3.2 | import name alttester | VERSION 2.3.2
+Python 3.12.5
+uv 0.11.28 (ebf0f43d7 2026-07-07 x86_64-pc-windows-msvc)
+
+## Host adb
+Android Debug Bridge version 1.0.41 Version 37.0.1-15733141 
+
+## Device (adb shell getprop)
+List of devices attached
+<serial>            device product:m3qxins model:SM_S948B device:m3q transport_id:1
+
+ro.product.manufacturer = samsung
+ro.product.model = SM-S948B
+ro.build.version.release = 16
+ro.build.version.sdk = 36
+ro.build.version.oneui = 80500
+ro.build.version.security_patch = 2026-08-05
+ro.product.cpu.abilist = arm64-v8a
+PAGE_SIZE = 4096
+Physical size: 1440x3120
+Physical density: 600
