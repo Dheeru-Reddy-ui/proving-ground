@@ -5,6 +5,7 @@ from typing import Annotated
 
 import typer
 
+from pg_cli.smoke import smoke_cmd
 from pg_cli.spike import app as spike_app
 
 app = typer.Typer(
@@ -12,6 +13,7 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(spike_app, name="spike")
+app.command("smoke")(smoke_cmd)
 
 
 @app.callback()

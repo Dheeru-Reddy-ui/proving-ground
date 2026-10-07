@@ -103,6 +103,26 @@ class AltTesterSession:
     ) -> Any:
         return self._driver.get_static_property(component, path, assembly, max_depth=max_depth)
 
+    def screen_size(self) -> tuple[int, int]:
+        width, height = self._driver.get_application_screensize()
+        return int(width), int(height)
+
+    def position(self, path: str) -> tuple[float, float] | None:
+        """Screen position of the active object at `path`, or None if there is none."""
+        from alttester import By
+        from alttester import exceptions as alt
+
+        try:
+            obj = self._driver.find_object(By.PATH, path)
+        except alt.NotFoundException:
+            return None
+        return float(obj.x), float(obj.y)
+
+    def tap(self, path: str) -> None:
+        from alttester import By
+
+        self._driver.find_object(By.PATH, path).tap()
+
     def time_scale(self) -> float:
         return float(self._driver.get_time_scale())
 

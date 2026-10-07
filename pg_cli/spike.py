@@ -83,7 +83,7 @@ class SpikeEnv:
     def write_json(self, name: str, payload: Any) -> Path:
         self.out_dir.mkdir(parents=True, exist_ok=True)
         path = self.out_dir / name
-        path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+        path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8", newline="\n")
         return path
 
 
@@ -143,7 +143,7 @@ def run_dump(env: SpikeEnv, label: str | None, with_components: bool) -> dict[st
     )
     path = env.out_dir / f"{stem}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(dump.model_dump_json(indent=2), encoding="utf-8")
+    path.write_text(dump.model_dump_json(indent=2), encoding="utf-8", newline="\n")
     return {
         "scene": scene,
         "elements": dump.element_count,
