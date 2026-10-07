@@ -1,0 +1,9 @@
+# Game errors expected on the CLEAN build, which the pytest plugin records but does not fail a
+# test for. Every entry needs evidence: a run on the clean build that logged it. Adding an entry
+# hides that error from the game-error kill rule, so entries need Dheeru's approval.
+#
+# Measured 2026-10-07 on build e63240052d1b: the six flows of tests/device/test_sdk_live.py
+# (main menu, store reads and purchases, refused purchase, missions claim, settings, restart,
+# a full run to game over) logged no error- or exception-level message.
+# Evidence: docs/evidence/phase1/sdk_live_clean_e63240052d1b.json ("game_errors": [] for all six).
+patterns: []

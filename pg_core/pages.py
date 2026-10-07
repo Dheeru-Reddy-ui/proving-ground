@@ -9,6 +9,10 @@ from __future__ import annotations
 
 APP = "app"
 
+# Root attributes of `game` that are not screens: model-state reads and test setup. No seeded bug
+# lists them, since a bug shows on a screen.
+HELPERS: frozenset[str] = frozenset({"player", "setup"})
+
 PAGES: frozenset[str] = frozenset(
     {
         APP,

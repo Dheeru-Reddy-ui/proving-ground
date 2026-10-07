@@ -1,0 +1,886 @@
+{
+  "classes": {
+    "Game": {
+      "doc": "The game under test. Every test starts on the main menu of a new game (data cleared).\n\nPages are reached as attributes (`game.store`, `game.main_menu`, ...). Readers named\n`*_shown()` return what the screen displays; `*_state()` readers return game data. Tests\nassert on what the player sees and may cross-check game data.",
+      "members": {
+        "game_over": {
+          "doc": "The game-over screen.",
+          "kind": "property",
+          "returns": "GameOver"
+        },
+        "leaderboard": {
+          "doc": "The leaderboard.",
+          "kind": "property",
+          "returns": "Leaderboard"
+        },
+        "main_menu": {
+          "doc": "The main menu: navigation and the character/theme/accessory/power-up selectors.",
+          "kind": "property",
+          "returns": "MainMenu"
+        },
+        "missions": {
+          "doc": "The missions popup.",
+          "kind": "property",
+          "returns": "Missions"
+        },
+        "player": {
+          "doc": "The player's data as the game holds it (`*_state()` readers).",
+          "kind": "property",
+          "returns": "Player"
+        },
+        "restart": {
+          "doc": "Close the game and open it again, keeping its saved data (like a player quitting\nand coming back). Returns on the main menu, after pressing START.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "run": {
+          "doc": "The run in progress: HUD, pause, second chance.",
+          "kind": "property",
+          "returns": "Run"
+        },
+        "screen_shown": {
+          "doc": "Which screen is in front right now.",
+          "kind": "method",
+          "params": [],
+          "returns": "Screen"
+        },
+        "settings": {
+          "doc": "The settings popup.",
+          "kind": "property",
+          "returns": "Settings"
+        },
+        "setup": {
+          "doc": "Test-setup helpers that write the player's data directly. Arrange only.",
+          "kind": "property",
+          "returns": "Setup"
+        },
+        "store": {
+          "doc": "The store and its four sections.",
+          "kind": "property",
+          "returns": "Store"
+        }
+      }
+    },
+    "GameOver": {
+      "doc": "Shown after declining to continue. When a mission was completed, the game opens the\nmissions popup over it; close that (`game.missions.close()`) before using these buttons.",
+      "members": {
+        "go_to_main_menu": {
+          "doc": "Press Main Menu; returns once the main menu is shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "is_shown": {
+          "doc": "True when the game-over screen is in front (no popup over it).",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "open_leaderboard": {
+          "doc": "Open the leaderboard from the game-over screen.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "open_missions": {
+          "doc": "Open the missions popup from the game-over screen.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "open_store": {
+          "doc": "Open the store from the game-over screen.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "run_again": {
+          "doc": "Press Run! to start a new run; returns once the run HUD is shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "score_shown": {
+          "doc": "The final score shown for the run that just ended.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        }
+      }
+    },
+    "Leaderboard": {
+      "doc": "The leaderboard, opened from the main menu or the game-over screen.",
+      "members": {
+        "close": {
+          "doc": "Close the leaderboard. Precondition: leaderboard open.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "entries_shown": {
+          "doc": "Leaderboard lines that are on screen and have a score, top to bottom.\nPrecondition: leaderboard open.",
+          "kind": "method",
+          "params": [],
+          "returns": "list[LeaderboardEntry]"
+        },
+        "is_shown": {
+          "doc": "True when the leaderboard is open.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        }
+      }
+    },
+    "MainMenu": {
+      "doc": "The screen shown after START and after leaving a run or the game-over screen.",
+      "members": {
+        "accessory_shown": {
+          "doc": "Name in the accessory selector, or None when the selector is not shown (the\nselected character has no owned accessory).",
+          "kind": "method",
+          "params": [],
+          "returns": "str | None"
+        },
+        "character_arrows_shown": {
+          "doc": "True when the character arrows are shown (the game shows them only when the player\nowns more than one character).",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "character_shown": {
+          "doc": "Name of the selected character as displayed. Precondition: main menu shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "is_shown": {
+          "doc": "True when the main menu is the screen in front (no store, popup or run over it).",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "next_accessory": {
+          "doc": "Press the accessory up arrow; returns the accessory shown afterwards.\nPrecondition: accessory selector shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "str | None"
+        },
+        "next_character": {
+          "doc": "Press the right character arrow; returns the character name shown afterwards.\nPrecondition: character arrows shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "next_power_up": {
+          "doc": "Press the right power-up arrow to equip the next owned power-up (or none); returns\nthe count shown afterwards. Precondition: power-up selector shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "int | None"
+        },
+        "next_theme": {
+          "doc": "Press the right theme arrow; returns the theme name shown afterwards.\nPrecondition: theme arrows shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "open_leaderboard": {
+          "doc": "Open the leaderboard. Precondition: main menu shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "open_missions": {
+          "doc": "Open the missions popup. Precondition: main menu shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "open_settings": {
+          "doc": "Open the settings popup. Precondition: main menu shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "open_store": {
+          "doc": "Open the store. Precondition: main menu shown. Ends with the store showing its\npower-ups section.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "power_up_count_shown": {
+          "doc": "How many of the equipped power-up the player owns, as displayed; None when no\npower-up is equipped or the selector is not shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "int | None"
+        },
+        "power_up_selector_shown": {
+          "doc": "True when the power-up selector is shown (only when the player owns power-ups).",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "previous_accessory": {
+          "doc": "Press the accessory down arrow; returns the accessory shown afterwards.\nPrecondition: accessory selector shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "str | None"
+        },
+        "previous_character": {
+          "doc": "Press the left character arrow; returns the character name shown afterwards.\nPrecondition: character arrows shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "previous_power_up": {
+          "doc": "Press the left power-up arrow; returns the count shown afterwards.\nPrecondition: power-up selector shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "int | None"
+        },
+        "previous_theme": {
+          "doc": "Press the left theme arrow; returns the theme name shown afterwards.\nPrecondition: theme arrows shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "start_run": {
+          "doc": "Press Run. Precondition: main menu shown. Returns once the run HUD is on screen.\nOn a new game the first run is the tutorial, which pauses at each obstacle until the\nplayer swipes; call `game.setup.complete_tutorial()` first for a normal run.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "theme_arrows_shown": {
+          "doc": "True when the theme arrows are shown (only when more than one theme is owned).",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "theme_shown": {
+          "doc": "Name of the selected theme as displayed. Precondition: main menu shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "tutorial_shown": {
+          "doc": "True when the tutorial overlay covers the main menu (tutorial not completed).",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        }
+      }
+    },
+    "Missions": {
+      "doc": "The missions popup. The game-over screen opens it by itself when a mission is complete.",
+      "members": {
+        "claim": {
+          "doc": "Press the claim button of the mission at `index` (0 = top) and wait until the list\nis rebuilt. Precondition: missions popup open and that mission claimable.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "index",
+              "required": true,
+              "type": "int"
+            }
+          ],
+          "returns": "None"
+        },
+        "close": {
+          "doc": "Close the popup. Precondition: missions popup open.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "is_shown": {
+          "doc": "True when a missions popup is open.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "missions_shown": {
+          "doc": "The missions listed, in display order. Precondition: missions popup open.",
+          "kind": "method",
+          "params": [],
+          "returns": "list[Mission]"
+        }
+      }
+    },
+    "Player": {
+      "doc": "The player's saved progress and settings as the game holds them in memory.",
+      "members": {
+        "coins_state": {
+          "doc": "Coin balance.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "high_scores_state": {
+          "doc": "Stored high scores, best first.",
+          "kind": "method",
+          "params": [],
+          "returns": "list[LeaderboardEntry]"
+        },
+        "missions_state": {
+          "doc": "Active missions with their progress, target and reward.",
+          "kind": "method",
+          "params": [],
+          "returns": "list[MissionState]"
+        },
+        "owned_accessories_state": {
+          "doc": "Owned accessories as stored by the game (\"<character>:<accessory>\" per entry).",
+          "kind": "method",
+          "params": [],
+          "returns": "list[str]"
+        },
+        "owned_characters_state": {
+          "doc": "Names of the owned characters, in the order they were acquired.",
+          "kind": "method",
+          "params": [],
+          "returns": "list[str]"
+        },
+        "owned_themes_state": {
+          "doc": "Names of the owned themes.",
+          "kind": "method",
+          "params": [],
+          "returns": "list[str]"
+        },
+        "power_ups_state": {
+          "doc": "Owned power-ups by store name (\"Magnet\", \"x2\", \"Invincible\", \"Life\") and count.",
+          "kind": "method",
+          "params": [],
+          "returns": "dict[str, int]"
+        },
+        "premium_state": {
+          "doc": "Premium balance.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "selected_character_state": {
+          "doc": "Name of the selected character.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "selected_theme_state": {
+          "doc": "Name of the selected theme.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "tutorial_completed_state": {
+          "doc": "True once the tutorial has been completed.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "volumes_state": {
+          "doc": "Stored volumes converted to the settings sliders' 0.0-1.0 scale.",
+          "kind": "method",
+          "params": [],
+          "returns": "Volumes"
+        }
+      }
+    },
+    "Run": {
+      "doc": "The run in progress, from pressing Run until the game-over screen.",
+      "members": {
+        "character_state": {
+          "doc": "Name of the character actually running (game state). Precondition: run started.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        },
+        "coins_shown": {
+          "doc": "Coins collected in this run, as shown on the HUD.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "coins_state": {
+          "doc": "Coins collected in this run (game state). Precondition: run started.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "continue_cost_shown": {
+          "doc": "Premium price of continuing, as shown on the offer. Precondition: offer shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "continue_enabled": {
+          "doc": "True when the pay-to-continue button can be pressed. Precondition: offer shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "continue_with_premium": {
+          "doc": "Pay premium to continue the same run; returns once the run HUD is back.\nPrecondition: offer shown and continuing enabled.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "decline_continue": {
+          "doc": "Press Game over on the offer; returns once the game-over screen is shown (with the\nmissions popup over it if a mission was completed). Precondition: offer shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "distance_shown": {
+          "doc": "The distance on the HUD, in metres.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "hud_shown": {
+          "doc": "Every HUD value at once. Precondition: run in progress or paused.",
+          "kind": "method",
+          "params": [],
+          "returns": "HudReadout"
+        },
+        "is_paused": {
+          "doc": "True while the pause menu is shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "is_shown": {
+          "doc": "True while the run HUD is in front (not paused, no second-chance offer).",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "lives_shown": {
+          "doc": "Remaining lives: the HUD hearts still drawn white (lost lives turn black).",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "lives_state": {
+          "doc": "Remaining lives (game state). Precondition: run started.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "multiplier_shown": {
+          "doc": "The score multiplier on the HUD.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "pause": {
+          "doc": "Press pause. Precondition: run in front. Returns once the pause menu is shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "play_until_out_of_lives": {
+          "doc": "Let the run go on without input until every life is lost (the runner hits\nobstacles on its own). Returns when the second-chance offer is shown.\nPrecondition: a normal run in progress (not the tutorial, which waits for swipes).",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "premium_owned_shown": {
+          "doc": "The player's premium balance as shown on the offer. Precondition: offer shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "premium_shown": {
+          "doc": "Premium currency collected in this run, as shown on the HUD.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "quit_to_main_menu": {
+          "doc": "Press Exit on the pause menu. Returns once the main menu is shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "resume": {
+          "doc": "Press Resume on the pause menu. Returns once the run HUD is back.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "score_shown": {
+          "doc": "The score on the HUD.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "score_state": {
+          "doc": "The run's score (game state). Precondition: run started.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "second_chance_shown": {
+          "doc": "True while the \"another chance?\" offer is shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "theme_state": {
+          "doc": "Name of the theme the run takes place in (game state). Precondition: run started.",
+          "kind": "method",
+          "params": [],
+          "returns": "str"
+        }
+      }
+    },
+    "Settings": {
+      "doc": "The settings popup, opened from the main menu.",
+      "members": {
+        "cancel_delete": {
+          "doc": "Answer NO to the delete confirmation. Precondition: confirmation shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "close": {
+          "doc": "Close the popup (the game saves settings here). Precondition: settings open.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "confirm_delete": {
+          "doc": "Answer YES to the delete confirmation. Precondition: confirmation shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "confirmation_shown": {
+          "doc": "True while the delete-data confirmation question is shown.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "delete_data": {
+          "doc": "Press Delete data; returns once the confirmation question is shown.\nPrecondition: settings open.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "is_shown": {
+          "doc": "True when the settings popup is open.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "set_master_volume": {
+          "doc": "Move the master slider to `level` (0.0 to 1.0); the game applies it at once.\nPrecondition: settings open.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "level",
+              "required": true,
+              "type": "float"
+            }
+          ],
+          "returns": "None"
+        },
+        "set_music_volume": {
+          "doc": "Move the music slider to `level` (0.0 to 1.0). Precondition: settings open.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "level",
+              "required": true,
+              "type": "float"
+            }
+          ],
+          "returns": "None"
+        },
+        "set_sound_effects_volume": {
+          "doc": "Move the sound-effects slider to `level` (0.0 to 1.0). Precondition: settings open.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "level",
+              "required": true,
+              "type": "float"
+            }
+          ],
+          "returns": "None"
+        },
+        "volumes_shown": {
+          "doc": "Positions of the master, music and sound-effects sliders (0.0 to 1.0).\nPrecondition: settings open.",
+          "kind": "method",
+          "params": [],
+          "returns": "Volumes"
+        }
+      }
+    },
+    "Setup": {
+      "doc": "Arrange-only helpers that change the player's data directly.",
+      "members": {
+        "complete_mission": {
+          "doc": "Make the active mission at `index` (0 = first) complete by setting its progress to\nits target. The missions popup shows it as claimable the next time it opens.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "index",
+              "required": true,
+              "type": "int"
+            }
+          ],
+          "returns": "None"
+        },
+        "complete_tutorial": {
+          "doc": "Mark the tutorial as completed, so the next run is a normal run.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "set_coins": {
+          "doc": "Set the coin balance to `amount` (>= 0) and save.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "amount",
+              "required": true,
+              "type": "int"
+            }
+          ],
+          "returns": "None"
+        },
+        "set_premium": {
+          "doc": "Set the premium balance to `amount` (>= 0) and save.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "amount",
+              "required": true,
+              "type": "int"
+            }
+          ],
+          "returns": "None"
+        }
+      }
+    },
+    "Store": {
+      "doc": "The store, opened from the main menu or the game-over screen.",
+      "members": {
+        "accessories": {
+          "doc": "The accessories section; rows are grouped under the character they belong to.",
+          "kind": "property",
+          "returns": "StoreSection"
+        },
+        "characters": {
+          "doc": "The characters section.",
+          "kind": "property",
+          "returns": "StoreSection"
+        },
+        "close": {
+          "doc": "Close the store; the screen it was opened from comes back. Precondition: store open.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        },
+        "coins_shown": {
+          "doc": "The coin balance displayed in the store. Precondition: store open.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "is_shown": {
+          "doc": "True when the store is the screen in front.",
+          "kind": "method",
+          "params": [],
+          "returns": "bool"
+        },
+        "power_ups": {
+          "doc": "The power-ups section (store tab \"Items\"): Magnet, x2, Invincible, Life.",
+          "kind": "property",
+          "returns": "StoreSection"
+        },
+        "premium_shown": {
+          "doc": "The premium balance displayed in the store. Precondition: store open.",
+          "kind": "method",
+          "params": [],
+          "returns": "int"
+        },
+        "sections_shown": {
+          "doc": "Labels of the section tabs, in display order. Precondition: store open.",
+          "kind": "method",
+          "params": [],
+          "returns": "list[str]"
+        },
+        "themes": {
+          "doc": "The themes section.",
+          "kind": "property",
+          "returns": "StoreSection"
+        }
+      }
+    },
+    "StoreSection": {
+      "doc": "One section (tab) of the store: power-ups, characters, accessories or themes.",
+      "members": {
+        "buy": {
+          "doc": "Press Buy on the row `name` and report what the store showed before and after.\n\nThe button is pressed even when it is disabled: a refused purchase then shows no\nchange, after a few seconds of waiting for one. Opens the section first.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "name",
+              "required": true,
+              "type": "str"
+            },
+            {
+              "default": "None",
+              "name": "character",
+              "required": false,
+              "type": "str | None"
+            }
+          ],
+          "returns": "PurchaseResult"
+        },
+        "item": {
+          "doc": "The row named `name` (in the accessories section also give the `character` it\nbelongs to). Opens the section first; raises PGTimeout if no such row is listed.",
+          "kind": "method",
+          "params": [
+            {
+              "name": "name",
+              "required": true,
+              "type": "str"
+            },
+            {
+              "default": "None",
+              "name": "character",
+              "required": false,
+              "type": "str | None"
+            }
+          ],
+          "returns": "StoreItem"
+        },
+        "items": {
+          "doc": "Every row of this section in display order, as shown. Opens the section first.",
+          "kind": "method",
+          "params": [],
+          "returns": "list[StoreItem]"
+        },
+        "open": {
+          "doc": "Show this section. Precondition: the store is open. Returns once its rows are listed.",
+          "kind": "method",
+          "params": [],
+          "returns": "None"
+        }
+      }
+    }
+  },
+  "enums": {
+    "Screen": [
+      "start",
+      "main_menu",
+      "store",
+      "missions",
+      "settings",
+      "leaderboard",
+      "run",
+      "pause_menu",
+      "second_chance",
+      "game_over",
+      "unknown"
+    ]
+  },
+  "exceptions": {
+    "PGError": "Base class of every error raised by pg_sdk.",
+    "PGGameError": "The game logged an error or exception while the test ran (raised by the pytest plugin).",
+    "PGInfraError": "The device chain failed: driver connection, adb, or the app not running. Never a kill.",
+    "PGTimeout": "A post-condition did not hold in time (screen not shown, item not listed, ...)."
+  },
+  "exports": [
+    "Game",
+    "HudReadout",
+    "LeaderboardEntry",
+    "Mission",
+    "MissionState",
+    "PGError",
+    "PGGameError",
+    "PGInfraError",
+    "PGTimeout",
+    "PurchaseResult",
+    "Screen",
+    "StoreItem",
+    "Volumes"
+  ],
+  "fixture": {
+    "name": "game",
+    "type": "Game"
+  },
+  "records": {
+    "HudReadout": {
+      "doc": "The run HUD's values as shown on screen.",
+      "fields": {
+        "coins": "int",
+        "distance_m": "int",
+        "lives": "int",
+        "multiplier": "int",
+        "premium": "int",
+        "score": "int"
+      }
+    },
+    "LeaderboardEntry": {
+      "doc": "One leaderboard line: its rank as shown, the player name and the score.",
+      "fields": {
+        "name": "str",
+        "rank": "int",
+        "score": "int"
+      }
+    },
+    "Mission": {
+      "doc": "One mission as listed in the missions popup.\n\n`progress` and `target` come from the \"progress / target\" text, which the game shows only\nwhile the mission is not complete; both are None for a completed mission. `claimable` is\nTrue when the mission's claim button is shown.",
+      "fields": {
+        "claimable": "bool",
+        "description": "str",
+        "progress": "int | None",
+        "reward": "int",
+        "target": "int | None"
+      }
+    },
+    "MissionState": {
+      "doc": "One active mission as stored in the player's data (model state).",
+      "fields": {
+        "complete": "bool",
+        "progress": "float",
+        "reward": "int",
+        "target": "float"
+      }
+    },
+    "PurchaseResult": {
+      "doc": "What the store showed just before and just after pressing Buy on one row.",
+      "fields": {
+        "coins_after": "int",
+        "coins_before": "int",
+        "item_after": "StoreItem",
+        "item_before": "StoreItem",
+        "premium_after": "int",
+        "premium_before": "int"
+      }
+    },
+    "StoreItem": {
+      "doc": "One row of a store section, as the player sees it.\n\n`character` is set only in the accessories section, where rows are grouped under the\ncharacter they belong to. `count` is the number owned, shown on power-up rows only.\n`owned` is True when the row's button reads \"Owned\". A price is \"highlighted\" when the\nstore shows it in red because the player cannot cover it.",
+      "fields": {
+        "buy_enabled": "bool",
+        "character": "str | None",
+        "coin_price": "int",
+        "coin_price_highlighted": "bool",
+        "count": "int | None",
+        "name": "str",
+        "owned": "bool",
+        "premium_price": "int | None",
+        "premium_price_highlighted": "bool"
+      }
+    },
+    "Volumes": {
+      "doc": "Volume levels on the settings sliders' scale: 0.0 (silent) to 1.0 (full).",
+      "fields": {
+        "master": "float",
+        "music": "float",
+        "sound_effects": "float"
+      }
+    }
+  },
+  "schema": 1
+}

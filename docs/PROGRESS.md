@@ -16,11 +16,20 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 - **G5 budget:** 120 s median test runtime, excluding reset and connect.
 - **Seeded bugs:** the 16 proposed bugs, with one change: SB13 shows the run's coins instead of distance on the game-over screen, because score equals distance at multiplier 1 and the swap would be invisible (`TrackManager.AddScore`).
 
+### Findings from the live SDK work (2026-10-07)
+
+- **The store reloads the save file when it opens** (`ShopUI.Start` → `PlayerData.Create`). Unsaved in-memory changes vanish, so every `game.setup.*` helper saves after writing.
+- **Selections are not saved when changed** (`LoadoutState.ChangeCharacter` and friends do not call `Save`): after a restart the clean build shows Trash Cat again. This contradicts **PERSIST-3**; any correct test of it fails G2. Raised with Dheeru.
+- AltTester 2.3.2 sets a list element's field and then raises (`docs/VERSIONS.md`); setup verifies such writes by reading them back.
+- `GAME_MODEL.md` corrected: each store tab has its own list, the buy button is `BuyButton`, mission progress is `Image/Reward/Text`.
+
 ### Milestones
 
 | Milestone | State | Evidence |
 |---|---|---|
 | M1.1 Game hooks | Scripts and 16 hooks written and applied to the Unity project (18 marked lines, `grep -rn "PG hook"`); waiting for Dheeru's build | [`game/HOOKS.md`](../game/HOOKS.md), [`game/unity_scripts/`](../game/unity_scripts/) |
+| M1.2 Bug catalog | 16 bugs, seeded stratified split 10 dev / 6 holdout (holdout SB01, SB03, SB06, SB07, SB10, SB12); `pg bugs check` passes. **Freeze pending Dheeru's approval of the split** | [`benchmark/bugs.yaml`](../benchmark/bugs.yaml), `pg_core/catalog.py` |
+| M1.3 `pg_sdk` | Pages, locators, setup helpers, model readers, manifest (11 classes, 110 members) and pytest plugin written; live suite 6/6 on the clean build `e63240052d1b` with 0 game errors; fake-driver unit tests. Locators for the hooked build and the human baseline still to come | [`sdk_live_clean_e63240052d1b.json`](evidence/phase1/sdk_live_clean_e63240052d1b.json), `pg_sdk/manifest.json` |
 
 ## Phase 0: Foundation and feasibility spike
 

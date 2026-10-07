@@ -9,6 +9,7 @@ from pg_sdk._ui import UI_ASSEMBLY, Element, Ui, is_red, parse_int
 from pg_sdk.types import PurchaseResult, Screen, StoreItem
 
 SectionKey = Literal["power_ups", "characters", "accessories", "themes"]
+_SECTIONS: tuple[SectionKey, ...] = ("power_ups", "characters", "accessories", "themes")
 
 
 class _RowGone(Exception):
@@ -170,10 +171,27 @@ class Store:
 
     def __init__(self, ui: Ui) -> None:
         self._ui = ui
-        self.power_ups = StoreSection(ui, "power_ups")
-        self.characters = StoreSection(ui, "characters")
-        self.accessories = StoreSection(ui, "accessories")
-        self.themes = StoreSection(ui, "themes")
+        self._sections = {key: StoreSection(ui, key) for key in _SECTIONS}
+
+    @property
+    def power_ups(self) -> StoreSection:
+        """The power-ups section (store tab "Items"): Magnet, x2, Invincible, Life."""
+        return self._sections["power_ups"]
+
+    @property
+    def characters(self) -> StoreSection:
+        """The characters section."""
+        return self._sections["characters"]
+
+    @property
+    def accessories(self) -> StoreSection:
+        """The accessories section; rows are grouped under the character they belong to."""
+        return self._sections["accessories"]
+
+    @property
+    def themes(self) -> StoreSection:
+        """The themes section."""
+        return self._sections["themes"]
 
     def is_shown(self) -> bool:
         """True when the store is the screen in front."""

@@ -1,7 +1,8 @@
 """Live checks of pg_sdk against the phone. Never run in CI (no device there).
 
-Run through the plugin with a run context, for example:
-    uv run pg sdk-live   (writes the context and runs this file)
+Run with the pg_sdk pytest plugin and a run context file (pg_sdk.pytest_plugin.RunContext):
+set PG_RUN_CONTEXT=<context.json>, then
+    uv run pytest tests/device/test_sdk_live.py -p pg_sdk.pytest_plugin
 """
 
 from __future__ import annotations
