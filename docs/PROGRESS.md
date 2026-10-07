@@ -13,8 +13,8 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M0.1 Repository scaffold | Done | commits `5999222`..`5864dc3`; local checks below; first CI run green: [run 37616434447](https://github.com/Dheeru-Reddy-ui/proving-ground/actions/runs/37616434447) |
 | M0.2 Build checklist (`game/BUILD_TRASHCAT.md`) | Done: Dheeru built the instrumented APK (19:05), installed and verified 2026-10-07. ARM64-only was not applied (APK has 3 ABIs); fix on the next rebuild | [`game/BUILD_TRASHCAT.md`](../game/BUILD_TRASHCAT.md); build facts in [`docs/VERSIONS.md`](VERSIONS.md) |
 | M0.3 `pg doctor` | Done: 8/8 PASS live on 2026-10-07 | [`docs/evidence/phase0/doctor_all_pass.txt`](evidence/phase0/doctor_all_pass.txt); rules in `pg_core/doctor.py` (100% line and branch coverage) |
-| M0.4 Connectivity and introspection spike | Live: connect, dumps (`Start` 311 objects, `Main` 441) and log capture in both channels verified. Reset timing and time scale not yet run. Two driver bugs recorded (duplicate log notifications, worked around with `overwrite=False`; stack traces never delivered). A dump race fixed (objects vanishing mid-dump are counted, not fatal) | [`logs_check.json`](evidence/phase0/logs_check.json), [`scenes/`](evidence/phase0/scenes/), [`driver-notification-duplicate.txt`](evidence/phase0/driver-notification-duplicate.txt) |
-| M0.5 Game model | Source pass done; `Start` and main-menu paths mapped from device dumps; store, run and game-over screens pending | [`docs/game/GAME_MODEL.md`](game/GAME_MODEL.md) |
+| M0.4 Connectivity and introspection spike | Done, all six steps live on 2026-10-07: connect; dumps + screenshots; log capture in both channels; reset (`pm clear` + relaunch to `Start`) 8.0 s / 12.1 s / 10.4 s over 3 runs, first-launch save verified each time, including after the save held 2,000,000 coins; time scale ×2.00 game time and ×2.07 distance on a normal run. Side effects: the game's Pause/Resume and tutorial prompts reset the time scale. Driver/server issues recorded in `docs/VERSIONS.md` | [`spike/`](evidence/phase0/spike/), [`logs_check.json`](evidence/phase0/logs_check.json), [`scenes/`](evidence/phase0/scenes/) |
+| M0.5 Game model | Done pending review: every screen visited on the phone with a dump and screenshot (Start, main menu first launch and after a run, missions, settings, leaderboard, store x4 tabs, run HUD, second chance, game over). Buying and mission claiming not exercised yet | [`docs/game/GAME_MODEL.md`](game/GAME_MODEL.md), [`scenes/`](evidence/phase0/scenes/) |
 | M0.6 Feature specs | Drafts written (6 files, 59 statements, 4 marked `[confirm]`), left uncommitted for Dheeru to review, edit and commit | `specs/` (Dheeru's commit pending) |
 | M0.7 Reliability baseline (20 smoke runs) | Not started | |
 | M0.8 ADRs 0001–0003 | Written: 0001 (target game and tooling), 0002 (free-plan limits), 0003 (license options; decision pending) | `docs/adr/` |
@@ -47,15 +47,13 @@ Raw output: [`docs/evidence/phase0/environment.txt`](evidence/phase0/environment
 
 ### Not done or not verified
 
-- M0.4: reset timing and time scale; M0.5: store, run and game-over dumps; M0.6: Dheeru's review and commit of the specs; M0.7: smoke baseline.
+- M0.6: Dheeru's review and commit of the specs; M0.7: smoke baseline (20 runs); screenshots stay local (not committed) until a decision on game imagery.
 - License: options in ADR-0003; Dheeru decides.
 
 ### Known risks carried forward
 
-- **First-launch flow** (observed 2026-10-07 on a fresh install):
-  - There is no licence popup in this build. `LicenceDisplayer` is unused, which corrects the source-only reading.
-  - START loads `Main` cleanly. The main menu then shows `TutorialOverlay` while `tutorialDone` is false.
-  - In the first spike a tutorial run started without any AltTester tap after START. A touch on the phone is not ruled out, so M0.4 repeats this hands-off. How a reset test reaches the store (M0.7) depends on the answer.
+- **First-launch flow** (observed 2026-10-07): no licence popup in this build; START loads `Main`; the main menu shows `TutorialOverlay` but the store is reachable; the tutorial does **not** start by itself (25 s hands-off watch) — the earlier unexpected run was most likely a touch on the phone. The first Run is the tutorial, which pauses at each obstacle until a swipe.
+- **Shop rows refresh affordability only when built:** setup that grants currency must do so before opening the store (or re-open the tab).
 - **Determinism lever for Phase 1:** `TrackManager.trackSeed` is a settable property (`TrackManager.cs`), so runs can be pinned to one track layout.
 - **Player settings to change in M0.2** (both covered by the checklist): managed stripping is Low (AltTester's known issue requires Minimal for IL2CPP); target architectures are ARMv7 + ARM64 + x86 (the phone only needs ARM64).
 - **Licence window.** The driver may only be used with a valid AltTester subscription; continuing past the trial depends on the Lite request.

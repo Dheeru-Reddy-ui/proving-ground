@@ -1,0 +1,20 @@
+{
+  "requested_scale": 2.0,
+  "restored_scale": 1.0,
+  "base": {
+    "scale": 1.0,
+    "wall_seconds": 3.062000000034459,
+    "game_seconds": 3.0666560999999994,
+    "metric_delta": 25.456595999999998
+  },
+  "scaled": {
+    "scale": 2.0,
+    "wall_seconds": 3.062000000034459,
+    "game_seconds": 6.133319900000004,
+    "metric_delta": 52.811865999999995
+  },
+  "game_time_ok": true,
+  "game_time_detail": "expected x2.00, measured x2.00 (tolerance 15%)",
+  "metric": "TrackManager:instance.worldDistance",
+  "metric_ratio": 2.074584755950874
+}

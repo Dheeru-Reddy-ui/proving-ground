@@ -1,0 +1,82 @@
+[
+  {
+    "label": "run_hud",
+    "scene": "Main",
+    "elements": 1511,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_run_hud.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_run_hud.png"
+  },
+  {
+    "label": "run_death_popup",
+    "scene": "Main",
+    "elements": 1511,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_run_death_popup.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_run_death_popup.png"
+  },
+  {
+    "label": "gameover",
+    "scene": "Main",
+    "elements": 1511,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_gameover.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_gameover.png"
+  },
+  {
+    "label": "loadout_after_run",
+    "scene": "Main",
+    "elements": 747,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_loadout_after_run.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_loadout_after_run.png"
+  },
+  {
+    "label": "missions_popup",
+    "scene": "Main",
+    "elements": 771,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_missions_popup.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_missions_popup.png"
+  },
+  {
+    "label": "settings_popup",
+    "scene": "Main",
+    "elements": 771,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_settings_popup.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_settings_popup.png"
+  },
+  {
+    "label": "leaderboard",
+    "scene": "Main",
+    "elements": 771,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_leaderboard.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_leaderboard.png"
+  },
+  {
+    "label": "shop_characters",
+    "scene": "Main",
+    "elements": 913,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_shop_characters.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_shop_characters.png"
+  },
+  {
+    "label": "shop_accessories",
+    "scene": "Main",
+    "elements": 992,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_shop_accessories.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_shop_accessories.png"
+  },
+  {
+    "label": "shop_themes",
+    "scene": "Main",
+    "elements": 1022,
+    "vanished_during_dump": 0,
+    "dump": "artifacts\\spike\\cf86374974de\\scene_Main_shop_themes.json",
+    "screenshot": "artifacts\\spike\\cf86374974de\\scene_Main_shop_themes.png"
+  }
+]

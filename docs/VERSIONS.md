@@ -26,6 +26,8 @@ Raw evidence for the values below: [`docs/evidence/phase0/environment.txt`](evid
 - Quirk: `AltDriver._check_server_version` treats only server versions 2.2.x and 1.0.x as supported, so it logs "Version mismatch" against a 2.3 server even when everything matches. Driver logging is off by default. `pg doctor` compares versions itself instead of relying on this warning.
 - Bug: log notifications are delivered **twice** when a listener is added with `overwrite=True` (the default of `AltDriver.add_notification_listener`). `NotificationHandler.add_notification_listener` replaces the callback list with `[callback]` and then appends the same callback again. This differs from the docstring ("overwrite the other callbacks or just append"). Reproduced without a device: [`docs/evidence/phase0/driver-notification-duplicate.txt`](evidence/phase0/driver-notification-duplicate.txt). Workaround (approved by Dheeru on 2026-10-07): register with `overwrite=False` on a fresh driver connection, which delivers each log once.
 - Bug: log notifications never carry their stack trace. The game sends the trace under the key `stackTrace`, but the driver reads `stack_trace`, so `LogNotificationResult.stack_trace` is always `None`. Observed live on 2026-10-07: the logcat copy of the notification in [`docs/evidence/phase0/logs_check.json`](evidence/phase0/logs_check.json) shows a populated `stackTrace`, while the notification the driver delivered had an empty trace. Stack traces are taken from logcat instead.
+- Server bug (AltTester Unity SDK 2.3.2, in the game): `set_static_property` on a dotted path whose first segment is a static **property** fails with `UnknownErrorException: Unable to cast object of type 'RuntimePropertyInfo' to type 'FieldInfo'`, although the docs say "field or property". Reads through the same path work. Workaround: start the path at the backing static field (`PlayerData` → `m_Instance.tutorialDone`). Observed 2026-10-07.
+- Reading a member through a static property that is currently null (e.g. `TrackManager.instance` on the main menu) raises `UnknownErrorException`; adapters must treat that as "not available".
 - Importing `alttester` prints `SyntaxWarning`s from its dependency `pure-python-adb` 0.3.0.dev0 (invalid escape sequences under Python 3.12) the first time it is compiled. Harmless; we call adb ourselves.
 
 ### Confirmed driver API
@@ -43,8 +45,9 @@ Each call below is used by our code, matches the installed package's signature, 
 | `call_static_method(type, method, assembly, parameters)` | trigger `UnityEngine.Debug.LogError` | logged in both channels |
 | `get_static_property(component, "instance.<field>", assembly, max_depth)` | read `PlayerData`, `TrackManager` | first-launch save values, `isTutorial`, `worldDistance` |
 | `find_object(By.PATH, path)`, `AltObject.tap()` | press the START button | scene changed to `Main` |
-| `get_time_scale()` | read time scale | 1.0 |
-| `set_time_scale(scale)` | time-scale spike | signature only, not yet run live |
+| `get_time_scale()`, `set_time_scale(scale)` | time-scale spike | game time ×2.00 at scale 2, restored afterwards |
+| `find_object(By.COMPONENT, name)`, `AltObject.call_component_method(component, method, assembly, parameters)` | find `ShopUI`, call `CheatCoin` | coins 0 → 1,000,000 |
+| `set_static_property(component, path, assembly, value)` | test setup: mark the tutorial done | works via `m_Instance.tutorialDone` with value `"true"`; fails via `instance.tutorialDone` (server bug below) |
 
 `NotificationType` is not exported at the package top level; import it from `alttester.commands.Notifications.notification_type`.
 

@@ -1,0 +1,30 @@
+{
+  "package": "com.DefaultCompany.TrashCat",
+  "activity": "com.DefaultCompany.TrashCat/com.unity3d.player.UnityPlayerActivity",
+  "pm_clear": "Success",
+  "am_start_total_time_ms": 133,
+  "seconds": {
+    "pm_clear": 0.19,
+    "launch": 0.25,
+    "driver_connected": 9.95,
+    "first_scene": 0.03,
+    "total": 10.42
+  },
+  "expected_scene": "Start",
+  "player_data": {
+    "coins": 0,
+    "premium": 0,
+    "characters": [
+      "Trash Cat"
+    ],
+    "themes": [
+      "Day"
+    ],
+    "ftueLevel": 0,
+    "licenceAccepted": false,
+    "tutorialDone": false
+  },
+  "read_errors": {},
+  "diffs_from_first_launch": [],
+  "first_launch_state": true
+}

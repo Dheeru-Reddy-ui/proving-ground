@@ -1,0 +1,122 @@
+{
+  "observations": [
+    {
+      "t": 0.1,
+      "msg": "start",
+      "scene": "Start"
+    },
+    {
+      "t": 0.5,
+      "msg": "main loaded",
+      "scene": "Main"
+    },
+    {
+      "t": 0.7,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 3.4,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 6.1,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 8.7,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 11.4,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 14.1,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 16.8,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 19.5,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 22.2,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 24.9,
+      "msg": "watch",
+      "isMoving": "UnknownErrorException",
+      "isTutorial": "UnknownErrorException",
+      "store_y": 280,
+      "tutorialDone": false
+    },
+    {
+      "t": 29.7,
+      "msg": "after store tap",
+      "loaded": [
+        "Main",
+        "Shop"
+      ],
+      "scene": "Main"
+    },
+    {
+      "t": 29.8,
+      "msg": "ShopUI object",
+      "name": "Canvas"
+    },
+    {
+      "t": 31.0,
+      "msg": "cheat",
+      "coins_premium_before": [
+        0,
+        0
+      ],
+      "coins_premium_after": [
+        1000000,
+        1000
+      ]
+    }
+  ],
+  "log_notifications": 82,
+  "error_logs": []
+}
