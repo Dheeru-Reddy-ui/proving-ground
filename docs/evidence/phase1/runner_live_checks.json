@@ -1,0 +1,42 @@
+{
+  "run-20261007T175515-3b1c84": [
+    {
+      "test_file": "test_sample_store.py",
+      "attempts": 1,
+      "final": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "duration_s": 6.776,
+        "wall_s": 18.297,
+        "exit_code": 0,
+        "timed_out": false
+      }
+    },
+    {
+      "test_file": "test_sample_store.py",
+      "attempts": 1,
+      "final": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "duration_s": 6.739,
+        "wall_s": 18.0,
+        "exit_code": 0,
+        "timed_out": false
+      }
+    }
+  ],
+  "run-20261007T175610-de9972": [
+    {
+      "test_file": "test_sample_hang.py",
+      "attempts": 1,
+      "final": {
+        "outcome": "infra",
+        "rule": "wall_clock_timeout",
+        "duration_s": 0.0,
+        "wall_s": 40.093,
+        "exit_code": null,
+        "timed_out": true
+      }
+    }
+  ]
+}

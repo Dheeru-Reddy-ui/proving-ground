@@ -9,6 +9,8 @@ license-files = ["LICENSE"]
 authors = [{ name = "Dheeru Reddy" }]
 dependencies = [
     "alttester-driver==2.3.2",
+    "defusedxml>=0.7.1",
+    "psutil>=7.2.2",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
     "pyyaml>=6.0.3",
@@ -65,6 +67,9 @@ select = [
 "tests/unit/test_gate_static.py" = [
   "E501",  # one adversarial sample per table row reads better unwrapped
 ]
+"tests/unit/test_classify.py" = [
+  "E501",  # one observation per table row reads better unwrapped
+]
 
 [tool.mypy]
 python_version = "3.12"
@@ -102,5 +107,7 @@ dev = [
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "ruff>=0.16.10",
+    "types-defusedxml>=0.7.0.20260504",
+    "types-psutil>=7.2.2.20260906",
     "types-pyyaml>=6.0.12.20260906",
 ]
