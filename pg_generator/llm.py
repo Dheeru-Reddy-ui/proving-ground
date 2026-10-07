@@ -163,6 +163,6 @@ class GeminiClient:
 
 
 def make_client(provider: str, api_key: str, model: str, timeout_s: float) -> LLMClient:
-    if provider == "gemini":
+    if provider.strip().lower() == "gemini":
         return GeminiClient(api_key=api_key, model=model, timeout_s=timeout_s)
     raise ValueError(f"unsupported LLM provider {provider!r} (supported: gemini)")

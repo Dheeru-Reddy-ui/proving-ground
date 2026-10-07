@@ -6,8 +6,9 @@
 # fields differ from that draw. Holdout bugs are used only for final measurement (Phase 4);
 # they are frozen in benchmark/HOLDOUT_FREEZE.md.
 #
-# pages: the pg_sdk pages where the bug shows (pg_core.pages). G3 runs a test against a dev
-# bug only if the test touches one of these pages.
+# pages: the pg_sdk pages a test must touch to see the bug (pg_core.pages). G3 runs a test
+# against a dev bug only if the test touches one of them. `main_menu` is never listed: every
+# test navigates through it, so it would make the filter useless.
 version: 1
 split_seed: a60b9d2c9a75532a4f4bf3f6aed2eb898f7eb0aa
 holdout_share: 0.4
@@ -30,14 +31,14 @@ bugs:
     flag: sb_theme_not_granted
     category: purchase_not_granted
     feature: store
-    pages: [store, main_menu]
+    pages: [store]
     symptom: Buying a theme charges the price but the theme is not owned or selectable.
     split: holdout
   - id: SB04
     flag: sb_accessory_not_granted
     category: purchase_not_granted
     feature: store
-    pages: [store, main_menu]
+    pages: [store]
     symptom: Buying an accessory charges the price but the accessory is not owned.
     split: dev
   - id: SB05
@@ -65,7 +66,7 @@ bugs:
     flag: sb_tutorial_done_not_loaded
     category: progress_not_persisted
     feature: persistence
-    pages: [app, main_menu, run]
+    pages: [app]
     symptom: The tutorial is shown again after the game is closed and reopened.
     split: dev
   - id: SB09
@@ -107,7 +108,7 @@ bugs:
     flag: sb_run_ignores_selected_character
     category: selection_not_applied
     feature: character_select
-    pages: [run, main_menu]
+    pages: [run]
     symptom: The run uses the first owned character whatever the main menu selected.
     split: dev
   - id: SB15
