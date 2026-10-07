@@ -14,7 +14,7 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M0.2 Build checklist (`game/BUILD_TRASHCAT.md`) | Checklist written; Dheeru's build not done yet | [`game/BUILD_TRASHCAT.md`](../game/BUILD_TRASHCAT.md) |
 | M0.3 `pg doctor` | Implemented and unit-tested; live all-PASS run waits for the APK | 8 checks; rules in `pg_core/doctor.py` (100% line and branch coverage), adapters `pg_runner/adb.py` and `pg_sdk/_driver.py`; live run 2026-10-07: python, adb, AltTester Desktop and driver version PASS; device FAIL (phone attached but USB debugging off at the time), game/reverse/app SKIP |
 | M0.4 Connectivity and introspection spike | `pg spike connect/dump/screenshot/logs/reset/timescale` implemented and unit-tested against fakes; live runs need the APK. Driver bug (duplicate log notifications) worked around with `overwrite=False`, approved by Dheeru | [`docs/evidence/phase0/driver-notification-duplicate.txt`](evidence/phase0/driver-notification-duplicate.txt) |
-| M0.5 Game model | Not started | |
+| M0.5 Game model | Draft from the source pass: scenes, states, store rules, `PlayerData` state, persistence, never-press list. Screen paths pending device dumps | [`docs/game/GAME_MODEL.md`](game/GAME_MODEL.md) |
 | M0.6 Feature specs | Not started | |
 | M0.7 Reliability baseline (20 smoke runs) | Not started | |
 | M0.8 ADRs 0001–0003 | Written: 0001 (target game and tooling), 0002 (free-plan limits), 0003 (license options; decision pending) | `docs/adr/` |
