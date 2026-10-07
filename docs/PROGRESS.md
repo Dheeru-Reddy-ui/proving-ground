@@ -12,7 +12,7 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 |---|---|---|
 | M0.1 Repository scaffold | Done | commits `5999222`..`5864dc3`; local checks below; first CI run green: [run 37616434447](https://github.com/Dheeru-Reddy-ui/proving-ground/actions/runs/37616434447) |
 | M0.2 Build checklist (`game/BUILD_TRASHCAT.md`) | Checklist written; Dheeru's build not done yet | [`game/BUILD_TRASHCAT.md`](../game/BUILD_TRASHCAT.md) |
-| M0.3 `pg doctor` | Not started | |
+| M0.3 `pg doctor` | Implemented and unit-tested; live all-PASS run waits for the APK | 8 checks; rules in `pg_core/doctor.py` (100% line and branch coverage), adapters `pg_runner/adb.py` and `pg_sdk/_driver.py`; live run 2026-10-07: python, adb, AltTester Desktop and driver version PASS; device FAIL (phone attached but USB debugging off at the time), game/reverse/app SKIP |
 | M0.4 Connectivity and introspection spike | Not started | |
 | M0.5 Game model | Not started | |
 | M0.6 Feature specs | Not started | |
@@ -57,3 +57,4 @@ Raw output: [`docs/evidence/phase0/environment.txt`](evidence/phase0/environment
 - **Player settings to change in M0.2** (both covered by the checklist): managed stripping is Low (AltTester's known issue requires Minimal for IL2CPP); target architectures are ARMv7 + ARM64 + x86 (the phone only needs ARM64).
 - **Phone "Stay awake" is off.** A sleeping screen pauses the game; Dheeru to enable it before automated runs.
 - **Licence window.** The driver may only be used with a valid AltTester subscription; continuing past the trial depends on the Lite request.
+- **For Phase 1 (G1 static gate):** `pg_sdk._driver` wraps the raw AltTester driver. Generated tests may import `pg_sdk.*`, so G1 must also reject imports of underscore modules such as `pg_sdk._driver`.
