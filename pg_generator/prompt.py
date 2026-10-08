@@ -148,3 +148,19 @@ def render_prompt(
     )
     digest = hashlib.sha256((system + "\n\n" + filled).encode("utf-8")).hexdigest()
     return RenderedPrompt(version=version, system=system, user=filled, sha256=digest)
+
+
+REFERENCE_DOC = Path(__file__).resolve().parents[1] / "docs" / "SDK_REFERENCE.md"
+
+
+def reference_doc(manifest: Mapping[str, Any]) -> str:
+    """docs/SDK_REFERENCE.md: the same SDK reference the generator's prompt shows, for people."""
+    header = (
+        "# pg_sdk reference\n\n"
+        "Generated from `pg_sdk/manifest.json` by `uv run pg sdk-reference`; "
+        "do not edit by hand.\n"
+        "Every test gets a `Game` as its `game` fixture, on the main menu of a new game.\n"
+        "Members are listed as `Class.member(params) -> return type: description`.\n\n"
+    )
+    body = sdk_reference(manifest).replace("\n### ", "\n## ").replace("### ", "## ", 1)
+    return header + body + "\n"

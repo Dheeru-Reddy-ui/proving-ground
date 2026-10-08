@@ -38,3 +38,10 @@ def test_manifest_exposes_no_private_names() -> None:
     assert '"_' not in text
     assert "_driver" not in text
     assert "AltTester" not in text.replace("AltTester Desktop", "")
+
+
+def test_sdk_reference_doc_is_current() -> None:
+    from pg_generator.prompt import REFERENCE_DOC, reference_doc
+
+    expected = reference_doc(json.loads(MANIFEST_PATH.read_text(encoding="utf-8")))
+    assert REFERENCE_DOC.read_text(encoding="utf-8") == expected, "run `uv run pg sdk-reference`"

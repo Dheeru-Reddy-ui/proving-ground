@@ -26,7 +26,7 @@ def test_buying_magnet_charges_its_price(game: Game) -> None:
 ```
 
 - The `game` fixture starts every test on the main menu of a new game (data cleared).
-- Use only `pg_sdk`: the full API with one-line docs is in `pg_sdk/manifest.json` (or run `uv run python -c "from pg_generator.prompt import sdk_reference; import json; print(sdk_reference(json.load(open('pg_sdk/manifest.json'))))"`).
+- Use only `pg_sdk`: every class, method and result field is listed in [`docs/SDK_REFERENCE.md`](SDK_REFERENCE.md).
 - `*_shown()` reads the screen; `*_state()` reads game data. Assert on the screen; cross-check data if you like.
 - `game.setup.*` arranges state (coins, premium, tutorial done, a completed mission) and saves it. Set balances before opening the store.
 - For a normal run: `game.setup.complete_tutorial()` before `game.main_menu.start_run()`, then `game.run.play_until_out_of_lives()`.

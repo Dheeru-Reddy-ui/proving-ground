@@ -61,3 +61,16 @@ def doctor(
     report = run_doctor(Settings(), default_deps())
     typer.echo(report.model_dump_json(indent=2) if json_output else render(report))
     raise typer.Exit(report.exit_code)
+
+
+@app.command("sdk-reference")
+def sdk_reference_cmd() -> None:
+    """Write docs/SDK_REFERENCE.md from pg_sdk/manifest.json (the API tests may use)."""
+    import json
+    from pathlib import Path
+
+    from pg_generator.prompt import REFERENCE_DOC, reference_doc
+
+    manifest = json.loads(Path("pg_sdk/manifest.json").read_text(encoding="utf-8"))
+    REFERENCE_DOC.write_text(reference_doc(manifest), encoding="utf-8", newline="\n")
+    typer.echo(f"wrote {REFERENCE_DOC}")
