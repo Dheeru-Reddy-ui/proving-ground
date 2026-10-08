@@ -2,6 +2,24 @@
 
 Status of each phase: what works, what was verified (with evidence) and what is not done. Numbers here come from evidence files or stored runs, never typed from memory.
 
+## Phase 2: Production platform
+
+Started 2026-10-08. Plan approved by Dheeru on 2026-10-08 with every recommended default.
+
+### Decisions (2026-10-08)
+
+- **Hosting on free tiers** (ADR-0010). Render's free instances exist only for web services, Postgres and Key Value, and pre-deploy commands are paid-only ([render.com/docs/free](https://render.com/docs/free), [render.com/docs/deploys](https://render.com/docs/deploys), checked 2026-10-08). So:
+  - the worker loop runs **inside the pg_api web service** (`PG_EMBEDDED_WORKER=true`); the same code runs standalone as `pg worker run`;
+  - migrations run from the release workflow before it calls Render's deploy hook, never at app start.
+- **APKs are stored in parts.** Supabase Storage's Free plan caps a file at 50 MB and the cap cannot be raised ([file limits](https://supabase.com/docs/guides/storage/uploads/file-limits)); build 2's APK is 64.1 MB. Each APK goes to a private bucket as parts of at most 45 MB plus a manifest of sha256s; the agent joins and verifies them. APKs never go into a GitHub release (public repo, Asset Store content).
+- **Database:** Supabase Free, reached through the session pooler (IPv4, prepared statements supported; the direct connection is IPv6-only on Free, [docs](https://supabase.com/docs/guides/database/connecting-to-postgres)). The local Phase 1 database is copied in once so the demo shows runs 5 and 6 with the same IDs; the local copy stays untouched.
+- **LLM tracing:** an `llm_calls` table, not Langfuse.
+- **Metrics:** `/metrics` computed from the existing tables on request; nothing scrapes on the free tier.
+- **Public demo mode** hides screenshots (the Phase 0 game-imagery decision is still open).
+- **Keep-alive:** a weekly scheduled workflow calls `/readyz`, because Supabase pauses Free projects after 7 days of low activity ([docs](https://supabase.com/docs/guides/platform/free-project-pausing)).
+- **Cloud resources:** Dheeru creates the Supabase project and the Render web service and enters the secrets. Secret locations as approved: `DATABASE_URL` in `.env`, Render env and a GitHub Actions secret; the Supabase service key in Render env only; agent and CLI tokens stored hashed on the server.
+- **Second build:** Dheeru makes a no-change rebuild of the hooked game (new sha256) so one build can be registered through the webhook path and one through the CLI path.
+
 ## Phase 1: Core trust loop
 
 Started 2026-10-07. Plan approved by Dheeru on 2026-10-07. **Closed 2026-10-08** with one exit-gate item deferred to Phase 4 (human baseline, ADR-0009).
