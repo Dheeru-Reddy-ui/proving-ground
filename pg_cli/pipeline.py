@@ -250,6 +250,7 @@ def prove_subject(
     artifact_root: Path,
     timeout_s: float,
     echo: Callable[[str], Any],
+    clean_only: bool = False,
 ) -> tuple[Any, Any, Any, Any]:
     """Run G2/G5 (clean) and, when G2 passes, G3 (relevant dev bugs) for one test."""
     common: dict[str, Any] = {
@@ -273,7 +274,7 @@ def prove_subject(
     )
     g2 = check_determinism(clean)
     g5 = check_cost(clean)
-    if not g2.passed:
+    if not g2.passed or clean_only:
         return g2, None, None, g5
     relevant, skipped = relevant_bugs(report.pages_used, dev_bugs)
     for bug_id, why in skipped.items():
@@ -471,6 +472,9 @@ def prove_cmd(
     static_only: Annotated[
         bool, typer.Option(help="Run only G1 (no device, no decision stored).")
     ] = False,
+    clean_only: Annotated[
+        bool, typer.Option(help="Stop after the clean runs (G2/G5); G3 stays pending.")
+    ] = False,
 ) -> None:
     """Run G1-G5 on every candidate of a generation run and decide ACCEPT/REVIEW/REJECT."""
     eng = engine()
@@ -518,6 +522,7 @@ def prove_cmd(
             artifact_root=artifact_root / f"c{cid}",
             timeout_s=timeout,
             echo=typer.echo,
+            clean_only=clean_only,
         )
         evidences.append(
             Evidence(
