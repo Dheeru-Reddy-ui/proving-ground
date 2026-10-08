@@ -81,6 +81,11 @@ select = [
   "S105",  # tests use made-up tokens and secrets
   "S106",
 ]
+"ops/**" = [
+  "S101",  # drills assert their expected outcome
+  "S603",  # drills run fixed commands (docker, git)
+  "S607",
+]
 "tests/unit/test_gate_static.py" = [
   "E501",  # one adversarial sample per table row reads better unwrapped
 ]

@@ -1,0 +1,9 @@
+tests/integration/test_failure_modes.py::test_a_killed_agent_process_leaves_exactly_one_completion PASSED
+tests/integration/test_failure_modes.py::test_forged_and_stale_webhooks_are_refused_and_logged PASSED
+tests/integration/test_api.py::test_the_webhook_registers_one_build_and_rejects_forgeries PASSED
+tests/integration/test_worker.py::test_an_llm_error_storm_gives_one_set_of_candidates PASSED
+tests/integration/test_worker.py::test_a_spent_build_budget_stops_generation PASSED
+tests/integration/test_worker.py::test_a_spent_daily_budget_waits_for_tomorrow PASSED
+tests/integration/test_pipeline.py::test_an_agent_crash_mid_job_gives_exactly_one_completion PASSED
+tests/integration/test_pipeline.py::test_a_run_that_is_infra_every_attempt_dies_and_leaves_the_candidate_pending PASSED
+============================= 8 passed in 41.02s ==============================

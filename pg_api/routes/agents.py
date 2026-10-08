@@ -194,7 +194,7 @@ def complete(job_id: int, body: CompleteIn, request: Request, state: State) -> J
             raise ApiError(
                 422, "invalid_result", f"invalid {job.type} result: {exc.error_count()} problem(s)"
             ) from None
-        s.refresh(job)
+        s.flush()  # never refresh here: it would discard the unflushed completion
         ack = _ack(action, job)
         log.info("job_completed", ack=ack.status, job_status=job.status)
         return ack

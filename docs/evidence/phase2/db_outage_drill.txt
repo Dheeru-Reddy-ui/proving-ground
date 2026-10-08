@@ -1,0 +1,14 @@
+Database outage drill (ops/drills/db_outage.py), 2026-10-08, on the device host: a throwaway postgres:16 container, the API in-process. While the database is down each probe waits for the 10 s connect timeout (two requests per probe).
+
+[   3.5s] database container up and migrated
+[   5.6s] before: /readyz 200 ok; /v1/builds 200
+[   6.8s] database container stopped
+2026-10-08 22:55:57 [warning  ] database_unavailable           error=OperationalError request_id=c6b9f042f70e48c790a20e656a5a4d20
+[  26.9s] database down: /readyz 503 unavailable (OperationalError); /v1/builds 503 database_unavailable
+2026-10-08 22:56:18 [warning  ] database_unavailable           error=OperationalError request_id=6cafc973b7be4ab78b3ac5f82e85b091
+[  46.9s] database still down: /readyz 503 unavailable (OperationalError); /v1/builds 503 database_unavailable
+[  47.6s] database container started again
+[  47.7s] /readyz ready again after 0.0s, without restarting the API
+[  47.7s] after: /readyz 200 ok; /v1/builds 200
+[  47.7s] RESULT: 503 while the database was down; recovered on its own
+drill container removed
