@@ -91,7 +91,7 @@ def test_spec_parsing_marks_unconfirmed_and_drops_retired() -> None:
 def test_prompt_is_deterministic_and_versioned() -> None:
     first, second = prompt(), prompt()
     assert first.sha256 == second.sha256
-    assert first.version == "generate_tests_v1"
+    assert first.version == "generate_tests_v2"
     assert "- STORE-1: Opens." in first.user
     assert "STORE-2" not in first.user
     assert (

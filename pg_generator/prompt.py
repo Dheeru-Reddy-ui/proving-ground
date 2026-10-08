@@ -16,7 +16,9 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 PROMPTS_DIR = Path(__file__).with_name("prompts")
-DEFAULT_TEMPLATE = "generate_tests_v1"
+# v1 told the model to expect PGTimeout from an action that "must not complete"; buy() reports
+# a refusal as an unchanged result instead (two candidates of generation run 1 failed on it).
+DEFAULT_TEMPLATE = "generate_tests_v2"
 CONFIRM_MARK = "[confirm]"
 
 
