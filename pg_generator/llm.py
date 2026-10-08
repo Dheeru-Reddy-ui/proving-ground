@@ -126,6 +126,8 @@ class GeminiClient:
             max_output_tokens=max_output_tokens,
             response_mime_type="application/json",
             response_json_schema=json_schema,
+            # No tools are used; disabling automatic function calling keeps one plain request.
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
 
         def call() -> LLMResponse:
