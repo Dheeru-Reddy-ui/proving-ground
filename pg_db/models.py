@@ -41,6 +41,11 @@ class Build(Base):
     label: Mapped[str] = mapped_column(Text)
     locator_tag: Mapped[str] = mapped_column(String(64))
     created_at: Mapped[datetime] = _now()
+    source: Mapped[str] = mapped_column(String(16), server_default="cli")
+    patch_notes: Mapped[str] = mapped_column(Text, server_default="")
+    apk: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # pg_core.builds.ApkManifest
+
+    __table_args__ = (CheckConstraint("source IN ('cli', 'webhook')", name="builds_source"),)
 
 
 class Spec(Base):
@@ -277,3 +282,63 @@ class Job(Base):
         Index("jobs_leases", "lease_expires_at", postgresql_where=text("status = 'leased'")),
         Index("jobs_validation", "validation_id"),
     )
+
+
+class Agent(Base):
+    """A device agent (ADR-0005). Its bearer tokens live in `api_tokens`, hashed."""
+
+    __tablename__ = "agents"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(64), unique=True)
+    capabilities: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    health: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)  # last self-check
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = _now()
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ApiToken(Base):
+    """A bearer token, stored only as its sha256. `agent` tokens reach agent endpoints only;
+    `admin` tokens (the CLI) reach admin endpoints."""
+
+    __tablename__ = "api_tokens"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    kind: Mapped[str] = mapped_column(String(16))
+    name: Mapped[str] = mapped_column(String(64))
+    token_sha256: Mapped[str] = mapped_column(String(64), unique=True)
+    agent_id: Mapped[int | None] = mapped_column(ForeignKey("agents.id"))
+    created_at: Mapped[datetime] = _now()
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint("kind IN ('agent', 'admin')", name="api_tokens_kind"),
+        CheckConstraint("(kind = 'agent') = (agent_id IS NOT NULL)", name="api_tokens_agent"),
+    )
+
+
+class EnrolmentToken(Base):
+    """A one-time token that lets `pg agent enroll` register one agent before it expires."""
+
+    __tablename__ = "enrolment_tokens"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    token_sha256: Mapped[str] = mapped_column(String(64), unique=True)
+    created_at: Mapped[datetime] = _now()
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    agent_id: Mapped[int | None] = mapped_column(ForeignKey("agents.id"))
+
+
+class WebhookDelivery(Base):
+    """Each accepted webhook delivery once: a replay of the same delivery id changes nothing."""
+
+    __tablename__ = "webhook_deliveries"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    delivery_id: Mapped[str] = mapped_column(String(64), unique=True)
+    body_sha256: Mapped[str] = mapped_column(String(64))
+    build_id: Mapped[int | None] = mapped_column(ForeignKey("builds.id"))
+    received_at: Mapped[datetime] = _now()

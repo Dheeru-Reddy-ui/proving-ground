@@ -40,7 +40,7 @@ from pg_core.gates.runs import (
 from pg_core.gates.static import StaticReport, check_static, spec_ids_from_markdown
 from pg_core.spike import build_tag
 from pg_core.trust import Decision, Evidence, decide_batch
-from pg_db import repo
+from pg_db import repo, sync
 from pg_db.models import Bug, Build, Candidate, GenerationRun, Kill, SuiteTest
 from pg_db.session import make_engine, session_scope
 from pg_generator.generate import call_log, generate
@@ -113,15 +113,7 @@ def known_spec_ids() -> frozenset[str]:
 
 
 def sync_specs_and_bugs(session: Session) -> None:
-    rows = []
-    for path in sorted(SPECS_DIR.glob("*.md")):
-        if path.stem.lower() == "readme":
-            continue
-        text = path.read_text(encoding="utf-8")
-        sha = repo.sha256_text(text)
-        rows += [(s.spec_id, path.stem, s.text, sha) for s in parse_spec_file(text)]
-    repo.sync_specs(session, rows)
-    repo.sync_bugs(session, load_catalog(Path()))
+    sync.sync_specs_and_bugs(session, Path())
 
 
 def resolve_build(session: Session, prefix: str | None) -> Build:

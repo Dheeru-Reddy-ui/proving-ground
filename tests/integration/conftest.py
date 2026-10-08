@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture(scope="module")
-def engine() -> Iterator[Engine]:
+def database_url() -> Iterator[str]:
+    """A fresh database migrated to head; DATABASE_URL points at it while the module runs."""
     url = Settings().database_url
     if url is None:
         pytest.skip("DATABASE_URL is not set")
@@ -37,9 +38,7 @@ def engine() -> Iterator[Engine]:
     os.environ["DATABASE_URL"] = test_url
     try:
         command.upgrade(Config(str(ROOT / "alembic.ini")), "head")
-        test_engine = make_engine(test_url)
-        yield test_engine
-        test_engine.dispose()
+        yield test_url
     finally:
         if previous is None:
             os.environ.pop("DATABASE_URL", None)
@@ -48,3 +47,10 @@ def engine() -> Iterator[Engine]:
         with admin.connect() as conn:
             conn.execute(text(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)'))
         admin.dispose()
+
+
+@pytest.fixture(scope="module")
+def engine(database_url: str) -> Iterator[Engine]:
+    test_engine = make_engine(database_url)
+    yield test_engine
+    test_engine.dispose()

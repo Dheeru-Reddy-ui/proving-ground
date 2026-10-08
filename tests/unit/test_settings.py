@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from pg_api.settings import ApiSettings
 from pg_cli.settings import Settings
 
 
@@ -20,7 +21,8 @@ def example_keys() -> set[str]:
 
 
 def test_env_example_documents_every_setting_and_nothing_else() -> None:
-    assert example_keys() == {name.upper() for name in Settings.model_fields}
+    fields = {*Settings.model_fields, *ApiSettings.model_fields}
+    assert example_keys() == {name.upper() for name in fields}
 
 
 def test_settings_read_environment(monkeypatch: pytest.MonkeyPatch) -> None:

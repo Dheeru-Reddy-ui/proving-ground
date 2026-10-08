@@ -5,6 +5,7 @@ from typing import Annotated
 
 import typer
 
+from pg_cli.api import app as api_app
 from pg_cli.bugs import app as bugs_app
 from pg_cli.pipeline import (
     accept_cmd,
@@ -36,6 +37,7 @@ app.command("baseline")(baseline_cmd)
 app.command("accept")(accept_cmd)
 app.command("reject")(reject_cmd)
 app.command("report")(report_cmd)
+app.add_typer(api_app, name="api")
 
 
 @app.callback()

@@ -10,15 +10,24 @@ authors = [{ name = "Dheeru Reddy" }]
 dependencies = [
     "alembic>=1.20.0",
     "alttester-driver==2.3.2",
+    "argon2-cffi>=25.1.0",
     "defusedxml>=0.7.1",
+    "fastapi>=0.142.4",
     "google-genai>=2.28.0",
+    "httpx>=0.28.1",
+    "itsdangerous>=2.2.0",
+    "jinja2>=3.1.6",
+    "platformdirs>=4.12.3",
     "psutil>=7.2.2",
     "psycopg[binary]>=3.3.6",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
+    "python-multipart>=0.0.32",
     "pyyaml>=6.0.3",
     "sqlalchemy>=2.0",
+    "structlog>=26.1.0",
     "typer>=0.27.3",
+    "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
@@ -111,6 +120,9 @@ markers = [
 filterwarnings = [
   # pure-python-adb (a dependency of the AltTester driver) has invalid escapes in its regexes
   "ignore:invalid escape sequence:SyntaxWarning",
+  # Starlette 1.7's test client asks for the `httpx2` fork; httpx 0.28 works, and the warning is
+  # about the test client only
+  "ignore:Using `httpx` with `starlette.testclient` is deprecated",
 ]
 
 [tool.coverage.run]

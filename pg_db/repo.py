@@ -25,17 +25,36 @@ def sha256_text(text: str) -> str:
 
 
 def register_build(
-    session: Session, apk_sha256: str, label: str, locator_tag: str
+    session: Session,
+    apk_sha256: str,
+    label: str,
+    locator_tag: str,
+    *,
+    source: str = "cli",
+    patch_notes: str = "",
+    apk: dict[str, Any] | None = None,
 ) -> tuple[Build, bool]:
-    """The build with this APK hash; created (True) or already registered (False)."""
+    """The build with this APK hash; created (True) or already registered (False). A repeat
+    changes nothing, except that an APK manifest is attached if the build had none yet."""
     statement = (
         insert(Build)
-        .values(apk_sha256=apk_sha256, label=label, locator_tag=locator_tag)
+        .values(
+            apk_sha256=apk_sha256,
+            label=label,
+            locator_tag=locator_tag,
+            source=source,
+            patch_notes=patch_notes,
+            apk=apk,
+        )
         .on_conflict_do_nothing(index_elements=["apk_sha256"])
         .returning(Build.id)
     )
     created = session.execute(statement).scalar_one_or_none() is not None
-    build = session.execute(select(Build).where(Build.apk_sha256 == apk_sha256)).scalar_one()
+    build = session.execute(
+        select(Build).where(Build.apk_sha256 == apk_sha256).with_for_update()
+    ).scalar_one()
+    if not created and build.apk is None and apk is not None:
+        build.apk = apk
     return build, created
 
 
