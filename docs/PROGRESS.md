@@ -20,6 +20,30 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 - **G5 budget:** 120 s median test runtime, excluding reset and connect.
 - **Seeded bugs:** the 16 proposed bugs, with one change: SB13 shows the run's coins instead of distance on the game-over screen, because score equals distance at multiplier 1 and the swap would be invisible (`TrackManager.AddScore`).
 
+### Phase 1 exit gate
+
+| Item | State | Evidence |
+|---|---|---|
+| APK with hooks built; flags toggle verified via `Active()` and `PGFLAGS` | ✅ build 2 `87d396162a05` | [`bug_symptoms_87d396162a05.json`](evidence/phase1/bug_symptoms_87d396162a05.json) |
+| Each seeded bug confirmed to show its symptom | ✅ 16/16 | [`game/HOOKS.md`](../game/HOOKS.md#verification) |
+| G1 unit tests ≥ 25 adversarial cases; pg_core coverage ≥ 90% | ✅ 46 cases; 93% | `tests/unit/test_gate_static.py`; `pytest --cov=pg_core` |
+| Prompt-leak test passes | ✅ | `tests/unit/test_prompt_leak.py` |
+| ≥ 2 features generated and proven end to end; report from the DB with run IDs | ✅ runs 5 (store) and 6 (run_and_gameover) | [`report_runs_5_6.md`](results/phase1/report_runs_5_6.md), embedded in README |
+| Human baseline suite exists and was run (clean + dev bugs) | ❌ **open**: being written by someone who has not seen the bug catalog | — |
+| ≥ 1 ACCEPT; REJECT reasons working (e.g. a hallucinated call) | ✅ 1 accept (c13 kills SB02); rejections: `redundant` 1, `not_deterministic` 1, `unknown_sdk_member` 1 | report |
+| PROGRESS.md updated with real numbers and known weaknesses | ✅ this section | — |
+
+When the baseline arrives: `pg baseline`, then `pg prove --run 5` and `--run 6` again (stored runs are reused; only the G4 decision is recomputed against the baseline), then `pg report --run 5 --run 6 --write --readme`.
+
+### Known weaknesses (Phase 1)
+
+- **Few ACCEPTs.** Most store candidates pass every gate but kill no *dev* bug: the power-up bugs they could catch (SB01, SB06) are in the holdout split, so they land in REVIEW. Their value can only show in the Phase 4 holdout measurement.
+- **G1 does not catch weak assertions** such as `assert game.game_over.score_shown() >= 0` (c20): not a tautology, but it cannot fail on a wrong score. Such tests pass the gates and reach REVIEW, where a human must reject them.
+- **No human baseline yet**, so G4 novelty compared candidates only with each other in their run.
+- **One device, one game, synthetic bugs**; the person who wrote the specs also wrote the bugs, and Dheeru saw the bug list before the baseline was commissioned.
+- **Environment fragility:** the adb reverse forward can vanish and AltTester Desktop stops its server when its licence check loses the internet (both now detected; see `docs/VERSIONS.md`).
+- **Procedure changes between runs** (each recorded): the model switched from gemini-3.8-flash after 503s; G3 skips the second bug run once a kill is impossible (applied after run 5); "DID NOT RAISE" counts as an assertion. Run 1 (build 1, prompt v1, clean-only) was pipeline validation, not a result.
+
 ### Findings from the live SDK work (2026-10-07)
 
 - **The store reloads the save file when it opens** (`ShopUI.Start` → `PlayerData.Create`). Unsaved in-memory changes vanish, so every `game.setup.*` helper saves after writing.
@@ -38,9 +62,9 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M1.5 Gates and decision | G1-G5, `decide`/`decide_batch`, trust score; 46 adversarial G1 cases; ADR-0004 | `pg_core/gates/`, `pg_core/trust.py`, [ADR-0004](adr/0004-trust-decision.md) |
 | M1.6 Runner | Sandboxed subprocess runner, infra classification and retries, `pg run-test`; live: sample test 2/2 passed, hanging test killed at 40 s as infra | [`runner_live_checks.json`](evidence/phase1/runner_live_checks.json) |
 | M1.7 Persistence | Postgres 16 in Docker, SQLAlchemy models, migration 0001, idempotent repo writes; integration tests 5/5 | `pg_db/`, `migrations/` |
-| M1.4 Generator | Gemini adapter (`gemini-3.8-flash` confirmed via the API), versioned prompt, budget, prompt-leak test; no live generation run yet | `pg_generator/` |
+| M1.4 Generator | Done: Gemini adapter, prompts v1 and v2 (v2 corrects the PGTimeout rule), budget, retries with backoff, prompt-leak test over every spec file | `pg_generator/`, `tests/unit/test_prompt_leak.py` |
 | M1.8 CLI | `pg build register`, `generate`, `prove` (resumable; `--static-only`, `--clean-only`), `baseline`, `accept`/`reject`, `suite sync`, `report`, `bugs verify`. First live generation: run 1 (store, n=8) returned 8 candidates, all passing G1 | `pg_cli/pipeline.py`, `pg_cli/report.py`, `pg_core/report.py` |
-| M1.9 Results | Not started | — |
+| M1.9 Results | Generation runs [5, 6] (store, run_and_gameover; gemini-3.5-flash, prompt v2) on build 2: 16 candidates → **1 accept, 12 review, 3 reject** (`redundant` 1, `not_deterministic` 1, `unknown_sdk_member` 1); G2 14/15; device time 64.1 min over 149 attempts (3 infra); LLM cost $0.000000 (free tier). Accepted test synced to `suites/accepted/`. **Human baseline not run yet** | [`report_runs_5_6.md`](results/phase1/report_runs_5_6.md), [`.json`](results/phase1/report_runs_5_6.json) |
 
 ## Phase 0: Foundation and feasibility spike
 

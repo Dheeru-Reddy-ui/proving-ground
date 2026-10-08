@@ -134,3 +134,12 @@ def test_json_carries_the_same_numbers() -> None:
 def test_subject_labels() -> None:
     assert subject_label("candidate", 12, "test_a") == "c12 test_a"
     assert subject_label("human", 3, "test_b") == "human test_b"
+
+
+def test_kill_matrix_orders_candidates_by_number() -> None:
+    kills = tuple(
+        KillRow(subject=s, bug="SB02", killed=False, unstable=False)
+        for s in ("c10 b", "human h", "c9 a")
+    )
+    subjects, _ = kill_matrix(data(kills=kills))
+    assert subjects == ["c9 a", "c10 b", "human h"]

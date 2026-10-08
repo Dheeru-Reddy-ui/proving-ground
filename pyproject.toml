@@ -45,6 +45,9 @@ packages = [
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+# suites/ holds generated tests (checked by G1, stored byte-for-byte) and the human baseline.
+extend-exclude = ["suites"]
+force-exclude = true  # also when pre-commit passes the file names explicitly
 
 [tool.ruff.lint]
 select = [

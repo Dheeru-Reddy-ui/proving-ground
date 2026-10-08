@@ -1,0 +1,513 @@
+{
+  "build_sha256": "87d396162a05a085aa11aa9541aa168b15a3d98ce16bc4fc3ad3da431c1a3833",
+  "generated_at": "2026-10-08 08:08 UTC",
+  "generation_run_ids": [
+    5,
+    6
+  ],
+  "prove_run_groups": [
+    "prove-5",
+    "prove-6"
+  ],
+  "baseline_run_groups": [],
+  "summary": {
+    "candidates": 16,
+    "by_decision": {
+      "accept": 1,
+      "review": 12,
+      "reject": 3,
+      "pending": 0
+    },
+    "human_approved_reviews": 0,
+    "rejection_reasons": {
+      "redundant": 1,
+      "not_deterministic": 1,
+      "unknown_sdk_member": 1
+    },
+    "g2": {
+      "reached": 15,
+      "passed": 14
+    },
+    "llm_cost_usd": "0.000000",
+    "tokens_in": 9742,
+    "tokens_out": 14129,
+    "device_minutes_prove": 64.1,
+    "device_minutes_baseline": 0.0,
+    "infra_attempts": 3,
+    "executions": 149,
+    "cost_per_accepted_usd": "0.000000",
+    "device_minutes_per_accepted": 64.1
+  },
+  "kill_matrix": {
+    "bugs": [
+      "SB02",
+      "SB04",
+      "SB05",
+      "SB08",
+      "SB09",
+      "SB11",
+      "SB13",
+      "SB14",
+      "SB15",
+      "SB16"
+    ],
+    "rows": {
+      "c9 test_store_navigation_and_balances_main_menu": {
+        "SB02": ".",
+        "SB04": ".",
+        "SB05": ".",
+        "SB08": ".",
+        "SB09": ".",
+        "SB16": "."
+      },
+      "c10 test_store_navigation_game_over": {
+        "SB02": ".",
+        "SB04": ".",
+        "SB05": ".",
+        "SB08": ".",
+        "SB09": ".",
+        "SB11": ".",
+        "SB13": ".",
+        "SB14": ".",
+        "SB15": ".",
+        "SB16": "."
+      },
+      "c11 test_store_item_prices": {
+        "SB02": ".",
+        "SB04": ".",
+        "SB05": ".",
+        "SB16": "."
+      },
+      "c12 test_buy_power_up_inventory_and_balance": {
+        "SB02": ".",
+        "SB04": ".",
+        "SB05": ".",
+        "SB16": "."
+      },
+      "c13 test_buy_character_unlock_and_select": {
+        "SB02": "K",
+        "SB04": ".",
+        "SB05": ".",
+        "SB16": "."
+      },
+      "c14 test_buy_theme_unlock_and_select": {
+        "SB02": ".",
+        "SB04": ".",
+        "SB05": ".",
+        "SB16": "."
+      },
+      "c15 test_store_unaffordable_items_highlighting": {
+        "SB02": ".",
+        "SB04": ".",
+        "SB05": ".",
+        "SB16": "."
+      },
+      "c16 test_store_already_owned_items": {
+        "SB02": ".",
+        "SB04": ".",
+        "SB05": ".",
+        "SB16": "."
+      },
+      "c18 test_pause_and_resume": {
+        "SB08": ".",
+        "SB09": ".",
+        "SB14": "."
+      },
+      "c19 test_pause_and_quit": {
+        "SB08": ".",
+        "SB09": ".",
+        "SB14": "."
+      },
+      "c20 test_decline_continue_to_game_over": {
+        "SB08": ".",
+        "SB09": ".",
+        "SB13": ".",
+        "SB14": "."
+      },
+      "c21 test_continue_with_premium_success": {
+        "SB08": ".",
+        "SB09": ".",
+        "SB14": "."
+      },
+      "c22 test_continue_with_premium_insufficient": {
+        "SB14": "."
+      },
+      "c24 test_game_over_navigation": {
+        "SB02": ".",
+        "SB04": ".",
+        "SB05": ".",
+        "SB13": ".",
+        "SB14": ".",
+        "SB16": "."
+      }
+    }
+  },
+  "candidates": [
+    {
+      "id": 9,
+      "generation_run_id": 5,
+      "name": "test_store_navigation_and_balances_main_menu",
+      "spec_ids": [
+        "STORE-1",
+        "STORE-2",
+        "STORE-3",
+        "STORE-11"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 59,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 6 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 10,
+      "generation_run_id": 5,
+      "name": "test_store_navigation_game_over",
+      "spec_ids": [
+        "STORE-1",
+        "STORE-11"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 57,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 10 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 11,
+      "generation_run_id": 5,
+      "name": "test_store_item_prices",
+      "spec_ids": [
+        "STORE-4"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 59,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 4 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 12,
+      "generation_run_id": 5,
+      "name": "test_buy_power_up_inventory_and_balance",
+      "spec_ids": [
+        "STORE-5",
+        "STORE-6",
+        "STORE-10"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 59,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 4 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 13,
+      "generation_run_id": 5,
+      "name": "test_buy_character_unlock_and_select",
+      "spec_ids": [
+        "STORE-5",
+        "STORE-7",
+        "STORE-10"
+      ],
+      "decision": "accept",
+      "human_decision": null,
+      "trust_score": 79,
+      "reasons": [
+        {
+          "code": "kills_dev_bugs",
+          "message": "kills SB02"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 14,
+      "generation_run_id": 5,
+      "name": "test_buy_theme_unlock_and_select",
+      "spec_ids": [
+        "STORE-5",
+        "STORE-7",
+        "STORE-10"
+      ],
+      "decision": "reject",
+      "human_decision": null,
+      "trust_score": 59,
+      "reasons": [
+        {
+          "code": "redundant",
+          "message": "adds no new kill and no new spec ID over 1 suite test(s)"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 15,
+      "generation_run_id": 5,
+      "name": "test_store_unaffordable_items_highlighting",
+      "spec_ids": [
+        "STORE-8"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 59,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 4 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 16,
+      "generation_run_id": 5,
+      "name": "test_store_already_owned_items",
+      "spec_ids": [
+        "STORE-9"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 59,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 4 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 17,
+      "generation_run_id": 6,
+      "name": "test_run_start_and_hud",
+      "spec_ids": [
+        "RUN-1",
+        "RUN-2",
+        "RUN-4"
+      ],
+      "decision": "reject",
+      "human_decision": null,
+      "trust_score": 15,
+      "reasons": [
+        {
+          "code": "not_deterministic",
+          "message": "failed 1 of 1 clean runs (assertion)"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": false
+    },
+    {
+      "id": 18,
+      "generation_run_id": 6,
+      "name": "test_pause_and_resume",
+      "spec_ids": [
+        "RUN-5"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 60,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 3 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 19,
+      "generation_run_id": 6,
+      "name": "test_pause_and_quit",
+      "spec_ids": [
+        "RUN-6"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 60,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 3 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 20,
+      "generation_run_id": 6,
+      "name": "test_decline_continue_to_game_over",
+      "spec_ids": [
+        "RUN-9",
+        "RUN-10"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 58,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 4 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 21,
+      "generation_run_id": 6,
+      "name": "test_continue_with_premium_success",
+      "spec_ids": [
+        "RUN-7",
+        "RUN-8"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 58,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 3 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 22,
+      "generation_run_id": 6,
+      "name": "test_continue_with_premium_insufficient",
+      "spec_ids": [
+        "RUN-7"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 52,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 1 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    },
+    {
+      "id": 23,
+      "generation_run_id": 6,
+      "name": "test_coins_and_premium_added_to_balance",
+      "spec_ids": [
+        "RUN-11"
+      ],
+      "decision": "reject",
+      "human_decision": null,
+      "trust_score": 0,
+      "reasons": [
+        {
+          "code": "unknown_sdk_member",
+          "message": "`Run` has no member `premium_state` (not in the SDK manifest)"
+        }
+      ],
+      "reached_g2": false,
+      "passed_g2": false
+    },
+    {
+      "id": 24,
+      "generation_run_id": 6,
+      "name": "test_game_over_navigation",
+      "spec_ids": [
+        "RUN-12"
+      ],
+      "decision": "review",
+      "human_decision": null,
+      "trust_score": 56,
+      "reasons": [
+        {
+          "code": "no_kill",
+          "message": "killed none of 6 relevant dev bug(s)"
+        },
+        {
+          "code": "needs_human",
+          "message": "passes every gate but kills no dev bug; the catalog may not cover it"
+        }
+      ],
+      "reached_g2": true,
+      "passed_g2": true
+    }
+  ]
+}

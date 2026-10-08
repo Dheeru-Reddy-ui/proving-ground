@@ -119,7 +119,15 @@ def kill_matrix(data: ReportData) -> tuple[list[str], dict[str, dict[str, str]]]
     for kill in data.kills:
         cell = "K" if kill.killed else ("u" if kill.unstable else ".")
         rows.setdefault(kill.subject, {})[kill.bug] = cell
-    return sorted(rows), rows
+    return sorted(rows, key=_subject_order), rows
+
+
+def _subject_order(subject: str) -> tuple[int, int, str]:
+    """Candidates by number (c9 before c10), then human tests by name."""
+    head, _, name = subject.partition(" ")
+    if head.startswith("c") and head[1:].isdigit():
+        return (0, int(head[1:]), name)
+    return (1, 0, subject)
 
 
 def render_markdown(data: ReportData) -> str:
