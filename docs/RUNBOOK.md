@@ -2,6 +2,88 @@
 
 How to operate Proving Ground's device agent and control plane. Commands run from the repository root on the device host (Dheeru's Windows PC) unless stated otherwise.
 
+## First deployment (once)
+
+Free tiers only (ADR-0010). Check each provider's current limits yourself before relying on them.
+
+### 1. Supabase (database and storage)
+
+1. Create a project on the Free plan.
+2. **Storage → New bucket:** name `proving-ground`, **private** (not public).
+3. **Database connection string:** use the **session pooler** URI (IPv4, port 5432; the direct connection is IPv6-only on Free). This is the production `DATABASE_URL`.
+4. **API settings:** note the project URL (`SUPABASE_URL`) and the **service_role** key (`SUPABASE_SERVICE_KEY`). The service key goes only to Render; never to the PC's `.env`, never to the agent.
+
+### 2. Schema and the Phase 1 data
+
+From the repository on the PC, with the Supabase URL in a shell variable (not in `.env`):
+
+```bash
+DATABASE_URL="<supabase session pooler URI>" uv run alembic upgrade head
+```
+
+Copy the Phase 1 results (runs 5 and 6 and everything they reference) so the demo shows them under the same IDs. This reads the local database and writes only to the empty Supabase one:
+
+```bash
+docker exec pg-proving-ground pg_dump -U pg -d proving_ground --data-only --no-owner --no-privileges -t builds -t specs -t bugs -t generation_runs -t candidates -t executions -t kills -t suite_tests > artifacts/phase1_data.sql
+```
+
+```bash
+docker run --rm -i postgres:16 psql "<supabase session pooler URI>" -v ON_ERROR_STOP=1 < artifacts/phase1_data.sql
+```
+
+Run these two in Git Bash (PowerShell has no `<` redirection). `pg_dump --data-only` also restores the sequences, so new rows continue after the copied IDs.
+
+### 3. Render (API, dashboard and worker in one free web service)
+
+1. **New Web Service** from this GitHub repository, runtime **Docker** (it builds `Dockerfile`), instance type **Free**, health check path `/healthz`.
+2. Turn **automatic deploys off**: the release workflow migrates first, then calls the deploy hook.
+3. Copy the service's **Deploy Hook URL** (Settings).
+4. Environment variables:
+
+   | Variable | Value |
+   |---|---|
+   | `DATABASE_URL` | the Supabase session pooler URI |
+   | `PG_SESSION_SECRET` | 32+ random characters |
+   | `PG_ADMIN_PASSWORD_HASH` | output of `uv run pg api hash-password` |
+   | `PG_WEBHOOK_SECRET` | 32+ random characters (also a GitHub secret) |
+   | `PG_PUBLIC_DEMO` | `true` |
+   | `PG_SECURE_COOKIES` | `true` |
+   | `PG_PUBLIC_BASE_URL` | `https://<service>.onrender.com` |
+   | `PG_STORAGE_BACKEND` | `supabase` |
+   | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | from step 1 |
+   | `PG_STORAGE_BUCKET` | `proving-ground` |
+   | `PG_EMBEDDED_WORKER` | `true` |
+   | `PG_WORKER_NAME` | `render-worker` |
+   | `PG_LLM_PROVIDER`, `PG_LLM_MODEL`, `PG_LLM_API_KEY` | as in the PC's `.env` (`gemini`, `gemini-3.5-flash`, the key) |
+   | `PG_LLM_INPUT_USD_PER_MTOK`, `PG_LLM_OUTPUT_USD_PER_MTOK` | `0` on the free tier |
+   | `PG_MAX_COST_PER_RUN_USD`, `PG_MAX_COST_PER_BUILD_USD`, `PG_MAX_COST_PER_DAY_USD` | e.g. `1.00`, `2.00`, `5.00` |
+   | `PG_ALERT_WEBHOOK_URL` | optional: a Slack or Discord incoming-webhook URL |
+
+   The service refuses to start and names the variable if one is missing or invalid.
+
+### 4. GitHub
+
+- **Actions secrets:** `DATABASE_URL` (Supabase), `PG_WEBHOOK_SECRET`, `RENDER_DEPLOY_HOOK_URL`.
+- **Actions variable:** `PG_API_URL` = `https://<service>.onrender.com`.
+- Deploy: push a tag `v0.2.0`; `release.yml` builds the image, migrates, calls the deploy hook and waits for `/readyz`.
+
+### 5. The PC
+
+1. Admin token for the CLI (writes to the Supabase database):
+
+   ```bash
+   DATABASE_URL="<supabase session pooler URI>" uv run pg api admin-token --name dheeru-pc-cli
+   ```
+
+   Put it in `.env` as `PG_API_TOKEN`, with `PG_API_URL=https://<service>.onrender.com`.
+2. Enrol the agent: create an enrolment token on the dashboard's System page (log in first), then `uv run pg agent enroll --api https://<service>.onrender.com --name dheeru-pc` (below).
+
+### 6. Register builds and validate
+
+- **CLI path:** `uv run pg build register --apk <apk> --label "<label>" --locator-tag 87d396162a05`
+- **Webhook path:** `uv run pg build upload --apk <apk> --label "<label>" --locator-tag 87d396162a05`, then create a GitHub release tagged `build-<n>` with the written `build.json` attached (never the APK); `release.yml` posts it, signed.
+- **Validate:** `uv run pg build validate --build <id> --feature store --feature run_and_gameover --n 8`, then watch it on the dashboard.
+
 ## Before any device work
 
 The agent checks these before every claim and reports what fails (`pg agent status` shows the same checks):
