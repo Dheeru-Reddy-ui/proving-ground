@@ -67,6 +67,19 @@ class Adb:
     def reverse_list(self, serial: str | None) -> str:
         return self.run("reverse", "--list", serial=serial).stdout
 
+    def ensure_reverse(self, port: int, serial: str | None) -> bool:
+        """Make sure the phone's tcp:`port` reaches this PC (AltTester Desktop). A USB reconnect
+        or an adb server restart drops the forward. Returns True if it had to be recreated."""
+        from pg_core.doctor import parse_reverse_list
+
+        wanted = (f"tcp:{port}", f"tcp:{port}")
+        if wanted in parse_reverse_list(self.reverse_list(serial)):
+            return False
+        result = self.run("reverse", f"tcp:{port}", f"tcp:{port}", serial=serial)
+        if wanted not in parse_reverse_list(self.reverse_list(serial)):
+            raise AdbError(f"could not create adb reverse tcp:{port}: {result.stderr.strip()}")
+        return True
+
     def pidof(self, package: str, serial: str | None) -> int | None:
         return parse_pidof(self.run("shell", "pidof", package, serial=serial).stdout)
 

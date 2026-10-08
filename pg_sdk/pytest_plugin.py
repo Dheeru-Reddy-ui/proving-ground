@@ -87,6 +87,10 @@ class _AppSession:
     # --- lifecycle ------------------------------------------------------------------------
 
     def start(self) -> Game:
+        try:
+            recreated = self.adb.ensure_reverse(self.ctx.alttester_port, self.ctx.adb_serial)
+        except AdbError as exc:
+            raise PGInfraError(str(exc)) from exc
         report = fresh_launch(
             self.adb,
             self.ctx.package,
@@ -95,7 +99,11 @@ class _AppSession:
             clock=time.monotonic,
             sleep=time.sleep,
         )
-        self.launch = {"seconds": report.seconds, "dialog_dismissed": report.dialog_dismissed}
+        self.launch = {
+            "seconds": report.seconds,
+            "dialog_dismissed": report.dialog_dismissed,
+            "reverse_recreated": recreated,
+        }
         self._connect()
         self._configure_flags()
         self.ui = Ui(
@@ -110,6 +118,10 @@ class _AppSession:
     def restart(self) -> Driver:
         """AppControl: close and reopen the app with its data kept; a fresh connection."""
         self._disconnect()
+        try:
+            self.adb.ensure_reverse(self.ctx.alttester_port, self.ctx.adb_serial)
+        except AdbError as exc:
+            raise PGInfraError(str(exc)) from exc
         relaunch(
             self.adb,
             self.ctx.package,

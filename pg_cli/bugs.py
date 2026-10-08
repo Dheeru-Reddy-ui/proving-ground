@@ -5,11 +5,13 @@ Reads `benchmark/bugs.yaml`, `game/HOOKS.md` and `specs/` relative to the reposi
 
 from __future__ import annotations
 
+import ast
+import json
 import shutil
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 
@@ -86,6 +88,98 @@ def check(root: RootOption = Path()) -> None:
         f"OK {len(catalog.bugs)} bugs: {len(catalog.dev)} dev, {len(catalog.holdout)} holdout; "
         + ("holdout freeze verified" if frozen else "holdout not frozen yet")
     )
+
+
+SYMPTOM_TESTS = Path("tests/device/test_seeded_bug_symptoms.py")
+EVIDENCE_DIR = Path("docs/evidence/phase1")
+
+
+def _pgflags_lines(artifact_dir: str) -> list[str]:
+    lines: list[str] = []
+    for log in Path(artifact_dir).rglob("game_log.jsonl"):
+        for raw in log.read_text(encoding="utf-8").splitlines():
+            message = str(json.loads(raw).get("message", ""))
+            if message.startswith("PGFLAGS"):
+                lines.append(message)
+    return lines
+
+
+def _flags_active(artifact_dir: str) -> str | None:
+    results = Path(artifact_dir) / "pg_results.json"
+    if not results.exists():
+        return None
+    entry: dict[str, Any] = next(iter(json.loads(results.read_text(encoding="utf-8")).values()), {})
+    value = entry.get("flags_active")
+    return None if value is None else str(value)
+
+
+@app.command("verify")
+def verify(
+    bug: Annotated[list[str] | None, typer.Option(help="Only these bug IDs.")] = None,
+    root: RootOption = Path(),
+) -> None:
+    """Confirm each seeded bug shows its symptom: its symptom test passes on the clean build
+    and fails with the bug's flag on. Writes the evidence under docs/evidence/phase1/."""
+    from pg_cli.run import RUNS_DIR, device_context_args, new_run_id
+    from pg_cli.settings import Settings
+    from pg_runner.runner import make_context, run_test
+
+    catalog = load_catalog(root)
+    tests = _symptom_tests(root / SYMPTOM_TESTS)
+    args = device_context_args(Settings(), None)
+    run_id = new_run_id("verify")
+    results: dict[str, Any] = {}
+    for entry in catalog.bugs:
+        if bug and entry.id not in bug:
+            continue
+        name = tests.get(entry.id)
+        if name is None:
+            typer.echo(f"{entry.id}: no symptom test")
+            continue
+        row: dict[str, Any] = {"flag": entry.flag, "test": name}
+        for label, flags in (("clean", []), ("flag_on", [entry.flag])):
+            context = make_context(
+                run_id=run_id,
+                flags=flags,
+                artifact_dir=RUNS_DIR / run_id / entry.id / label,
+                **args,  # type: ignore[arg-type]
+            )
+            final = run_test(root / SYMPTOM_TESTS, context, select=name).final
+            row[label] = {
+                "outcome": final.outcome.value,
+                "rule": final.rule,
+                "detail": final.detail.strip().splitlines()[-1][:300] if final.detail else "",
+                "game_errors": list(final.game_errors),
+                "flags_active": _flags_active(final.artifact_dir),
+                "pgflags_log": _pgflags_lines(final.artifact_dir),
+            }
+        clean_ok = row["clean"]["outcome"] == "passed"
+        shown = row["flag_on"]["outcome"] in ("assertion", "pg_timeout", "game_error")
+        toggled = row["flag_on"]["flags_active"] == entry.flag
+        row["verified"] = clean_ok and shown and toggled
+        results[entry.id] = row
+        typer.echo(
+            f"{entry.id}: clean {row['clean']['outcome']}, flag on {row['flag_on']['outcome']}"
+            f" (Active()={row['flag_on']['flags_active']!r}) -> "
+            + ("VERIFIED" if row["verified"] else "NOT VERIFIED")
+        )
+    tag = str(args["locator_tag"])
+    path = root / EVIDENCE_DIR / f"bug_symptoms_{tag}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    previous: dict[str, Any] = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    previous.setdefault("runs", []).append(run_id)
+    previous.setdefault("bugs", {}).update(results)
+    path.write_text(json.dumps(previous, indent=2) + "\n", encoding="utf-8")
+    typer.echo(f"{run_id}: evidence in {path}")
+
+
+def _symptom_tests(path: Path) -> dict[str, str]:
+    """Bug ID -> symptom test name (`test_sb01_...` verifies SB01)."""
+    names: dict[str, str] = {}
+    for node in ast.parse(path.read_text(encoding="utf-8")).body:
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("test_sb"):
+            names[node.name[5:9].upper()] = node.name
+    return names
 
 
 @app.command("freeze")

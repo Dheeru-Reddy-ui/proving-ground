@@ -138,3 +138,48 @@ def test_ui_dump_and_tap_commands(monkeypatch: pytest.MonkeyPatch) -> None:
         ["exec-out", "cat", adb_mod.UI_DUMP_PATH],
         ["shell", "input", "tap", "328", "2947"],
     ]
+
+
+class ScriptedAdb(Adb):
+    """Adb whose `run` answers from a script, recording each argument list."""
+
+    def __init__(self, replies: dict[str, list[str]]) -> None:
+        super().__init__(executable="adb")
+        self.replies = replies
+        self.seen: list[tuple[str, ...]] = []
+
+    def run(
+        self, *args: str, serial: str | None = None, timeout_s: float | None = None
+    ) -> adb_mod.AdbResult:
+        self.seen.append(args)
+        key = " ".join(args[:2])
+        queue = self.replies.get(key, [""])
+        out = queue.pop(0) if len(queue) > 1 else queue[0]
+        return adb_mod.AdbResult(args, 0, out, "")
+
+
+def test_ensure_reverse_creates_a_missing_forward_once() -> None:
+    adb = ScriptedAdb({"reverse --list": ["", "UsbFfs tcp:13000 tcp:13000\n"]})
+    assert adb.ensure_reverse(13000, None) is True
+    assert ("reverse", "tcp:13000", "tcp:13000") in adb.seen
+    present = ScriptedAdb({"reverse --list": ["UsbFfs tcp:13000 tcp:13000\n"]})
+    assert present.ensure_reverse(13000, None) is False
+    assert all(args[1] == "--list" for args in present.seen)
+
+
+def test_ensure_reverse_reports_a_forward_that_will_not_stick() -> None:
+    adb = ScriptedAdb({"reverse --list": [""]})
+    with pytest.raises(adb_mod.AdbError, match="could not create"):
+        adb.ensure_reverse(13000, None)
+
+
+def test_installed_apk_sha256() -> None:
+    digest = "a" * 64
+    adb = ScriptedAdb(
+        {
+            "shell pm": ["package:/data/app/~~x/com.game/base.apk\n"],
+            "shell sha256sum": [f"{digest}  /data/app/~~x/com.game/base.apk\n"],
+        }
+    )
+    assert adb.installed_apk_sha256("com.game", None) == digest
+    assert ScriptedAdb({"shell pm": [""]}).installed_apk_sha256("com.game", None) is None
