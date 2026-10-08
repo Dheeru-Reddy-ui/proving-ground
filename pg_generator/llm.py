@@ -17,8 +17,8 @@ from typing import Any, Protocol
 from pydantic import BaseModel, ConfigDict
 
 RETRY_STATUS = frozenset({408, 429, 500, 502, 503, 504})
-MAX_ATTEMPTS = 4
-BACKOFF_BASE_S = 2.0
+MAX_ATTEMPTS = 6  # a busy free tier answers 503 "high demand" for a minute or two
+BACKOFF_BASE_S = 4.0
 
 
 class LLMResponse(BaseModel):

@@ -77,7 +77,18 @@ The adb serial is kept in the local `.env` (`PG_ADB_SERIAL`), not in the repo.
 
 ## Game build
 
-Current build: **ARM64-only rebuild** by Dheeru, 2026-10-07 22:08 (`Build Finished, Result: Success.`), installed 22:11. Checked with `aapt dump badging` from Unity's SDK build-tools 34.0.0, `unzip`, and `adb`. Rows not marked otherwise are unchanged from the first build.
+Current build: **build 2, with the seeded-bug hooks and telemetry** (M1.1), built by Dheeru on 2026-10-08 (`Build Finished, Result: Success.` at 11:47 local time) and installed with `adb install -r` the same day.
+
+| Field | Value |
+|---|---|
+| APK | `C:\Users\dheer\pg_game\Builds\TrashCat.apk`, 80,909,977 bytes |
+| APK sha256 | `87d396162a05a085aa11aa9541aa168b15a3d98ce16bc4fc3ad3da431c1a3833` (build tag `87d396162a05`, registered as build 2) |
+| Checked | `aapt dump badging`: package `com.DefaultCompany.TrashCat`, versionCode 350, `native-code: 'arm64-v8a'` only, `application-debuggable`, INTERNET, launch activity `com.unity3d.player.UnityPlayerActivity`; the phone's installed `base.apk` hashes to the same sha256 |
+| Contents | Build 1 plus `PGBugFlags`, `PGTelemetry` and the 16 hooks of `game/HOOKS.md`; Addressables rebuilt before the build (the extra size is in the asset bundles; the native libraries are arm64 only) |
+| Locators | `pg_sdk/locators/87d396162a05.yaml` extends `e63240052d1b` (same UI) |
+| Build note | The first attempt stalled for 27 min at "Checking prerequisites": an Android `sdkmanager --list` that Unity started the evening before had hung. Ending that process let the build finish. |
+
+Previous build (build 1, used for Phase 0 and the SDK work): **ARM64-only rebuild** by Dheeru, 2026-10-07 22:08 (`Build Finished, Result: Success.`), installed 22:11. Checked with `aapt dump badging` from Unity's SDK build-tools 34.0.0, `unzip`, and `adb`. Rows not marked otherwise are unchanged from the first build.
 
 | Field | Value |
 |---|---|

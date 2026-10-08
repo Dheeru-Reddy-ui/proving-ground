@@ -246,8 +246,8 @@ def test_retries_back_off_on_retryable_errors_only() -> None:
     response = with_retries(call, sleep=delays.append, rng=random.Random(0))  # noqa: S311 - deterministic jitter in a test
     assert response.attempts == 3
     assert len(delays) == 2
-    assert 2.0 <= delays[0] < 4.0
-    assert 4.0 <= delays[1] < 6.0
+    assert 4.0 <= delays[0] < 8.0
+    assert 8.0 <= delays[1] < 12.0
     with pytest.raises(LLMError, match="bad"):
         with_retries(
             lambda: (_ for _ in ()).throw(LLMError("bad", status=400)), sleep=delays.append
