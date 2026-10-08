@@ -4,7 +4,7 @@ Status of each phase: what works, what was verified (with evidence) and what is 
 
 ## Phase 1: Core trust loop
 
-Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
+Started 2026-10-07. Plan approved by Dheeru on 2026-10-07. **Closed 2026-10-08** with one exit-gate item deferred to Phase 4 (human baseline, ADR-0009).
 
 ### Decisions (2026-10-07)
 
@@ -29,17 +29,17 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | G1 unit tests ≥ 25 adversarial cases; pg_core coverage ≥ 90% | ✅ 46 cases; 93% | `tests/unit/test_gate_static.py`; `pytest --cov=pg_core` |
 | Prompt-leak test passes | ✅ | `tests/unit/test_prompt_leak.py` |
 | ≥ 2 features generated and proven end to end; report from the DB with run IDs | ✅ runs 5 (store) and 6 (run_and_gameover) | [`report_runs_5_6.md`](results/phase1/report_runs_5_6.md), embedded in README |
-| Human baseline suite exists and was run (clean + dev bugs) | ❌ **open**: being written by someone who has not seen the bug catalog | — |
+| Human baseline suite exists and was run (clean + dev bugs) | ⏸ **deferred to Phase 4** (not passed): no human-written suite exists yet; it must be written by a person and run before any Phase 4 benchmark run | [ADR-0009](adr/0009-defer-human-baseline.md) |
 | ≥ 1 ACCEPT; REJECT reasons working (e.g. a hallucinated call) | ✅ 1 accept (c13 kills SB02); rejections: `redundant` 1, `not_deterministic` 1, `unknown_sdk_member` 1 | report |
 | PROGRESS.md updated with real numbers and known weaknesses | ✅ this section | — |
 
-When the baseline arrives: `pg baseline`, then `pg prove --run 5` and `--run 6` again (stored runs are reused; only the G4 decision is recomputed against the baseline), then `pg report --run 5 --run 6 --write --readme`.
+**Phase 1 closed on 2026-10-08 with the human baseline deferred (ADR-0009).** When it arrives: `pg baseline`, then `pg prove --run 5` and `--run 6` again (stored runs are reused; only the G4 decision is recomputed against the baseline), then `pg report --run 5 --run 6 --write --readme`.
 
 ### Known weaknesses (Phase 1)
 
 - **Few ACCEPTs.** Most store candidates pass every gate but kill no *dev* bug: the power-up bugs they could catch (SB01, SB06) are in the holdout split, so they land in REVIEW. Their value can only show in the Phase 4 holdout measurement.
 - **G1 does not catch weak assertions** such as `assert game.game_over.score_shown() >= 0` (c20): not a tautology, but it cannot fail on a wrong score. Such tests pass the gates and reach REVIEW, where a human must reject them.
-- **No human baseline yet**, so G4 novelty compared candidates only with each other in their run.
+- **No human baseline yet** (deferred, ADR-0009), so G4 novelty compared candidates only with each other in their run; some decisions may change to REJECT (redundant) once it exists.
 - **One device, one game, synthetic bugs**; the person who wrote the specs also wrote the bugs, and Dheeru saw the bug list before the baseline was commissioned.
 - **Environment fragility:** the adb reverse forward can vanish and AltTester Desktop stops its server when its licence check loses the internet (both now detected; see `docs/VERSIONS.md`).
 - **Procedure changes between runs** (each recorded): the model switched from gemini-3.8-flash after 503s; G3 skips the second bug run once a kill is impossible (applied after run 5); "DID NOT RAISE" counts as an assertion. Run 1 (build 1, prompt v1, clean-only) was pipeline validation, not a result.
