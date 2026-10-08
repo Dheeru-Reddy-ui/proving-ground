@@ -28,8 +28,8 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 
 | Milestone | State | Evidence |
 |---|---|---|
-| M1.1 Game hooks | Scripts and 16 hooks written and applied to the Unity project (18 marked lines, `grep -rn "PG hook"`); waiting for Dheeru's build | [`game/HOOKS.md`](../game/HOOKS.md), [`game/unity_scripts/`](../game/unity_scripts/) |
-| M1.2 Bug catalog | 16 bugs, seeded stratified split 10 dev / 6 holdout (holdout SB01, SB03, SB06, SB07, SB10, SB12); `pg bugs check` passes. **Freeze pending Dheeru's approval of the split** | [`benchmark/bugs.yaml`](../benchmark/bugs.yaml), `pg_core/catalog.py` |
+| M1.1 Game hooks | Done: hooked build 2 (`87d396162a05`) built 2026-10-08 and installed; all 16 bugs verified by `pg bugs verify`: clean passes, flag on fails (14 assertion, 1 `PGTimeout`, 1 game error), `Active()` and `PGFLAGS` show each flag | [`game/HOOKS.md`](../game/HOOKS.md#verification), [`bug_symptoms_87d396162a05.json`](evidence/phase1/bug_symptoms_87d396162a05.json) |
+| M1.2 Bug catalog | Done: 16 bugs, seeded split 10 dev / 6 holdout, approved by Dheeru and frozen 2026-10-08 (sha256 `0d4edd7b05ba`, commit `b09f8a4`) | [`benchmark/bugs.yaml`](../benchmark/bugs.yaml), [`benchmark/HOLDOUT_FREEZE.md`](../benchmark/HOLDOUT_FREEZE.md) |
 | M1.3 `pg_sdk` | Pages, locators, setup helpers, model readers, manifest (11 classes, 110 members) and pytest plugin written; live suite 6/6 on the clean build `e63240052d1b` with 0 game errors; fake-driver unit tests. Locators for the hooked build and the human baseline still to come | [`sdk_live_clean_e63240052d1b.json`](evidence/phase1/sdk_live_clean_e63240052d1b.json), `pg_sdk/manifest.json` |
 | M1.5 Gates and decision | G1-G5, `decide`/`decide_batch`, trust score; 46 adversarial G1 cases; ADR-0004 | `pg_core/gates/`, `pg_core/trust.py`, [ADR-0004](adr/0004-trust-decision.md) |
 | M1.6 Runner | Sandboxed subprocess runner, infra classification and retries, `pg run-test`; live: sample test 2/2 passed, hanging test killed at 40 s as infra | [`runner_live_checks.json`](evidence/phase1/runner_live_checks.json) |

@@ -1,0 +1,410 @@
+{
+  "runs": [
+    "verify-20261008T061828-9b4660",
+    "verify-20261008T061923-fd97b9"
+  ],
+  "bugs": {
+    "SB16": {
+      "flag": "sb_accessories_tab_throws",
+      "test": "test_sb16_accessories_section_opens_cleanly",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "game_error",
+        "rule": "plugin_call",
+        "detail": "InvalidOperationException: Accessory list owner not resolved",
+        "game_errors": [
+          "InvalidOperationException: Accessory list owner not resolved"
+        ],
+        "flags_active": "sb_accessories_tab_throws",
+        "pgflags_log": [
+          "PGFLAGS sb_accessories_tab_throws"
+        ]
+      },
+      "verified": true
+    },
+    "SB01": {
+      "flag": "sb_item_double_charge",
+      "test": "test_sb01_power_up_costs_its_price",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:31: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_item_double_charge",
+        "pgflags_log": [
+          "PGFLAGS sb_item_double_charge"
+        ]
+      },
+      "verified": true
+    },
+    "SB02": {
+      "flag": "sb_character_premium_not_charged",
+      "test": "test_sb02_character_costs_its_premium_price",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:41: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_character_premium_not_charged",
+        "pgflags_log": [
+          "PGFLAGS sb_character_premium_not_charged"
+        ]
+      },
+      "verified": true
+    },
+    "SB03": {
+      "flag": "sb_theme_not_granted",
+      "test": "test_sb03_bought_theme_is_owned",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:50: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_theme_not_granted",
+        "pgflags_log": [
+          "PGFLAGS sb_theme_not_granted"
+        ]
+      },
+      "verified": true
+    },
+    "SB04": {
+      "flag": "sb_accessory_not_granted",
+      "test": "test_sb04_bought_accessory_is_owned",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:61: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_accessory_not_granted",
+        "pgflags_log": [
+          "PGFLAGS sb_accessory_not_granted"
+        ]
+      },
+      "verified": true
+    },
+    "SB05": {
+      "flag": "sb_character_coin_check_skipped",
+      "test": "test_sb05_unaffordable_character_cannot_be_bought",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:71: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_character_coin_check_skipped",
+        "pgflags_log": [
+          "PGFLAGS sb_character_coin_check_skipped"
+        ]
+      },
+      "verified": true
+    },
+    "SB06": {
+      "flag": "sb_item_affordable_one_short",
+      "test": "test_sb06_power_up_one_coin_short_cannot_be_bought",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:80: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_item_affordable_one_short",
+        "pgflags_log": [
+          "PGFLAGS sb_item_affordable_one_short"
+        ]
+      },
+      "verified": true
+    },
+    "SB07": {
+      "flag": "sb_character_purchase_not_saved",
+      "test": "test_sb07_bought_character_survives_a_restart",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:90: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_character_purchase_not_saved",
+        "pgflags_log": [
+          "PGFLAGS sb_character_purchase_not_saved"
+        ]
+      },
+      "verified": true
+    },
+    "SB08": {
+      "flag": "sb_tutorial_done_not_loaded",
+      "test": "test_sb08_completed_tutorial_stays_completed",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:96: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_tutorial_done_not_loaded",
+        "pgflags_log": [
+          "PGFLAGS sb_tutorial_done_not_loaded"
+        ]
+      },
+      "verified": true
+    },
+    "SB09": {
+      "flag": "sb_settings_not_saved_on_close",
+      "test": "test_sb09_volume_survives_a_restart",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:105: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_settings_not_saved_on_close",
+        "pgflags_log": [
+          "PGFLAGS sb_settings_not_saved_on_close"
+        ]
+      },
+      "verified": true
+    },
+    "SB10": {
+      "flag": "sb_volumes_swapped_on_load",
+      "test": "test_sb10_music_and_effects_volumes_stay_apart",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:116: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_volumes_swapped_on_load",
+        "pgflags_log": [
+          "PGFLAGS sb_volumes_swapped_on_load"
+        ]
+      },
+      "verified": true
+    },
+    "SB11": {
+      "flag": "sb_mission_reward_doubled",
+      "test": "test_sb11_mission_reward_is_added_once",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:132: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_mission_reward_doubled",
+        "pgflags_log": [
+          "PGFLAGS sb_mission_reward_doubled"
+        ]
+      },
+      "verified": true
+    },
+    "SB12": {
+      "flag": "sb_mission_reward_not_granted",
+      "test": "test_sb12_mission_reward_is_added",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:138: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_mission_reward_not_granted",
+        "pgflags_log": [
+          "PGFLAGS sb_mission_reward_not_granted"
+        ]
+      },
+      "verified": true
+    },
+    "SB13": {
+      "flag": "sb_gameover_shows_coins",
+      "test": "test_sb13_game_over_shows_the_run_score",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:150: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_gameover_shows_coins",
+        "pgflags_log": [
+          "PGFLAGS sb_gameover_shows_coins"
+        ]
+      },
+      "verified": true
+    },
+    "SB14": {
+      "flag": "sb_run_ignores_selected_character",
+      "test": "test_sb14_selected_character_runs",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "assertion",
+        "rule": "plugin_call",
+        "detail": "test_seeded_bug_symptoms.py:159: AssertionError",
+        "game_errors": [],
+        "flags_active": "sb_run_ignores_selected_character",
+        "pgflags_log": [
+          "PGFLAGS sb_run_ignores_selected_character"
+        ]
+      },
+      "verified": true
+    },
+    "SB15": {
+      "flag": "sb_missions_close_locked",
+      "test": "test_sb15_missions_popup_closes",
+      "clean": {
+        "outcome": "passed",
+        "rule": "plugin_passed",
+        "detail": "",
+        "game_errors": [],
+        "flags_active": "",
+        "pgflags_log": [
+          "PGFLAGS "
+        ]
+      },
+      "flag_on": {
+        "outcome": "pg_timeout",
+        "rule": "plugin_call",
+        "detail": "..\\..\\..\\..\\proving_ground\\pg_sdk\\_ui.py:157: PGTimeout",
+        "game_errors": [],
+        "flags_active": "sb_missions_close_locked",
+        "pgflags_log": [
+          "PGFLAGS sb_missions_close_locked"
+        ]
+      },
+      "verified": true
+    }
+  }
+}

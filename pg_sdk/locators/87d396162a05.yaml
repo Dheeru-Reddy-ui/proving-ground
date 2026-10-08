@@ -1,0 +1,4 @@
+# Locator map for build 87d396162a05: the same UI as e63240052d1b.
+build_tag: 87d396162a05
+extends: e63240052d1b
+locators: {}

@@ -67,8 +67,23 @@ Categories match `benchmark/bugs.yaml`. "Edit" names the statement the hook atta
 
 ## Verification
 
-Filled in after the hooked APK is built: one row per bug, with the evidence file showing the symptom with the flag on and its absence with the flag off.
+Each bug has a symptom test in `tests/device/test_seeded_bug_symptoms.py` that checks the intended behaviour. `pg bugs verify` runs it on build `87d396162a05` once clean and once with the bug's flag on; a bug is verified when the clean run passes, the flagged run fails in a product-visible way (assertion, `PGTimeout` or a logged game error), and the game reports exactly that flag through `Active()` and a `PGFLAGS` log line. This table is generated from the evidence file, runs `verify-20261008T061828-9b4660`, `verify-20261008T061923-fd97b9` (2026-10-08): [`docs/evidence/phase1/bug_symptoms_87d396162a05.json`](../docs/evidence/phase1/bug_symptoms_87d396162a05.json).
 
-| ID | Flag toggles (`Active()` + `PGFLAGS`) | Symptom seen | Evidence |
-|---|---|---|---|
-| SB01–SB16 | not yet | not yet | — |
+| ID | Flag toggles (`Active()` + `PGFLAGS`) | Clean build | Flag on | Verified |
+|---|---|---|---|---|
+| SB01 | yes | passed | assertion | yes |
+| SB02 | yes | passed | assertion | yes |
+| SB03 | yes | passed | assertion | yes |
+| SB04 | yes | passed | assertion | yes |
+| SB05 | yes | passed | assertion | yes |
+| SB06 | yes | passed | assertion | yes |
+| SB07 | yes | passed | assertion | yes |
+| SB08 | yes | passed | assertion | yes |
+| SB09 | yes | passed | assertion | yes |
+| SB10 | yes | passed | assertion | yes |
+| SB11 | yes | passed | assertion | yes |
+| SB12 | yes | passed | assertion | yes |
+| SB13 | yes | passed | assertion | yes |
+| SB14 | yes | passed | assertion | yes |
+| SB15 | yes | passed | pg_timeout | yes |
+| SB16 | yes | passed | game_error | yes |
