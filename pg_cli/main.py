@@ -19,6 +19,7 @@ from pg_cli.pipeline import (
 )
 from pg_cli.report import report_cmd
 from pg_cli.run import run_test_cmd
+from pg_cli.slo import app as slo_app
 from pg_cli.smoke import smoke_cmd
 from pg_cli.spike import app as spike_app
 
@@ -40,6 +41,7 @@ app.command("reject")(reject_cmd)
 app.command("report")(report_cmd)
 app.add_typer(api_app, name="api")
 app.add_typer(agent_app, name="agent")
+app.add_typer(slo_app, name="slo")
 
 worker_app = typer.Typer(help="The generation and scoring worker (Phase 2).", no_args_is_help=True)
 app.add_typer(worker_app, name="worker")
