@@ -119,8 +119,8 @@ def check_detection(
     for bug in relevant:
         valid = [e for e in runs_by_flag.get(bug.flag, ()) if e.outcome.is_valid][:required]
         failures = sum(e.outcome.is_product_failure for e in valid)
-        if len(valid) < required:
-            inconclusive.append(bug.id)
+        if len(valid) < required and failures == len(valid):
+            inconclusive.append(bug.id)  # every valid run so far failed: a kill is still possible
         elif failures == required:
             kills.append(bug.id)
         elif failures > 0:
@@ -172,7 +172,11 @@ def check_detection(
 
 
 def detection_needs_more(runs: Sequence[Execution], required: int = BUG_RUNS) -> bool:
-    return sum(e.outcome.is_valid for e in runs) < required
+    """True while another bug run could still make a kill: fewer than `required` valid runs and
+    every valid run so far failed. Once one passes, a 2-of-2 kill is impossible, so the second
+    run is skipped (ADR-0004); a pass-then-fail pair is then recorded as survived, not unstable."""
+    valid = [e for e in runs if e.outcome.is_valid]
+    return len(valid) < required and all(e.outcome.is_product_failure for e in valid)
 
 
 # --- G4 -----------------------------------------------------------------------------------

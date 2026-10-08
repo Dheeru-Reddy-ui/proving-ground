@@ -43,6 +43,8 @@ Every verdict stores machine-readable reasons (`Reason(code, message)`) per gate
 
 A single failing run on a bug build can be noise: a dropped tap, a slow frame, a random mission. Counting it would reward flaky tests, the opposite of what the gate is for. Requiring the same product-visible failure twice, on top of 3/3 clean passes, means the failure is caused by the bug. Unstable kills are recorded so the report can show them.
 
+**Skipping a bug run that cannot change the result** (2026-10-08, asked for by Dheeru to save device time). After a bug run passes, a 2-of-2 kill is impossible, so the second run is not made and the bug is recorded as survived. Decisions are unchanged (unstable kills never count); the only loss is that a pass-then-fail pair is no longer reported as unstable. Generation run 5 was proved before this change.
+
 ## Why the relevance filter exists
 
 Running every candidate against every dev bug twice would cost about `2 × dev bugs` runs per candidate (20 runs at 10 dev bugs) on a single phone. G1 already knows which pages a test touches, and the catalog records where each bug shows (`pages` in `benchmark/bugs.yaml`). The filter only saves device time: every skipped bug is logged with its reason, it never turns a failure into a pass, and the Phase 4 holdout measurement runs **every** test against **every** holdout bug with no filter.

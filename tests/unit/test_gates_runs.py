@@ -204,3 +204,15 @@ def test_batch_leaves_pending_candidates_out_of_novelty() -> None:
     verdicts = decide_batch([evidence("p", clean=(P, INF))], SUITE)
     assert verdicts[0].decision is Decision.PENDING
     assert "G4" not in verdicts[0].gates
+
+
+def test_g3_stops_once_a_kill_is_impossible() -> None:
+    assert not detection_needs_more(runs(P))  # a pass: 2/2 can no longer happen
+    assert detection_needs_more(runs(A))  # one failure: the second run decides
+    assert detection_needs_more(runs(INF))  # no valid run yet
+    bugs = [BugRef(id="SB02", flag="sb_a", pages=("store",))]
+    result, detection = check_detection(["store"], bugs, {"sb_a": runs(P)})
+    assert not result.inconclusive
+    assert detection.survived == ("SB02",)
+    pending, _ = check_detection(["store"], bugs, {"sb_a": runs(A)})
+    assert pending.inconclusive
