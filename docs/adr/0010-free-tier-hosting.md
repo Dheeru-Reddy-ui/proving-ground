@@ -18,7 +18,7 @@ The Phase 2 plan names Supabase (Postgres and Storage) and Render (an API web se
 | Supabase pauses Free projects with low activity over 7 days | [project pausing](https://supabase.com/docs/guides/platform/free-project-pausing) |
 | Supabase Storage can mint signed upload URLs, valid for 2 hours, that upload without further authentication | [createSignedUploadUrl](https://supabase.com/docs/reference/javascript/storage-from-createsigneduploadurl) |
 
-Our hooked APK (build 2) is 64.1 MB (`docs/VERSIONS.md`).
+Our hooked APK (build 2) is 80,909,977 bytes (`docs/VERSIONS.md`, "Game build").
 
 Limits these pages do not settle (instance memory, pooler connection counts, total storage) are for Dheeru to check on the current pricing pages; we never state them from memory.
 
