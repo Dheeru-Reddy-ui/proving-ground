@@ -12,6 +12,10 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 - **Database:** local Postgres in Docker for Phase 1; the same Alembic migrations move to Supabase in Phase 2.
 - **LLM:** Google Gemini API free tier, model `gemini-3.8-flash` (listed "Free of charge" on [the pricing page](https://ai.google.dev/gemini-api/docs/pricing), checked 2026-10-07). Free-tier prompts are used by Google to improve its products; our prompts carry only specs, the SDK manifest and a game summary. LLM cost is recorded at the configured rate of 0.
 - **Hook edits:** Claude applies the edits listed in `game/HOOKS.md`; Dheeru reviews in Unity and builds.
+- **LLM model switched to `gemini-3.8-flash` → `gemini-3.5-flash`** (2026-10-08, approved by Dheeru). Generation runs 2, 3 and 4 failed: the API answered 503 "high demand" to every retry. Gemini 3.5 Flash is also free on the pricing page and was confirmed through the models API. All Phase 1 result runs (5 and 6) use it with prompt `generate_tests_v2`; the failed runs stay in the database.
+- **Second feature for M1.9: `run_and_gameover`**, by a rule fixed before generation: the non-store spec file with the most statements (14). Not chosen by where the bugs are.
+- **Human baseline:** written by a person who has not seen the bug catalog (Dheeru's choice, 2026-10-08), because Dheeru saw the bug list in the plan. Recorded as a threat to validity.
+- **"DID NOT RAISE" counts as an assertion** (2026-10-08, ADR-0004 amended).
 - **G4 novelty:** candidates of the same generation run count against each other, in trust-score order (to be recorded in ADR-0004).
 - **G5 budget:** 120 s median test runtime, excluding reset and connect.
 - **Seeded bugs:** the 16 proposed bugs, with one change: SB13 shows the run's coins instead of distance on the game-over screen, because score equals distance at multiplier 1 and the swap would be invisible (`TrackManager.AddScore`).
