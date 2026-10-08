@@ -81,6 +81,9 @@ select = [
 "tests/unit/test_prompt_leak.py" = [
   "E501",
 ]
+"tests/unit/test_report.py" = [
+  "E501",
+]
 "tests/unit/test_classify.py" = [
   "E501",  # one observation per table row reads better unwrapped
 ]

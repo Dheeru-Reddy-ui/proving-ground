@@ -30,6 +30,12 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M1.1 Game hooks | Scripts and 16 hooks written and applied to the Unity project (18 marked lines, `grep -rn "PG hook"`); waiting for Dheeru's build | [`game/HOOKS.md`](../game/HOOKS.md), [`game/unity_scripts/`](../game/unity_scripts/) |
 | M1.2 Bug catalog | 16 bugs, seeded stratified split 10 dev / 6 holdout (holdout SB01, SB03, SB06, SB07, SB10, SB12); `pg bugs check` passes. **Freeze pending Dheeru's approval of the split** | [`benchmark/bugs.yaml`](../benchmark/bugs.yaml), `pg_core/catalog.py` |
 | M1.3 `pg_sdk` | Pages, locators, setup helpers, model readers, manifest (11 classes, 110 members) and pytest plugin written; live suite 6/6 on the clean build `e63240052d1b` with 0 game errors; fake-driver unit tests. Locators for the hooked build and the human baseline still to come | [`sdk_live_clean_e63240052d1b.json`](evidence/phase1/sdk_live_clean_e63240052d1b.json), `pg_sdk/manifest.json` |
+| M1.5 Gates and decision | G1-G5, `decide`/`decide_batch`, trust score; 46 adversarial G1 cases; ADR-0004 | `pg_core/gates/`, `pg_core/trust.py`, [ADR-0004](adr/0004-trust-decision.md) |
+| M1.6 Runner | Sandboxed subprocess runner, infra classification and retries, `pg run-test`; live: sample test 2/2 passed, hanging test killed at 40 s as infra | [`runner_live_checks.json`](evidence/phase1/runner_live_checks.json) |
+| M1.7 Persistence | Postgres 16 in Docker, SQLAlchemy models, migration 0001, idempotent repo writes; integration tests 5/5 | `pg_db/`, `migrations/` |
+| M1.4 Generator | Gemini adapter (`gemini-3.8-flash` confirmed via the API), versioned prompt, budget, prompt-leak test; no live generation run yet | `pg_generator/` |
+| M1.8 CLI | Not done: runner can now select one test in a file; `build register`, `generate`, `prove`, baseline, `accept`/`reject`, `suite sync`, `report` still to write | — |
+| M1.9 Results | Not started | — |
 
 ## Phase 0: Foundation and feasibility spike
 

@@ -150,6 +150,7 @@ def _attempt(
     attempt_no: int,
     timeout_s: float,
     clock: Callable[[], float],
+    select: str | None,
 ) -> Attempt:
     artifact_dir = context.artifact_dir
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -164,7 +165,7 @@ def _attempt(
             sys.executable,
             "-m",
             "pytest",
-            target.name,
+            target.name if select is None else f"{target.name}::{select}",
             "-p",
             "pg_sdk.pytest_plugin",
             "-p",
@@ -202,13 +203,15 @@ def _attempt(
     results: dict[str, Any] = (
         json.loads(results_path.read_text(encoding="utf-8")) if results_path.exists() else {}
     )
-    entry = next(iter(results.values()), None)
+    entry = next(
+        (v for k, v in results.items() if select is None or k.endswith(f"::{select}")), None
+    )
     junit_map = junit_outcomes(artifact_dir / "junit.xml")
     verdict: Classification = classify(
         Observation(
             exit_code=exit_code,
             timed_out=timed_out,
-            junit_outcome=next(iter(junit_map.values()), None),
+            junit_outcome=junit_map.get(select) if select else next(iter(junit_map.values()), None),
             plugin_entry=entry,
             output_tail=output_tail,
         )
@@ -240,8 +243,10 @@ def run_test(
     clock: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
     rng: random.Random | None = None,
+    select: str | None = None,
 ) -> RunRecord:
-    """Execute one test file (one test function) once, retrying infra failures."""
+    """Execute one test once (the file's only test, or the function named `select`),
+    retrying infra failures."""
     if not test_file.is_file():
         raise FileNotFoundError(test_file)
     rng = rng or random.Random()  # noqa: S311 - jitter, not security
@@ -250,7 +255,7 @@ def run_test(
         attempt_context = context.model_copy(
             update={"artifact_dir": context.artifact_dir / f"attempt_{number}"}
         )
-        attempt = _attempt(test_file, attempt_context, number, timeout_s, clock)
+        attempt = _attempt(test_file, attempt_context, number, timeout_s, clock, select)
         attempts.append(attempt)
         if attempt.outcome is not Outcome.INFRA or number > max_retries:
             break

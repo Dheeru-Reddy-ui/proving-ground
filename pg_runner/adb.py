@@ -70,6 +70,19 @@ class Adb:
     def pidof(self, package: str, serial: str | None) -> int | None:
         return parse_pidof(self.run("shell", "pidof", package, serial=serial).stdout)
 
+    def installed_apk_sha256(self, package: str, serial: str | None) -> str | None:
+        """sha256 of the installed base APK, read on the device (`sha256sum`)."""
+        paths = [
+            line.removeprefix("package:").strip()
+            for line in self.pm_path(package, serial).splitlines()
+            if line.strip().endswith("base.apk")
+        ]
+        if not paths:
+            return None
+        output = self.run("shell", "sha256sum", paths[0], serial=serial, timeout_s=60).stdout
+        digest = output.split()[0] if output.split() else ""
+        return digest if len(digest) == 64 else None
+
     def force_stop(self, package: str, serial: str | None) -> AdbResult:
         """Stop the app without touching its data (a player closing the game)."""
         return self.run("shell", "am", "force-stop", package, serial=serial)

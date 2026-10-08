@@ -6,6 +6,16 @@ from typing import Annotated
 import typer
 
 from pg_cli.bugs import app as bugs_app
+from pg_cli.pipeline import (
+    accept_cmd,
+    baseline_cmd,
+    build_app,
+    generate_cmd,
+    prove_cmd,
+    reject_cmd,
+    suite_app,
+)
+from pg_cli.report import report_cmd
 from pg_cli.run import run_test_cmd
 from pg_cli.smoke import smoke_cmd
 from pg_cli.spike import app as spike_app
@@ -18,6 +28,14 @@ app.add_typer(spike_app, name="spike")
 app.add_typer(bugs_app, name="bugs")
 app.command("smoke")(smoke_cmd)
 app.command("run-test")(run_test_cmd)
+app.add_typer(build_app, name="build")
+app.add_typer(suite_app, name="suite")
+app.command("generate")(generate_cmd)
+app.command("prove")(prove_cmd)
+app.command("baseline")(baseline_cmd)
+app.command("accept")(accept_cmd)
+app.command("reject")(reject_cmd)
+app.command("report")(report_cmd)
 
 
 @app.callback()
