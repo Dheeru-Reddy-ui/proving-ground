@@ -1,0 +1,23 @@
+<article class="item review-item" id="review-{{ item.id }}" role="listitem">
+  <header>
+    <h3><a class="mono" href="/candidates/{{ item.id }}">{{ item.name }}</a></h3>
+    <span class="muted">{{ item.feature }} · run {{ item.generation_run_id }} · trust score {{ item.trust_score if item.trust_score is not none else "–" }}</span>
+  </header>
+  <p>{{ item.intent }}</p>
+  <p class="muted mono">{{ item.spec_ids | join(", ") }}</p>
+  {% for r in item.reasons %}{% if r.code != "needs_human" %}<p class="muted">{{ r.message }}</p>{% endif %}{% endfor %}
+  {% if error %}<p class="notice bad">{{ error }}</p>{% endif %}
+  {% if item.human_decision %}
+    <p class="notice">{{ "Accepted" if item.human_decision == "accept" else "Rejected" }} by a person{% if item.human_decided_at %} {{ ago(item.human_decided_at) }}{% endif %}: “{{ item.human_reason }}”</p>
+  {% elif viewer.admin %}
+    <form method="post" action="/review/{{ item.id }}" hx-post="/review/{{ item.id }}" hx-target="#review-{{ item.id }}" hx-swap="outerHTML">
+      <input type="hidden" name="csrf_token" value="{{ viewer.csrf }}">
+      <label for="reason-{{ item.id }}">Why (stored with the decision)</label>
+      <textarea id="reason-{{ item.id }}" name="reason" required minlength="3" maxlength="500"></textarea>
+      <div class="counts">
+        <button type="submit" name="decision" value="accept">Accept into the suite</button>
+        <button class="danger" type="submit" name="decision" value="reject">Reject</button>
+      </div>
+    </form>
+  {% endif %}
+</article>

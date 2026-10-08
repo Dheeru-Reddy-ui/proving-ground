@@ -18,12 +18,13 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from pg_api import errors, logs
 from pg_api.middleware import BodyLimitMiddleware, RateLimitMiddleware, RequestIdMiddleware
-from pg_api.routes import agents, builds, health, local_storage, session
+from pg_api.routes import agents, builds, health, local_storage
 from pg_api.settings import ApiSettings, load_settings
 from pg_api.state import AppState, make_storage, utc_now
 from pg_api.storage import LocalStorage, Storage
 from pg_core.builds import PART_MAX_BYTES
 from pg_core.ratelimit import Limit
+from pg_dashboard import mount_dashboard
 from pg_db.session import make_engine
 
 SESSION_MAX_AGE_S = 8 * 3600
@@ -70,11 +71,11 @@ def create_app(
     app.state.pg = state
     errors.install(app)
     app.include_router(health.router)
-    app.include_router(session.router)
     app.include_router(agents.router)
     app.include_router(builds.router)
     if isinstance(state.storage, LocalStorage):
         app.include_router(local_storage.router)
+    mount_dashboard(app)
 
     limits = {
         kind: _limit(per_minute)

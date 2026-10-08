@@ -1,0 +1,21 @@
+{% from "macros.html" import status, bar %}
+{% set v = progress.validation %}
+<section id="progress" aria-labelledby="progress-title"{% if v.status == "running" %} hx-get="/validations/{{ v.id }}/progress" hx-trigger="every 5s" hx-swap="outerHTML"{% endif %}>
+  <h2 id="progress-title">Progress {{ status(v.status) }}</h2>
+  <ol class="stages">
+    <li><span class="what">Install the build on the phone</span><span class="how">{{ status(progress.install) }}</span></li>
+    {% for f in progress.features %}
+    <li>
+      <span class="what">{{ f.name }}: generate tests</span>
+      <span class="how">{{ status(f.generate) }}{% if f.generation_run_id %} <a href="/runs/{{ f.generation_run_id }}">run {{ f.generation_run_id }}</a>{% endif %}</span>
+    </li>
+    <li><span class="what">{{ f.name }}: static checks (G1)</span><span class="how">{{ status(f.score_static) }}</span></li>
+    <li>
+      <span class="what">{{ f.name }}: device runs (G2, G3)</span>
+      <span class="how">{% if f.runs_total %}{{ bar(f.runs) }} <span class="num">{{ f.runs_done }} of {{ f.runs_total }} planned runs finished</span>{% else %}<span class="muted">none yet</span>{% endif %}</span>
+    </li>
+    <li><span class="what">{{ f.name }}: decide (G4, G5)</span><span class="how">{{ status(f.score_final) }}</span></li>
+    {% endfor %}
+  </ol>
+  {% if v.status == "running" %}<p class="muted">Updates every 5 seconds. Device runs are planned one repeat at a time, so the planned total grows as tests pass.</p>{% endif %}
+</section>

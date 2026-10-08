@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "macros.html" import counts, decision, status %}
+{% block title %}Validation {{ detail.id }} · Proving Ground{% endblock %}
+{% block main %}
+<section>
+  <p class="crumbs"><a href="/">Builds</a> › <a href="/builds/{{ build.id }}">{{ build.label }}</a> › validation {{ detail.id }}</p>
+  <div>
+    <h1>Validation {{ detail.id }}</h1>
+    <p class="lede">{{ detail.features | join(", ") }}, {{ detail.n }} candidates per feature. Started {{ detail.created_at | utc }} by <span class="mono">{{ detail.requested_by }}</span>{% if detail.finished_at %}, finished {{ detail.finished_at | utc }}{% endif %}.</p>
+  </div>
+  {% for p in detail.problems %}<p class="notice bad">{{ p }}</p>{% endfor %}
+  <dl class="figures">
+    <div class="figure"><dt>Decisions</dt><dd>{{ counts(detail.decisions) }}</dd></div>
+    <div class="figure"><dt>Device time</dt><dd>{{ (detail.device_seconds / 60) | round(1) }} <small>min</small></dd></div>
+    <div class="figure"><dt>LLM cost</dt><dd>{{ detail.llm_cost_usd | usd }}</dd></div>
+  </dl>
+</section>
+
+{% include "_progress.html" %}
+
+<section aria-labelledby="candidates">
+  <h2 id="candidates">Candidates</h2>
+  {% if detail.candidates %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Candidate</th><th scope="col">Decision</th><th scope="col" class="num">Trust score</th><th scope="col">Specs</th><th scope="col">Dev kills</th></tr></thead>
+      <tbody>
+      {% for c in detail.candidates %}
+      <tr>
+        <th scope="row"><a class="mono" href="/candidates/{{ c.id }}">{{ c.name }}</a></th>
+        <td>{{ decision(c.decision) }}</td>
+        <td class="num">{{ c.trust_score if c.trust_score is not none else "–" }}</td>
+        <td class="mono">{{ c.spec_ids | join(", ") }}</td>
+        <td class="mono">{{ c.kills | join(", ") or "–" }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No candidates yet: the worker generates them first.</p>
+  {% endif %}
+</section>
+
+{% if detail.dead_jobs %}
+<section aria-labelledby="dead">
+  <h2 id="dead">Jobs that gave up</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Job</th><th scope="col">Type</th><th scope="col" class="num">Attempts</th><th scope="col">Last error</th><th scope="col"><span class="skip">Action</span></th></tr></thead>
+      <tbody>
+      {% for j in detail.dead_jobs %}
+      <tr>
+        <th scope="row" class="mono">{{ j.key }}</th>
+        <td>{{ j.type }}</td>
+        <td class="num">{{ j.attempts }}</td>
+        <td>{{ j.last_error }}</td>
+        <td>{% if viewer.admin and j.status == "dead" %}<form method="post" action="/system/jobs/{{ j.id }}/retry"><input type="hidden" name="csrf_token" value="{{ viewer.csrf }}"><input type="hidden" name="next" value="/validations/{{ detail.id }}"><button class="quiet" type="submit">Retry</button></form>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

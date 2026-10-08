@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Log in · Proving Ground{% endblock %}
+{% block main %}
+<section>
+  <div>
+    <h1>Admin log in</h1>
+    <p class="lede">Only the owner logs in, to review tests and manage agents.{% if viewer.demo %} The public demo pages need no login.{% endif %}</p>
+  </div>
+  {% if failed %}<p class="notice bad" role="alert">{{ failed }}</p>{% endif %}
+  <form class="item" method="post" action="/login">
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="200">
+    <div><button type="submit">Log in</button></div>
+  </form>
+</section>
+{% endblock %}

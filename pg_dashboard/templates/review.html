@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Review queue · Proving Ground{% endblock %}
+{% block main %}
+<section>
+  <div>
+    <h1>Review queue</h1>
+    <p class="lede">Tests that passed every gate but killed no seeded dev bug. The bug catalog may simply not cover what they check, so a person decides. Each decision is stored with its reason; in Phase 4 these decisions are the labelled data for the false-accept rate.</p>
+  </div>
+  {% if waiting %}
+  <div class="stack" role="list">
+    {% for item in waiting %}{% include "_review_item.html" %}{% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">Nothing is waiting for review.</p>
+  {% endif %}
+</section>
+{% if decided %}
+<section aria-labelledby="decided">
+  <h2 id="decided">Decided by a person</h2>
+  <div class="stack" role="list">
+    {% for item in decided %}{% include "_review_item.html" %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

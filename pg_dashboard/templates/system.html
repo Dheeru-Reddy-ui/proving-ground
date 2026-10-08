@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% from "macros.html" import status %}
+{% block title %}System · Proving Ground{% endblock %}
+{% block main %}
+{% set s = system %}
+<section>
+  <div>
+    <h1>System</h1>
+    <p class="lede">The device agent on the Windows PC, the worker, the job queue and today's model spend.</p>
+  </div>
+  {% for w in s.workers if not w.generation_enabled %}
+  <p class="notice">Test generation is switched off on <span class="mono">{{ w.name }}</span> (<span class="mono">PG_GENERATION_ENABLED=false</span>). GENERATE jobs stay queued until it is switched back on; scoring continues.</p>
+  {% endfor %}
+  <dl class="figures">
+    <div class="figure"><dt>LLM spend today (UTC)</dt><dd>{{ s.spend_today_usd | usd }} <small>{{ s.calls_today }} calls</small></dd></div>
+    {% set ns = namespace(queued=0, leased=0) %}
+    {% for counts in s.queue.values() %}{% set ns.queued = ns.queued + counts.get("queued", 0) %}{% set ns.leased = ns.leased + counts.get("leased", 0) %}{% endfor %}
+    <div class="figure"><dt>Queue depth</dt><dd>{{ ns.queued }} <small>queued · {{ ns.leased }} running</small></dd></div>
+    <div class="figure"><dt>Jobs that gave up</dt><dd>{{ s.dead | length }}</dd></div>
+  </dl>
+</section>
+
+<section aria-labelledby="agents">
+  <h2 id="agents">Device agents</h2>
+  {% if s.agents %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Agent</th><th scope="col">Health</th><th scope="col">Last seen</th><th scope="col">Working on</th>{% if viewer.admin %}<th scope="col">Failing checks</th>{% endif %}</tr></thead>
+      <tbody>
+      {% for a in s.agents %}
+      <tr>
+        <th scope="row" class="mono">{{ a.name }}</th>
+        <td>{% if a.revoked %}<span class="chip dead">revoked</span>{% elif a.stale %}<span class="chip stale">not seen for 10+ min</span>{% elif a.healthy %}<span class="chip healthy">healthy</span>{% elif a.healthy is none %}<span class="chip">no report yet</span>{% else %}<span class="chip unhealthy">unhealthy</span>{% endif %}</td>
+        <td>{{ ago(a.last_seen_at) }}</td>
+        <td>{% if a.current_job_id %}job {{ a.current_job_id }}{% else %}<span class="muted">idle</span>{% endif %}</td>
+        {% if viewer.admin %}<td>{{ a.failing | join(", ") or "–" }}</td>{% endif %}
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No agent has enrolled yet.</p>
+  {% endif %}
+  {% if viewer.admin %}
+    {% if token %}
+    <div class="item">
+      <p><strong>Enrolment token</strong> (shown once, valid for 24 hours, usable once). On the device host run <code>uv run pg agent enroll --api &lt;this site&gt; --name &lt;name&gt;</code> and paste it when asked.</p>
+      <p class="secret">{{ token }}</p>
+    </div>
+    {% else %}
+    <form method="post" action="/system/enrolment-token">
+      <input type="hidden" name="csrf_token" value="{{ viewer.csrf }}">
+      <button class="quiet" type="submit">Create an enrolment token for a new agent</button>
+    </form>
+    {% endif %}
+  {% endif %}
+</section>
+
+<section aria-labelledby="workers">
+  <h2 id="workers">Workers</h2>
+  {% if s.workers %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Worker</th><th scope="col">State</th><th scope="col">Last loop</th><th scope="col">Generation</th></tr></thead>
+      <tbody>
+      {% for w in s.workers %}
+      <tr>
+        <th scope="row" class="mono">{{ w.name }}</th>
+        <td>{% if w.stale %}<span class="chip stale">not seen for 10+ min</span>{% else %}<span class="chip healthy">running</span>{% endif %}</td>
+        <td>{{ ago(w.last_seen_at) }}</td>
+        <td>{{ "on" if w.generation_enabled else "off" }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No worker has reported yet.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="queue">
+  <h2 id="queue">Job queue</h2>
+  {% if s.queue %}
+  {% set states = ("queued", "leased", "succeeded", "failed", "dead") %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Type</th>{% for st in states %}<th scope="col" class="num">{{ st }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for kind, counts in s.queue | dictsort %}
+      <tr><th scope="row" class="mono">{{ kind }}</th>{% for st in states %}<td class="num">{{ counts.get(st, 0) }}</td>{% endfor %}</tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">The queue is empty.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="dead">
+  <h2 id="dead">Jobs that gave up</h2>
+  {% if s.dead %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Job</th><th scope="col">State</th><th scope="col" class="num">Attempts</th><th scope="col">Last error</th><th scope="col">Ended</th>{% if viewer.admin %}<th scope="col"><span class="skip">Action</span></th>{% endif %}</tr></thead>
+      <tbody>
+      {% for j in s.dead %}
+      <tr>
+        <th scope="row"><span class="mono">{{ j.type }}</span><br><span class="muted mono">{{ j.key }}</span></th>
+        <td>{{ status(j.status) }}</td>
+        <td class="num">{{ j.attempts }}</td>
+        <td>{{ j.last_error }}</td>
+        <td>{{ ago(j.finished_at) }}</td>
+        {% if viewer.admin %}<td>{% if j.status == "dead" %}<form method="post" action="/system/jobs/{{ j.id }}/retry"><input type="hidden" name="csrf_token" value="{{ viewer.csrf }}"><button class="quiet" type="submit">Retry</button></form>{% endif %}</td>{% endif %}
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No dead or failed jobs.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "macros.html" import counts, status, bar %}
+{% block title %}{{ detail.build.label }} · Proving Ground{% endblock %}
+{% block main %}
+{% set b = detail.build %}
+<section>
+  <p class="crumbs"><a href="/">Builds</a> › build {{ b.id }}</p>
+  <div>
+    <h1>{{ b.label }}</h1>
+    <p class="lede"><span class="mono">{{ b.sha256 }}</span><br>Registered {{ b.created_at | utc }} via {{ b.source }} · locator map <span class="mono">{{ b.locator_tag }}</span>{% if b.has_apk %} · APK stored{% endif %}</p>
+    {% if b.patch_notes %}<p class="lede">{{ b.patch_notes }}</p>{% endif %}
+  </div>
+  <dl class="figures">
+    <div class="figure"><dt>Accepted tests</dt><dd>{{ totals.accepted }} <small>of {{ totals.decisions.values() | sum }} candidates</small></dd></div>
+    <div class="figure"><dt>In review</dt><dd>{{ totals.decisions.review }}</dd></div>
+    <div class="figure"><dt>Rejected</dt><dd>{{ totals.decisions.reject }}</dd></div>
+    <div class="figure"><dt>G2: 3 of 3 clean</dt><dd>{{ totals.g2_passed }} <small>of {{ totals.g2_decided }} decided</small></dd></div>
+    <div class="figure"><dt>LLM cost per accepted</dt><dd>{% if totals.accepted %}{{ (totals.llm_usd / totals.accepted) | usd }}{% else %}<small>no accepted test</small>{% endif %}</dd></div>
+    <div class="figure"><dt>Device time per accepted</dt><dd>{% if totals.accepted %}{{ (totals.device_minutes / totals.accepted) | round(1) }} <small>min</small>{% else %}<small>no accepted test</small>{% endif %}</dd></div>
+    <div class="figure"><dt>Infra attempts</dt><dd>{{ totals.infra_attempts }} <small>of {{ totals.attempts }}</small></dd></div>
+  </dl>
+</section>
+
+<section aria-labelledby="validations">
+  <h2 id="validations">Validations</h2>
+  {% if detail.validations %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Validation</th><th scope="col">Features</th><th scope="col">Status</th><th scope="col">Jobs</th><th scope="col">Decisions</th><th scope="col">Started</th><th scope="col" class="num">Device time</th></tr></thead>
+      <tbody>
+      {% for v in detail.validations %}
+      <tr>
+        <th scope="row"><a href="/validations/{{ v.id }}">#{{ v.id }}</a></th>
+        <td>{{ v.features | join(", ") }} <span class="muted">· n = {{ v.n }}</span></td>
+        <td>{{ status(v.status) }}</td>
+        <td>{{ bar(v.jobs) }} <span class="muted num">{{ v.jobs.get("succeeded", 0) }} of {{ v.jobs.values() | sum }} done</span></td>
+        <td>{{ counts(v.decisions) }}</td>
+        <td>{{ v.created_at | utc }}</td>
+        <td class="num">{{ (v.device_seconds / 60) | round(1) }} min</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No validation has been started for this build. An admin starts one with <code>POST /v1/builds/{{ b.id }}/validate</code>.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="runs">
+  <h2 id="runs">Generation runs</h2>
+  {% if runs %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Run</th><th scope="col">Feature</th><th scope="col">Model · prompt</th><th scope="col">Decisions</th><th scope="col" class="num">G2 passed</th><th scope="col" class="num">Device time</th><th scope="col" class="num">LLM cost</th><th scope="col">Started by</th></tr></thead>
+      <tbody>
+      {% for r in runs %}
+      <tr>
+        <th scope="row"><a href="/runs/{{ r.id }}">run {{ r.id }}</a></th>
+        <td>{{ r.feature }}</td>
+        <td class="mono">{{ r.model }} · {{ r.prompt_version }}</td>
+        <td>{{ counts(r.decisions) }}</td>
+        <td class="num">{{ r.g2_passed }} of {{ r.g2_decided }}</td>
+        <td class="num">{{ r.device_minutes }} min</td>
+        <td class="num">{{ r.llm_usd | usd }}</td>
+        <td>{% if r.validation_id %}<a href="/validations/{{ r.validation_id }}">validation {{ r.validation_id }}</a>{% else %}<span class="muted">CLI (<code>pg prove</code>)</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No tests have been generated for this build yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

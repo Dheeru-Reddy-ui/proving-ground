@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "macros.html" import counts, status %}
+{% block title %}Builds · Proving Ground{% endblock %}
+{% block main %}
+<section>
+  <div>
+    <h1>Builds</h1>
+    <p class="lede">Each build of the game under test, and what the gates decided about the AI-written tests generated for it. A test is accepted only after it runs, passes 3 of 3 clean runs and catches a seeded bug in 2 of 2 runs.</p>
+  </div>
+  {% if builds %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th scope="col">Build</th><th scope="col">APK sha256</th><th scope="col">Registered</th>
+        <th scope="col">Decisions</th><th scope="col">Latest validation</th>
+        <th scope="col" class="num">LLM cost</th><th scope="col" class="num">Device time</th>
+      </tr></thead>
+      <tbody>
+      {% for b in builds %}
+      <tr>
+        <th scope="row"><a href="/builds/{{ b.id }}">{{ b.label }}</a></th>
+        <td class="mono">{{ b.sha256 | sha }}</td>
+        <td>{{ b.created_at | utc }}<br><span class="muted">via {{ b.source }}</span></td>
+        <td>{{ counts(b.decisions) }}</td>
+        <td>{% if b.latest_validation %}{{ status(b.latest_validation) }}{% else %}<span class="muted">none</span>{% endif %}</td>
+        <td class="num">{{ b.llm_usd | usd }}</td>
+        <td class="num">{{ b.device_minutes }} min</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No builds yet. Register one with <code>pg build register</code> or the release webhook.</p>
+  {% endif %}
+</section>
+{% endblock %}

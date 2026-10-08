@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% from "macros.html" import decision %}
+{% block title %}{{ c.name }} · Proving Ground{% endblock %}
+{% block main %}
+<section>
+  <p class="crumbs"><a href="/">Builds</a> › <a href="/runs/{{ c.generation_run_id }}">run {{ c.generation_run_id }}</a> › candidate {{ c.id }}</p>
+  <div>
+    <h1 class="mono">{{ c.name }}</h1>
+    <p class="lede">{{ c.intent }}</p>
+  </div>
+  <dl class="figures">
+    <div class="figure"><dt>Decision</dt><dd>{{ decision(c.decision) }}</dd></div>
+    <div class="figure"><dt>Trust score</dt><dd>{{ c.trust_score if c.trust_score is not none else "–" }} <small>of 100, ranking only</small></dd></div>
+    <div class="figure"><dt>Dev kills</dt><dd>{{ c.kills | selectattr("killed") | list | length }} <small>of {{ c.kills | length }} bugs run</small></dd></div>
+    <div class="figure"><dt>Executions</dt><dd>{{ c.executions | length }} <small>attempts</small></dd></div>
+  </dl>
+  {% if c.human_decision %}
+  <p class="notice">A person {{ "accepted" if c.human_decision == "accept" else "rejected" }} this test{% if c.human_reason %}: “{{ c.human_reason }}”{% endif %}.</p>
+  {% endif %}
+  {% if c.decision == "review" and not c.human_decision %}
+    {% if viewer.admin %}
+    <form class="item" method="post" action="/review/{{ c.id }}">
+      <input type="hidden" name="csrf_token" value="{{ viewer.csrf }}">
+      <label for="reason-{{ c.id }}">Your decision on this REVIEW test, and why (stored with the decision)</label>
+      <textarea id="reason-{{ c.id }}" name="reason" required minlength="3" maxlength="500"></textarea>
+      <div class="counts"><button type="submit" name="decision" value="accept">Accept into the suite</button> <button class="danger" type="submit" name="decision" value="reject">Reject</button></div>
+    </form>
+    {% else %}
+    <p class="notice">Waiting for a person to review it: it passed every gate but killed no dev bug.</p>
+    {% endif %}
+  {% endif %}
+</section>
+
+<section aria-labelledby="specs">
+  <h2 id="specs">What it claims to test</h2>
+  <dl class="specs">
+    {% for sid in c.spec_ids %}
+    <dt id="spec-{{ sid }}">{{ sid }}</dt><dd>{{ c.specs.get(sid, "unknown spec") }}</dd>
+    {% endfor %}
+  </dl>
+</section>
+
+<section aria-labelledby="code">
+  <h2 id="code">Code</h2>
+  <p class="muted">Pages used: {{ c.pages_used | join(", ") or "–" }} · <span class="mono">{{ c.model }}</span> · prompt <span class="mono">{{ c.prompt_version }}</span></p>
+  <pre><code>{{ c.code }}</code></pre>
+</section>
+
+<section aria-labelledby="gates">
+  <h2 id="gates">Gates</h2>
+  <div class="gates">
+    {% set names = {"G1": "Static checks", "G2": "3 of 3 clean runs", "G3": "Catches a dev bug", "G4": "Adds something new", "G5": "Runtime budget"} %}
+    {% for g in ("G1", "G2", "G3", "G4", "G5") %}
+    {% set r = c.gates.get(g) %}
+    <article class="gate">
+      <header><h3>{{ g }} · {{ names[g] }}</h3>
+        {% if r is none %}<span class="chip">not run</span>
+        {% elif r.inconclusive %}<span class="chip running">waiting</span>
+        {% elif r.passed %}<span class="chip pass">pass</span>
+        {% else %}<span class="chip fail">fail</span>{% endif %}
+      </header>
+      {% if r and r.reasons %}<ul>{% for reason in r.reasons %}<li><span class="mono">{{ reason.code }}</span>: {{ reason.message }}</li>{% endfor %}</ul>{% endif %}
+      {% if r and r.metrics %}<details><summary class="muted">Measurements</summary><pre>{{ r.metrics | pretty }}</pre></details>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+{% if c.kills %}
+<section aria-labelledby="kills">
+  <h2 id="kills">Seeded dev bugs it ran against</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Bug</th><th scope="col">Result</th><th scope="col">Evidence (execution ids)</th></tr></thead>
+      <tbody>
+      {% for k in c.kills %}
+      <tr>
+        <th scope="row" class="mono">{{ k.bug }}</th>
+        <td>{% if k.killed %}<span class="chip accept">killed 2 of 2</span>{% elif k.unstable %}<span class="chip review">1 of 2: not a kill</span>{% else %}<span class="chip">survived</span>{% endif %}</td>
+        <td class="mono">{{ k.evidence_execution_ids | join(", ") }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<section aria-labelledby="executions">
+  <h2 id="executions">Executions</h2>
+  {% if c.executions %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Id</th><th scope="col">Bug flag</th><th scope="col" class="num">Repeat · attempt</th><th scope="col">Outcome</th><th scope="col" class="num">Test body</th><th scope="col" class="num">Wall</th><th scope="col">Detail</th>{% if viewer.admin %}<th scope="col">Artifacts</th>{% endif %}</tr></thead>
+      <tbody>
+      {% for e in c.executions %}
+      <tr>
+        <th scope="row" class="mono">{{ e.id }}</th>
+        <td class="mono">{{ e.flags | join(", ") or "clean" }}</td>
+        <td class="num">{{ e.repeat }} · {{ e.attempt }}</td>
+        <td><span class="chip {{ 'pass' if e.outcome == 'passed' else ('running' if e.outcome == 'infra' else 'fail') }}">{{ e.outcome }}</span><br><span class="muted mono">{{ e.failure_kind or "" }}</span></td>
+        <td class="num">{{ (e.duration_ms / 1000) | round(1) }} s</td>
+        <td class="num">{{ (e.wall_ms / 1000) | round(1) }} s</td>
+        <td><span class="muted">{{ e.detail.splitlines()[-1][:200] if e.detail else "" }}</span></td>
+        {% if viewer.admin %}<td>
+          {% for name in e.artifacts %}
+            {% if name.endswith(".png") %}<a href="/v1/executions/{{ e.id }}/artifacts/{{ name }}"><img src="/v1/executions/{{ e.id }}/artifacts/{{ name }}" alt="screenshot {{ name }} of execution {{ e.id }}" width="96"></a>
+            {% else %}<a class="mono" href="/v1/executions/{{ e.id }}/artifacts/{{ name }}">{{ name }}</a>{% endif %}<br>
+          {% endfor %}
+        </td>{% endif %}
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">Not run on the device yet.</p>
+  {% endif %}
+</section>
+
+{% include "_trace.html" %}
+{% endblock %}

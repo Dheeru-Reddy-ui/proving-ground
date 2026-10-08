@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% from "macros.html" import counts, decision %}
+{% block title %}Generation run {{ run.id }} · Proving Ground{% endblock %}
+{% block main %}
+<section>
+  <p class="crumbs"><a href="/">Builds</a> › <a href="/builds/{{ build.id }}">{{ build.label }}</a> › run {{ run.id }}</p>
+  <div>
+    <h1>Generation run {{ run.id }}: {{ run.feature }}</h1>
+    <p class="lede">{{ run.candidates }} candidate tests from <span class="mono">{{ run.model }}</span> with prompt <span class="mono">{{ run.prompt_version }}</span>, started {{ run.started_at | utc }}{% if run.validation_id %} by <a href="/validations/{{ run.validation_id }}">validation {{ run.validation_id }}</a>{% else %} from the CLI{% endif %}.</p>
+  </div>
+  <dl class="figures">
+    <div class="figure"><dt>Decisions</dt><dd>{{ counts(run.decisions) }}</dd></div>
+    <div class="figure"><dt>G2: 3 of 3 clean</dt><dd>{{ run.g2_passed }} <small>of {{ run.g2_decided }} decided</small></dd></div>
+    <div class="figure"><dt>Device time</dt><dd>{{ run.device_minutes }} <small>min, {{ run.attempts }} attempts ({{ run.infra_attempts }} infra)</small></dd></div>
+    <div class="figure"><dt>LLM</dt><dd>{{ run.llm_usd | usd }} <small>{{ run.tokens_in }} in · {{ run.tokens_out }} out tokens</small></dd></div>
+  </dl>
+</section>
+
+<section aria-labelledby="matrix">
+  <h2 id="matrix">Dev kill matrix</h2>
+  <p class="lede">Each cell is one candidate run against one seeded dev bug. A kill is a product-visible failure in 2 of 2 runs with the bug switched on. Holdout bugs are never run here; they are kept for the Phase 4 measurement.</p>
+  {% if matrix.bugs %}
+  <div class="table-wrap">
+    <table class="matrix">
+      <thead><tr><th scope="col" class="corner">Candidate</th>{% for bug in matrix.bugs %}<th scope="col">{{ bug }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for row in matrix.rows %}
+      <tr>
+        <th scope="row"><a href="/candidates/{{ row.candidate_id }}" class="mono">c{{ row.candidate_id }}</a> {{ decision(row.decision) }}{% if row.note %}<br><span class="muted">{{ row.note }}</span>{% endif %}</th>
+        {% for bug in matrix.bugs %}
+          {% set state = row.cells.get(bug) %}
+          {% if state == "killed" %}<td class="cell killed">2/2</td>
+          {% elif state == "unstable" %}<td class="cell unstable">1/2</td>
+          {% elif state == "survived" %}<td class="cell survived">0</td>
+          {% else %}<td class="cell none" aria-label="not run">·</td>{% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="legend">
+    <span><i class="cell killed"></i>killed in 2 of 2 runs</span>
+    <span><i class="cell unstable"></i>failed in only 1 of 2: not a kill</span>
+    <span><i class="cell survived"></i>survived</span>
+    <span>· not run: the test never touches that bug's screens</span>
+  </p>
+  {% else %}
+  <p class="empty">No bug runs yet. Candidates reach the bug runs only after 3 of 3 clean passes.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="candidates">
+  <h2 id="candidates">Candidates</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Candidate</th><th scope="col">Decision</th><th scope="col" class="num">Trust score</th><th scope="col">Specs</th><th scope="col">Reasons</th></tr></thead>
+      <tbody>
+      {% for c in candidates %}
+      <tr>
+        <th scope="row"><a href="/candidates/{{ c.id }}" class="mono">{{ c.name }}</a></th>
+        <td>{{ decision(c.decision) }}{% if c.human_decision %}<br><span class="muted">human: {{ c.human_decision }}</span>{% endif %}</td>
+        <td class="num">{{ c.trust_score if c.trust_score is not none else "–" }}</td>
+        <td class="mono">{{ c.spec_ids | join(", ") }}</td>
+        <td>{% for r in c.reasons %}<span class="mono">{{ r.code }}</span>{% if not loop.last %}, {% endif %}{% endfor %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include "_trace.html" %}
+{% endblock %}

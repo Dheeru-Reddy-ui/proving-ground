@@ -1,0 +1,27 @@
+<section aria-labelledby="trace">
+  <h2 id="trace">LLM calls</h2>
+  {% if trace %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Call</th><th scope="col">Status</th><th scope="col">Model</th><th scope="col" class="num">Tokens in</th><th scope="col" class="num">Tokens out</th><th scope="col" class="num">Latency</th><th scope="col" class="num">Attempts</th><th scope="col" class="num">Cost</th><th scope="col">Finish · error</th></tr></thead>
+      <tbody>
+      {% for t in trace %}
+      <tr>
+        <th scope="row" class="num">{{ t.call_index + 1 }}</th>
+        <td><span class="chip {{ 'succeeded' if t.status == 'ok' else 'failed' }}">{{ t.status }}</span></td>
+        <td class="mono">{{ t.model }}</td>
+        <td class="num">{{ t.tokens_in }}</td>
+        <td class="num">{{ t.tokens_out }}</td>
+        <td class="num">{{ (t.latency_ms / 1000) | round(1) }} s</td>
+        <td class="num">{{ t.attempts }}</td>
+        <td class="num">{{ t.cost_usd | usd }}</td>
+        <td>{{ t.finish_reason or "" }}{% if t.error %} <span class="muted">{{ t.error }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No model call recorded for this run.</p>
+  {% endif %}
+</section>

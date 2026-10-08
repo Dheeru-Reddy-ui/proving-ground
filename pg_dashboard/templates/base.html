@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="htmx-config" content='{"allowEval": false, "allowScriptTags": false, "includeIndicatorStyles": false, "selfRequestsOnly": true}'>
+<title>{% block title %}Proving Ground{% endblock %}</title>
+<link rel="stylesheet" href="/static/app.css?v={{ static_version["app.css"] }}">
+<script src="/static/htmx.min.js?v={{ static_version["htmx.min.js"] }}" defer></script>
+</head>
+<body{% if viewer.csrf %} hx-headers='{"X-CSRF-Token": "{{ viewer.csrf }}"}'{% endif %}>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="/">Proving Ground <small>trust layer for AI-written game tests</small></a>
+    <nav class="nav" aria-label="Main">
+      <a href="/"{% if nav == "builds" %} aria-current="page"{% endif %}>Builds</a>
+      <a href="/review"{% if nav == "review" %} aria-current="page"{% endif %}>Review queue</a>
+      <a href="/system"{% if nav == "system" %} aria-current="page"{% endif %}>System</a>
+    </nav>
+    <div class="who">
+      {% if viewer.admin %}
+        <span>Admin</span>
+        <form method="post" action="/logout">
+          <input type="hidden" name="csrf_token" value="{{ viewer.csrf }}">
+          <button class="quiet" type="submit">Log out</button>
+        </form>
+      {% elif viewer.demo %}
+        <span class="chip">Public demo · read-only</span>
+        <a href="/login">Admin log in</a>
+      {% else %}
+        <a href="/login">Log in</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+<footer class="foot">
+  Every number here is computed from stored runs. TrashCat is Unity's Endless Runner sample, not an EA game, and the seeded bugs are synthetic.
+  <a href="{{ repo_url }}">Source code</a>
+</footer>
+</body>
+</html>

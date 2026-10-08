@@ -62,6 +62,7 @@ class CandidateRow(BaseModel):
 class DeadJob(BaseModel):
     id: int
     type: str
+    status: str
     key: str
     attempts: int
     last_error: str
@@ -198,6 +199,7 @@ def validation_detail(session: Session, validation: Validation) -> ValidationDet
             DeadJob(
                 id=j.id,
                 type=j.type,
+                status=j.status,
                 key=j.idempotency_key,
                 attempts=j.attempts,
                 last_error=scrub(j.last_error),

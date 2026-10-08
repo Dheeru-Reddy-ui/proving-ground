@@ -1,0 +1,31 @@
+{% macro decision(d) -%}
+<span class="chip {{ d }}">{{ d }}</span>
+{%- endmacro %}
+
+{% macro status(s) -%}
+<span class="chip {{ s }}">{{ s }}</span>
+{%- endmacro %}
+
+{% macro counts(decisions) -%}
+<span class="counts">
+  {%- for d in ("accept", "review", "reject", "pending") %}{% if decisions.get(d) %}
+  <span class="chip {{ d }}">{{ decisions[d] }} {{ d }}</span>{% endif %}{% endfor %}
+  {%- if not (decisions.values() | select | list) %}<span class="muted">no candidates</span>{% endif %}
+</span>
+{%- endmacro %}
+
+{% macro bar(jobs) -%}
+{%- set total = jobs.values() | sum -%}
+{%- if total -%}
+<svg class="bar" viewBox="0 0 100 10" preserveAspectRatio="none" role="img" aria-label="{% for k, v in jobs | dictsort %}{{ v }} {{ k }}{% if not loop.last %}, {% endif %}{% endfor %}">
+  {%- set ns = namespace(x=0) -%}
+  {%- for state in ("succeeded", "failed", "dead", "leased") -%}
+    {%- if jobs.get(state) -%}
+    {%- set w = 100 * jobs[state] / total -%}
+    <rect class="{{ state }}" x="{{ ns.x }}" y="0" width="{{ w }}" height="10"></rect>
+    {%- set ns.x = ns.x + w -%}
+    {%- endif -%}
+  {%- endfor -%}
+</svg>
+{%- endif -%}
+{%- endmacro %}
