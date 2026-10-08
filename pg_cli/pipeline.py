@@ -8,6 +8,7 @@ and a repeated `pg prove` reuses every stored run instead of spending device tim
 from __future__ import annotations
 
 import ast
+import functools
 import json
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
@@ -20,6 +21,7 @@ from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session
 
 from pg_cli.bugs import load_catalog
+from pg_cli.doctor import tcp_probe
 from pg_cli.run import device_context_args, new_run_id
 from pg_cli.settings import Settings
 from pg_cli.spike import apk_sha256
@@ -56,6 +58,37 @@ MANIFEST_PATH = Path("pg_sdk/manifest.json")
 CLEAN_REPEATS = 3
 BUG_REPEATS = 2
 EXTRA_REPEATS = 2  # more repeats when one still ended in infra after its retries
+
+
+class DeviceChainDown(RuntimeError):
+    """AltTester Desktop stopped accepting connections: stop proving instead of retrying."""
+
+
+def require_alttester(context_args: dict[str, Any]) -> None:
+    """Raise DeviceChainDown unless AltTester Desktop accepts a TCP connection. Its server stops
+    when its licence check loses the internet (seen 2026-10-08) and has to be restarted by hand."""
+    host, port = str(context_args["alttester_host"]), int(context_args["alttester_port"])
+    error = tcp_probe(host, port, 5.0)
+    if error is not None:
+        raise DeviceChainDown(
+            f"AltTester Desktop is not accepting connections on {host}:{port} ({error}). "
+            "Restart its server, then rerun: stored runs are kept and reused."
+        )
+
+
+def stop_on_device_down[**P](func: Callable[P, None]) -> Callable[P, None]:
+    """End a device command cleanly (exit code 2) when the device chain is down."""
+
+    @functools.wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
+        try:
+            func(*args, **kwargs)
+        except DeviceChainDown as exc:
+            typer.echo(f"STOPPED: {exc}")
+            raise typer.Exit(2) from exc
+
+    return wrapper
+
 
 build_app = typer.Typer(help="Builds under test.")
 suite_app = typer.Typer(help="The regression suite.")
@@ -188,6 +221,8 @@ def execute_until(
             gate_execution(final.outcome.value, int(final.duration_s * 1000), flags, ident)
         )
         echo(f"    {label} r{repeat}: {final.outcome.value} ({final.rule}, {final.wall_s:.0f}s)")
+        if final.outcome is Outcome.INFRA:
+            require_alttester(context_args)
     return results
 
 
@@ -466,6 +501,7 @@ def generate_cmd(
     )
 
 
+@stop_on_device_down
 def prove_cmd(
     run: Annotated[int, typer.Option(help="Generation run id.")],
     timeout: Annotated[float, typer.Option(help="Seconds per test attempt.")] = DEFAULT_TIMEOUT_S,
@@ -497,6 +533,7 @@ def prove_cmd(
             return
         check_device_build(target)
     context_args = device_context_args(Settings(), locator_tag)
+    require_alttester(context_args)
     dev_bugs = dev_bug_refs()
     artifact_root = ARTIFACTS / "prove" / run_group
     evidences: list[Evidence] = []
@@ -549,6 +586,7 @@ def prove_cmd(
     typer.echo(f"{run_group}: " + ", ".join(f"{k} {v}" for k, v in counts.items()))
 
 
+@stop_on_device_down
 def baseline_cmd(
     timeout: Annotated[float, typer.Option(help="Seconds per test attempt.")] = DEFAULT_TIMEOUT_S,
     build: Annotated[str | None, typer.Option(help="Build sha prefix (default: latest).")] = None,
@@ -566,6 +604,7 @@ def baseline_cmd(
         build_id, locator_tag = target.id, target.locator_tag
         check_device_build(target)
     context_args = device_context_args(Settings(), locator_tag)
+    require_alttester(context_args)
     dev_bugs = dev_bug_refs()
     artifact_root = ARTIFACTS / "baseline" / run_group
     for path in files:
