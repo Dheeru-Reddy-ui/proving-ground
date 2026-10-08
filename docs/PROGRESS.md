@@ -22,6 +22,7 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 - **Selections are not saved when changed** (`LoadoutState.ChangeCharacter` and friends do not call `Save`): after a restart the clean build shows Trash Cat again. This contradicts **PERSIST-3**; any correct test of it fails G2. Raised with Dheeru.
 - AltTester 2.3.2 sets a list element's field and then raises (`docs/VERSIONS.md`); setup verifies such writes by reading them back.
 - `GAME_MODEL.md` corrected: each store tab has its own list, the buy button is `BuyButton`, mission progress is `Image/Reward/Text`.
+- **The adb reverse forward can vanish** (USB reconnect or adb restart). Every launch then fails with `NoAppConnected` and is (correctly) classified infra. Seen on 2026-10-08 during the first `pg prove`; the plugin now recreates the forward before each launch and records when it did.
 
 ### Milestones
 
@@ -34,7 +35,7 @@ Started 2026-10-07. Plan approved by Dheeru on 2026-10-07.
 | M1.6 Runner | Sandboxed subprocess runner, infra classification and retries, `pg run-test`; live: sample test 2/2 passed, hanging test killed at 40 s as infra | [`runner_live_checks.json`](evidence/phase1/runner_live_checks.json) |
 | M1.7 Persistence | Postgres 16 in Docker, SQLAlchemy models, migration 0001, idempotent repo writes; integration tests 5/5 | `pg_db/`, `migrations/` |
 | M1.4 Generator | Gemini adapter (`gemini-3.8-flash` confirmed via the API), versioned prompt, budget, prompt-leak test; no live generation run yet | `pg_generator/` |
-| M1.8 CLI | Not done: runner can now select one test in a file; `build register`, `generate`, `prove`, baseline, `accept`/`reject`, `suite sync`, `report` still to write | — |
+| M1.8 CLI | `pg build register`, `generate`, `prove` (resumable; `--static-only`, `--clean-only`), `baseline`, `accept`/`reject`, `suite sync`, `report`, `bugs verify`. First live generation: run 1 (store, n=8) returned 8 candidates, all passing G1 | `pg_cli/pipeline.py`, `pg_cli/report.py`, `pg_core/report.py` |
 | M1.9 Results | Not started | — |
 
 ## Phase 0: Foundation and feasibility spike
