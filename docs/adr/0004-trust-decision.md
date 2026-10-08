@@ -18,7 +18,7 @@ Five gates, each a pure function in `pg_core` returning `GateResult(passed, inco
 |---|---|---|
 | G1 static | `pg_core/gates/static.py` | Syntax tree only, never imported or run. One `test_*(game)` function with `@pytest.mark.spec(...)` naming existing spec IDs; imports limited to `pytest`, public `pg_sdk` names and `__future__`; no banned names or calls (`exec`, `eval`, `compile`, `open`, `__import__`, `getattr`/`setattr`/`delattr`, `globals`, `vars`, `breakpoint`, `input`, any `_`-prefixed name or attribute), no `while True`, `try`, `global`, nested `def`, `class`, `async`, `pytest.skip`/`xfail`; every attribute and call reached from `game` must resolve to `pg_sdk/manifest.json` with an argument list its signature accepts; at least one assertion, none a tautology (literal, `x == x`, `is not None` on a never-None SDK value), and at least one checking something the player sees; at most 80 lines and 40 SDK calls. |
 | G2 determinism | `pg_core/gates/runs.py` | 3 of 3 valid runs pass on the clean build (no flags), each from a data reset. |
-| G3 bug detection | `pg_core/gates/runs.py` | For each **dev** bug whose pages intersect the pages the test uses (derived from its syntax tree by G1): a **kill** is an assertion failure, a `PGTimeout` or a logged game error in **2 of 2** runs with that bug's flag on. 1 of 2 is an *unstable kill* and does not count. |
+| G3 bug detection | `pg_core/gates/runs.py` | For each **dev** bug whose pages intersect the pages the test uses (derived from its syntax tree by G1): a **kill** is an assertion failure (including a failed `pytest.raises` expectation, "DID NOT RAISE", and `pytest.fail`), a `PGTimeout` or a logged game error in **2 of 2** runs with that bug's flag on. 1 of 2 is an *unstable kill* and does not count. |
 | G4 novelty | `pg_core/gates/runs.py` | The candidate adds a dev kill or a spec ID not already covered by `suites/human_baseline/`, `suites/accepted/` and the candidates accepted earlier in the same run. |
 | G5 cost | `pg_core/gates/runs.py` | Median runtime of the passing clean runs (test body only, without reset and connect) is at most **120 s**. |
 
@@ -32,6 +32,8 @@ Five gates, each a pure function in `pg_core` returning `GateResult(passed, inco
 Every verdict stores machine-readable reasons (`Reason(code, message)`) per gate.
 
 **Infra is never evidence.** Runs that end in `PGInfraError`, a lost connection or an app that never reached the main menu are classified INFRA by the runner, retried, and excluded from every gate. A test that crashes with its own error (`TypeError`, ...) is a failure on the clean build but never a kill.
+
+**What counts as an assertion** (amended 2026-10-08, approved by Dheeru). A `pytest.raises(...)` block whose expected error never comes fails with pytest's own `Failed` exception, not `AssertionError`. It was first classified as a test error, which meant a correct "this must never appear" test could never kill the bug that makes it appear. It now counts as an assertion, as does `pytest.fail`. On the clean build nothing changes: any failure fails G2. Seen in generation run 1, where two candidates failed G2 this way (`docs/evidence/phase1/report_run1_clean_only_e63240052d1b.md`).
 
 **trust_score** (0-100) is for ranking only and never changes a decision: 40 × min(kills, 2)/2 + 20 if G2 passed + 15 × min(visible assertions, 3)/3 + 15 × (1 − median runtime / budget) + 10 if no unstable kill.
 

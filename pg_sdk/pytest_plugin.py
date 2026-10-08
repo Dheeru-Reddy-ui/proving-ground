@@ -298,7 +298,9 @@ def _failure_kind(report: pytest.TestReport, call: pytest.CallInfo[None]) -> str
         return "pg_timeout"
     if excinfo.errisinstance(PGGameError):
         return "game_error"
-    if excinfo.errisinstance(AssertionError):
+    # A failed expectation is an assertion whether it came from `assert`, from
+    # `pytest.raises` ("DID NOT RAISE") or from `pytest.fail` (ADR-0004, approved 2026-10-08).
+    if excinfo.errisinstance((AssertionError, pytest.fail.Exception)):
         return "assertion"
     return "test_error"
 
