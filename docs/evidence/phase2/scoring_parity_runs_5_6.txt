@@ -1,0 +1,21 @@
+Parity check (2026-10-08): pg_db.scoring.score_generation_run recomputes every decision of
+Phase 1 generation runs 5 and 6 from their stored executions, without writing, and compares
+decision, trust score and reason codes with what `pg prove` stored. Local Phase 1 database.
+run 5 c9: stored review/59/no_kill,needs_human  recomputed review/59/no_kill,needs_human  same
+run 5 c10: stored review/57/no_kill,needs_human  recomputed review/57/no_kill,needs_human  same
+run 5 c11: stored review/59/no_kill,needs_human  recomputed review/59/no_kill,needs_human  same
+run 5 c12: stored review/59/no_kill,needs_human  recomputed review/59/no_kill,needs_human  same
+run 5 c13: stored accept/79/kills_dev_bugs  recomputed accept/79/kills_dev_bugs  same
+run 5 c14: stored reject/59/redundant  recomputed reject/59/redundant  same
+run 5 c15: stored review/59/no_kill,needs_human  recomputed review/59/no_kill,needs_human  same
+run 5 c16: stored review/59/no_kill,needs_human  recomputed review/59/no_kill,needs_human  same
+run 5: 8 of 8 identical
+run 6 c17: stored reject/15/not_deterministic  recomputed reject/15/not_deterministic  same
+run 6 c18: stored review/60/no_kill,needs_human  recomputed review/60/no_kill,needs_human  same
+run 6 c19: stored review/60/no_kill,needs_human  recomputed review/60/no_kill,needs_human  same
+run 6 c20: stored review/58/no_kill,needs_human  recomputed review/58/no_kill,needs_human  same
+run 6 c21: stored review/58/no_kill,needs_human  recomputed review/58/no_kill,needs_human  same
+run 6 c22: stored review/52/no_kill,needs_human  recomputed review/52/no_kill,needs_human  same
+run 6 c23: stored reject/0/unknown_sdk_member  recomputed reject/0/unknown_sdk_member  same
+run 6 c24: stored review/56/no_kill,needs_human  recomputed review/56/no_kill,needs_human  same
+run 6: 8 of 8 identical
