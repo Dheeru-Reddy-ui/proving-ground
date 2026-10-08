@@ -486,8 +486,8 @@ def prove_cmd(
         if static_only:
             for cid, name, code in candidates:
                 g1, report = check_static(code, manifest(), known_spec_ids())
-                verdict = "pass" if g1.passed else "REJECT"
-                typer.echo(f"c{cid} {name}: G1 {verdict} pages={','.join(report.pages_used)}")
+                label = "pass" if g1.passed else "REJECT"
+                typer.echo(f"c{cid} {name}: G1 {label} pages={','.join(report.pages_used)}")
                 for problem in g1.reasons:
                     typer.echo(f"    {problem.code}: {problem.message}")
             return
