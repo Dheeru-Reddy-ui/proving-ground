@@ -389,3 +389,17 @@ class Worker(Base):
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     generation_enabled: Mapped[bool]
     info: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+
+
+class Alert(Base):
+    """An operational alert (dead job, silent agent), recorded once per key so a restart never
+    sends it twice; `sent` says whether the webhook accepted it."""
+
+    __tablename__ = "alerts"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    key: Mapped[str] = mapped_column(String(200), unique=True)
+    kind: Mapped[str] = mapped_column(String(32))
+    message: Mapped[str] = mapped_column(Text)
+    sent: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

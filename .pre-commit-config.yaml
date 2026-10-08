@@ -19,3 +19,9 @@ repos:
         language: unsupported
         pass_filenames: false
         types_or: [python, pyi]
+      - id: mypy-strict-phase2
+        name: mypy --strict (Phase 2 packages)
+        entry: uv run mypy --strict pg_api pg_db pg_worker pg_agent pg_dashboard
+        language: unsupported
+        pass_filenames: false
+        types_or: [python, pyi]

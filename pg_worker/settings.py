@@ -36,6 +36,9 @@ class WorkerSettings(BaseSettings):
     # Kill switch: false leaves GENERATE jobs queued (the dashboard says why); scoring goes on.
     pg_generation_enabled: bool = True
 
+    # Incoming-webhook URL (Slack, Discord, ...) for dead-job and silent-agent alerts. A secret.
+    pg_alert_webhook_url: SecretStr | None = None
+
     pg_worker_name: str = Field(default_factory=lambda: f"worker-{socket.gethostname()}"[:64])
     pg_worker_poll_s: float = Field(default=2.0, gt=0)
     pg_lease_ttl_s: float = Field(default=120, ge=10)

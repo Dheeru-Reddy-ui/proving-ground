@@ -18,7 +18,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from pg_api import errors, logs
 from pg_api.middleware import BodyLimitMiddleware, RateLimitMiddleware, RequestIdMiddleware
-from pg_api.routes import agents, builds, health, local_storage
+from pg_api.routes import agents, builds, health, local_storage, metrics
 from pg_api.settings import ApiSettings, load_settings
 from pg_api.state import AppState, make_storage, utc_now
 from pg_api.storage import LocalStorage, Storage
@@ -71,6 +71,7 @@ def create_app(
     app.state.pg = state
     errors.install(app)
     app.include_router(health.router)
+    app.include_router(metrics.router)
     app.include_router(agents.router)
     app.include_router(builds.router)
     if isinstance(state.storage, LocalStorage):

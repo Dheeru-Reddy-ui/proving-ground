@@ -1,0 +1,25 @@
+# Allow-list: only what the API and the worker need. Everything else (.env, artifacts, the device
+# packages, tests, docs, APKs) stays out of the image.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+!alembic.ini
+!migrations/
+!specs/
+!benchmark/bugs.yaml
+!benchmark/HOLDOUT_FREEZE.md
+!game/HOOKS.md
+!pg_core/
+!pg_db/
+!pg_api/
+!pg_worker/
+!pg_dashboard/
+!pg_generator/
+!pg_cli/__init__.py
+!pg_cli/bugs.py
+!pg_sdk/manifest.json
+!pg_sdk/locators/
+**/__pycache__
+**/*.pyc

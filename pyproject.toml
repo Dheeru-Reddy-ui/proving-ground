@@ -9,7 +9,6 @@ license-files = ["LICENSE"]
 authors = [{ name = "Dheeru Reddy" }]
 dependencies = [
     "alembic>=1.20.0",
-    "alttester-driver==2.3.2",
     "argon2-cffi>=25.1.0",
     "defusedxml>=0.7.1",
     "fastapi>=0.142.4",
@@ -18,7 +17,6 @@ dependencies = [
     "itsdangerous>=2.2.0",
     "jinja2>=3.1.6",
     "platformdirs>=4.12.3",
-    "psutil>=7.2.2",
     "psycopg[binary]>=3.3.6",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
@@ -135,6 +133,12 @@ branch = true
 show_missing = true
 
 [dependency-groups]
+# Only the device host needs these: the AltTester driver (its licence forbids redistribution, so
+# it never goes into the cloud image, ADR-0010) and psutil for the runner's process control.
+device = [
+    "alttester-driver==2.3.2",
+    "psutil>=7.2.2",
+]
 dev = [
     "mypy>=2.4.0",
     "pre-commit>=4.6.2",
@@ -145,3 +149,7 @@ dev = [
     "types-psutil>=7.2.2.20260906",
     "types-pyyaml>=6.0.12.20260906",
 ]
+
+[tool.uv]
+# `uv sync` on the PC and in CI installs everything; the cloud image uses --no-default-groups.
+default-groups = ["dev", "device"]

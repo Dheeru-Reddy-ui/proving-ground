@@ -17,6 +17,7 @@ from pg_db import jobs as queue
 from pg_db import pipeline
 from pg_db.models import Worker
 from pg_db.session import session_scope
+from pg_worker.alerts import Poster, raise_alerts, webhook_poster
 from pg_worker.handlers import HANDLERS, Lease, LeaseLost, WorkerContext
 
 log = logs.get("pg_worker")
@@ -70,6 +71,7 @@ class WorkerLoop:
         self._sleep = sleep or self.stop_event.wait
         self._last_reap = 0.0
         self.handled = 0
+        self._poster: Poster | None = None
 
     @property
     def name(self) -> str:
@@ -100,6 +102,12 @@ class WorkerLoop:
                     set_={k: v for k, v in values.items() if k not in ("name", "started_at")},
                 )
             )
+
+    def alert(self) -> list[str]:
+        url = self.ctx.settings.pg_alert_webhook_url
+        if self._poster is None and url is not None:
+            self._poster = webhook_poster(url.get_secret_value())
+        return raise_alerts(self.ctx.engine, self.ctx.now(), self._poster)
 
     def reap(self) -> list[int]:
         with session_scope(self.ctx.engine) as s:
@@ -135,6 +143,7 @@ class WorkerLoop:
             self._last_reap = now_s
             self.reap()
             self.beat()
+            self.alert()
         lease = self.claim()
         if lease is None:
             return False

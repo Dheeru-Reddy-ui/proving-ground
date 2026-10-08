@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     # Persistence
     database_url: SecretStr | None = None
 
+    # Control plane (Phase 2): when set, `pg build register` goes through the API
+    pg_api_url: str | None = None
+    pg_api_token: SecretStr | None = None
+
     # LLM
     pg_llm_provider: str | None = None
     pg_llm_model: str | None = None

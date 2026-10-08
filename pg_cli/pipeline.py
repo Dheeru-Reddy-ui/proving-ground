@@ -349,8 +349,18 @@ def build_register(
     locators_from: Annotated[
         str | None, typer.Option(help="Create this build's locator map extending that tag.")
     ] = None,
+    locator_tag: Annotated[
+        str | None,
+        typer.Option(help="With PG_API_URL: the deployed locator map this build uses."),
+    ] = None,
+    patch_notes: Annotated[str, typer.Option(help="With PG_API_URL: what changed.")] = "",
 ) -> None:
-    """Register a build (idempotent on the APK's sha256) and make sure it has a locator map."""
+    """Register a build (idempotent on the APK's sha256). With PG_API_URL set, upload the APK in
+    parts and register it through the control plane; otherwise write the local database."""
+    settings = Settings()
+    if settings.pg_api_url:
+        _register_via_api(settings, apk, label, locator_tag, patch_notes)
+        return
     sha = apk_sha256(apk)
     if sha is None:
         raise typer.BadParameter(f"{apk} is not a file")
@@ -371,6 +381,97 @@ def build_register(
         typer.echo(
             f"build {build.id} {sha[:12]} ({'registered' if created else 'already registered'})"
         )
+
+
+def _admin_api(settings: Settings) -> Any:
+    from pg_cli.remote import AdminApi
+
+    if not settings.pg_api_url or settings.pg_api_token is None:
+        raise typer.BadParameter("set PG_API_URL and PG_API_TOKEN (pg api admin-token) in .env")
+    return AdminApi(settings.pg_api_url, settings.pg_api_token.get_secret_value())
+
+
+def _register_via_api(
+    settings: Settings, apk: Path, label: str, locator_tag: str | None, patch_notes: str
+) -> None:
+    from pg_cli.remote import publish_build
+
+    if not apk.is_file():
+        raise typer.BadParameter(f"{apk} is not a file")
+    sha = apk_sha256(apk) or ""
+    tag = locator_tag or build_tag(sha)
+    if not (LOCATORS_DIR / f"{tag}.yaml").exists():
+        raise typer.BadParameter(
+            f"no locator map {tag}; pass --locator-tag with a deployed map "
+            "(e.g. the parent build's)"
+        )
+    api = _admin_api(settings)
+    try:
+        answer = publish_build(
+            api, apk, label=label, locator_tag=tag, patch_notes=patch_notes, echo=typer.echo
+        )
+    except Exception as exc:  # ApiError or Unreachable: say what the API said
+        raise typer.BadParameter(str(exc)) from None
+    finally:
+        api.close()
+    build = answer["build"]
+    state = "registered" if answer["created"] else "already registered"
+    typer.echo(f"build {build['id']} {build['sha256'][:12]} ({state} via the API)")
+
+
+@build_app.command("upload")
+def build_upload(
+    apk: Annotated[Path, typer.Option(help="The instrumented APK.")],
+    label: Annotated[str, typer.Option(help="A short description of the build.")],
+    locator_tag: Annotated[str, typer.Option(help="The deployed locator map this build uses.")],
+    build_json: Annotated[Path, typer.Option(help="Where to write build.json.")] = Path(
+        "build.json"
+    ),
+    patch_notes: Annotated[str, typer.Option(help="What changed.")] = "",
+) -> None:
+    """Upload the APK's parts to private storage through the API and write build.json, without
+    registering: attach build.json to a GitHub release tagged build-* and the release workflow
+    registers the build through the signed webhook."""
+    from pg_cli.remote import publish_build
+
+    settings = Settings()
+    if not (LOCATORS_DIR / f"{locator_tag}.yaml").exists():
+        raise typer.BadParameter(f"no locator map {locator_tag} in {LOCATORS_DIR}")
+    api = _admin_api(settings)
+    try:
+        registration = publish_build(
+            api,
+            apk,
+            label=label,
+            locator_tag=locator_tag,
+            patch_notes=patch_notes,
+            echo=typer.echo,
+            register=False,
+        )
+    finally:
+        api.close()
+    build_json.write_text(json.dumps(registration, indent=2) + "\n", encoding="utf-8")
+    typer.echo(f"wrote {build_json} for build {registration['sha256'][:12]}")
+
+
+@build_app.command("validate")
+def build_validate(
+    build_id: Annotated[int, typer.Option("--build", help="Build id on the control plane.")],
+    feature: Annotated[list[str], typer.Option(help="Spec file to generate for (repeat).")],
+    n: Annotated[int, typer.Option(help="Candidates per feature.")] = 8,
+    key: Annotated[str | None, typer.Option(help="Idempotency key (a retry is safe).")] = None,
+) -> None:
+    """Start a build validation on the control plane: generate, check, run on the phone, decide."""
+    settings = Settings()
+    api = _admin_api(settings)
+    try:
+        answer = api.validate(build_id, list(feature), n, key)
+    except Exception as exc:  # ApiError or Unreachable: say what the API said
+        raise typer.BadParameter(str(exc)) from None
+    finally:
+        api.close()
+    url = (settings.pg_api_url or "").rstrip("/")
+    typer.echo(f"validation {answer['id']}: {answer['status']} -> {url}/validations/{answer['id']}")
 
 
 def accepted_tests() -> list[tuple[str, list[str]]]:

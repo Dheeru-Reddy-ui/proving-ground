@@ -1,0 +1,23 @@
+Registration paths drill, 2026-10-08, local API (pg api serve) on a throwaway database, local storage, two fake APKs of random bytes (not game builds).
+
+== webhook path: pg build upload, then the release workflow's script
+  part 0: uploaded 120,000 bytes
+wrote C:\Users\dheer\AppData\Local\Temp\claude\C--Users-dheer-proving-ground\8408a5ef-99d2-4554-bfbb-41b5cae96bb6\scratchpad\build.json for build d9fb46f6a972
+attempt 1: HTTP 200 {"build":{"id":1,"sha256":"d9fb46f6a97202bc734b87b9ffb3ad25c281208874fdadf78883a7f081d584b3","label":"drill build A (webhook)","locator_tag":"87d39616
+== the same delivery again (a re-run of the workflow run)
+attempt 1: HTTP 200 {"build":{"id":1,"sha256":"d9fb46f6a97202bc734b87b9ffb3ad25c281208874fdadf78883a7f081d584b3","label":"drill build A (webhook)","locator_tag":"87d39616
+== CLI path: pg build register through the API (twice)
+  part 0: uploaded 90,000 bytes
+build 3 cd616fe622f6 (registered via the API)
+  part 0: already uploaded
+build 3 cd616fe622f6 (already registered via the API)
+== builds on the control plane
+  3 cli apk stored drill build B (cli)
+  1 webhook apk stored drill build A (webhook)
+== a validation through the CLI (twice, same key)
+== a validation through the CLI (twice, same key)
+validation 1: running -> http://127.0.0.1:8766/validations/1
+validation 1: running -> http://127.0.0.1:8766/validations/1
+== jobs queued
+pg_jobs{status="queued",type="GENERATE"} 1
+pg_jobs{status="queued",type="INSTALL_BUILD"} 1

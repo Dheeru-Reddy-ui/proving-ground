@@ -1,0 +1,110 @@
+name: integration
+
+# Tests of the platform against a real Postgres: migrations from an empty database (and back
+# down and up again), the queue, the API, the worker, the agent over HTTP, the dashboard. Then
+# the cloud image is built and its API and worker entry points are smoke-tested.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pg
+          POSTGRES_PASSWORD: pg
+          POSTGRES_DB: proving_ground
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pg -d proving_ground"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://pg:pg@localhost:5432/proving_ground
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.11.28"
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --locked
+
+      - name: Migrations from an empty database, down to base and up again
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+          uv run alembic check
+
+      - name: Integration tests
+        run: uv run pytest tests/integration -q
+
+  image:
+    name: cloud image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pg
+          POSTGRES_PASSWORD: pg
+          POSTGRES_DB: proving_ground
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pg -d proving_ground"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://pg:pg@localhost:5432/proving_ground
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.11.28"
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Build
+        run: docker build -t proving-ground:ci .
+
+      - name: The image holds no AltTester driver and runs as a non-root user
+        run: |
+          docker run --rm proving-ground:ci python -c "import importlib.util as u, os; assert u.find_spec('alttester') is None; assert os.getuid() != 0; print('ok')"
+          docker run --rm proving-ground:ci sh -c 'test ! -e /app/.env'
+
+      - name: Migrate the service database
+        run: uv sync --locked && uv run alembic upgrade head
+
+      - name: API and worker start and are ready
+        run: |
+          docker run -d --name api --network host -e DATABASE_URL -e PG_SESSION_SECRET=ci-session-secret-ci-session-secret proving-ground:ci
+          docker run -d --name worker --network host -e DATABASE_URL -e PG_GENERATION_ENABLED=false proving-ground:ci python -m pg_worker
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/healthz && break; sleep 2; done
+          curl -sf http://127.0.0.1:8000/readyz
+          sleep 5
+          docker logs worker 2>&1 | grep -q worker_started
+          docker inspect --format '{{.State.Running}}' worker | grep -q true
+
+      - name: Container logs
+        if: always()
+        run: |
+          docker logs api 2>&1 | tail -n 50 || true
+          docker logs worker 2>&1 | tail -n 50 || true

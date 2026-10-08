@@ -1,0 +1,10 @@
+Cloud image smoke test, 2026-10-08: proving-ground:dev built from the Dockerfile; the API and worker containers run against a throwaway database on the local Postgres.
+
+healthz: {"status":"ok"}
+readyz:  {"status":"ready","checks":{"database":"ok","migrations":"ok"}}
+home:    200
+docker health: healthy
+worker log:
+{"name": "image-smoke", "generation": false, "event": "worker_started", "level": "info", "timestamp": "2026-10-08T17:06:51.341078Z"}
+workers row: [('image-smoke', False)]
+containers stopped, smoke database dropped

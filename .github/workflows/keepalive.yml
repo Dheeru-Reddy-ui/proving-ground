@@ -1,0 +1,29 @@
+name: keep-alive
+
+# Supabase pauses Free projects after 7 days of low activity, which would take the public demo
+# down. Once a week this wakes the API (a free Render service sleeps when idle) and makes it
+# query the database through /readyz (ADR-0010). Variable: PG_API_URL.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readyz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: vars.PG_API_URL != ''
+    steps:
+      - name: Call /readyz
+        env:
+          PG_API_URL: ${{ vars.PG_API_URL }}
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -sf --max-time 120 "$PG_API_URL/readyz"; then exit 0; fi
+            sleep 30
+          done
+          exit 1
