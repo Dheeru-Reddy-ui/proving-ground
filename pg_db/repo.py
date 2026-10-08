@@ -9,7 +9,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -125,7 +125,9 @@ def add_candidate(
     intent: str,
     code: str,
     spec_ids: Sequence[str],
+    idx: int | None = None,
 ) -> tuple[Candidate, bool]:
+    """Idempotent on (run, code) and, with `idx`, on (run, position in the model's answer)."""
     code_sha = sha256_text(code)
     statement = (
         insert(Candidate)
@@ -140,17 +142,24 @@ def add_candidate(
             decision="pending",
             reasons=[],
             gates={},
+            idx=idx,
         )
-        .on_conflict_do_nothing(constraint="candidates_run_code")
+        .on_conflict_do_nothing()
         .returning(Candidate.id)
     )
-    created = session.execute(statement).scalar_one_or_none() is not None
+    new_id = session.execute(statement).scalar_one_or_none()
+    if new_id is not None:
+        return session.get_one(Candidate, new_id), True
+    same = Candidate.code_sha == code_sha
+    if idx is not None:
+        same = or_(same, Candidate.idx == idx)
     candidate = session.execute(
-        select(Candidate).where(
-            Candidate.generation_run_id == generation_run_id, Candidate.code_sha == code_sha
-        )
+        select(Candidate)
+        .where(Candidate.generation_run_id == generation_run_id, same)
+        .order_by(Candidate.id)
+        .limit(1)
     ).scalar_one()
-    return candidate, created
+    return candidate, False
 
 
 def candidates_of_run(session: Session, generation_run_id: int) -> list[Candidate]:

@@ -10,13 +10,16 @@ from sqlalchemy import (
     BigInteger,
     CheckConstraint,
     DateTime,
+    Double,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -87,6 +90,8 @@ class GenerationRun(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(16), default="running")
     error: Mapped[str | None] = mapped_column(Text)
+    validation_id: Mapped[int | None] = mapped_column(ForeignKey("validations.id"))
+    job_key: Mapped[str | None] = mapped_column(String(200), unique=True)  # the GENERATE job
 
 
 class Candidate(Base):
@@ -107,10 +112,12 @@ class Candidate(Base):
     human_decision: Mapped[str | None] = mapped_column(String(16))
     human_reason: Mapped[str | None] = mapped_column(Text)
     human_decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    idx: Mapped[int | None] = mapped_column(Integer)  # position in the model's answer
     created_at: Mapped[datetime] = _now()
 
     __table_args__ = (
         UniqueConstraint("generation_run_id", "code_sha", name="candidates_run_code"),
+        UniqueConstraint("generation_run_id", "idx", name="candidates_run_idx"),
         CheckConstraint(
             "decision IN ('pending', 'accept', 'review', 'reject')", name="candidates_decision"
         ),
@@ -156,6 +163,7 @@ class Execution(Base):
     artifacts: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    job_id: Mapped[int | None] = mapped_column(ForeignKey("jobs.id"))  # the RUN_TEST job
 
     __table_args__ = (
         CheckConstraint("purpose IN ('clean', 'bug', 'benchmark')", name="executions_purpose"),
@@ -199,4 +207,73 @@ class Kill(Base):
             name="kills_idempotent",
             postgresql_nulls_not_distinct=True,
         ),
+    )
+
+
+class Validation(Base):
+    """One build validation: the job DAG for some features of one build (ADR-0006)."""
+
+    __tablename__ = "validations"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    build_id: Mapped[int] = mapped_column(ForeignKey("builds.id"))
+    features: Mapped[list[str]] = mapped_column(ARRAY(Text))
+    n: Mapped[int] = mapped_column(Integer)
+    seed: Mapped[int | None] = mapped_column(BigInteger)
+    manifest_sha: Mapped[str] = mapped_column(String(64))  # the SDK manifest it was planned with
+    run_timeout_s: Mapped[float] = mapped_column(Double)
+    requested_by: Mapped[str] = mapped_column(String(64))
+    idempotency_key: Mapped[str | None] = mapped_column(String(200), unique=True)
+    status: Mapped[str] = mapped_column(String(16), default="running")
+    problems: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list)
+    created_at: Mapped[datetime] = _now()
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint("status IN ('running', 'succeeded', 'failed')", name="validations_status"),
+    )
+
+
+class Job(Base):
+    """A unit of work for the worker or the device agent, leased with SKIP LOCKED (ADR-0006)."""
+
+    __tablename__ = "jobs"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    type: Mapped[str] = mapped_column(String(32))
+    payload: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    requires: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    status: Mapped[str] = mapped_column(String(16), default="queued")
+    priority: Mapped[int] = mapped_column(Integer, default=0)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    max_attempts: Mapped[int] = mapped_column(Integer)
+    lease_owner: Mapped[str | None] = mapped_column(String(64))
+    lease_token: Mapped[str | None] = mapped_column(String(64))
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    run_after: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    idempotency_key: Mapped[str] = mapped_column(String(200), unique=True)
+    validation_id: Mapped[int | None] = mapped_column(ForeignKey("validations.id"))
+    result: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    result_sha: Mapped[str | None] = mapped_column(String(64))
+    last_error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint(
+            "type IN ('INSTALL_BUILD', 'RUN_TEST', 'GENERATE', 'SCORE', 'CRAWL')", name="jobs_type"
+        ),
+        CheckConstraint(
+            "status IN ('queued', 'leased', 'succeeded', 'failed', 'dead')", name="jobs_status"
+        ),
+        CheckConstraint("attempts >= 0 AND max_attempts >= 1", name="jobs_attempts"),
+        Index(
+            "jobs_claimable",
+            "priority",
+            "id",
+            postgresql_where=text("status = 'queued'"),
+        ),
+        Index("jobs_leases", "lease_expires_at", postgresql_where=text("status = 'leased'")),
+        Index("jobs_validation", "validation_id"),
     )
