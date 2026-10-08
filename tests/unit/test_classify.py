@@ -133,3 +133,17 @@ def test_junit_and_pgtelem_parsing(tmp_path: Path) -> None:
         )
     )
     assert read_pgtelem(log) == [{"v": 1, "frame_ms_p95": 17.1}]
+
+
+def test_leftover_artifacts_are_set_aside_not_deleted(tmp_path: Path) -> None:
+    from pg_runner.runner import set_aside
+
+    attempt = tmp_path / "attempt_1"
+    assert set_aside(attempt) is None
+    attempt.mkdir()
+    assert set_aside(attempt) is None  # empty: nothing to protect
+    (attempt / "pg_results.json").write_text("{}")
+    moved = set_aside(attempt)
+    assert moved is not None
+    assert (moved / "pg_results.json").exists()
+    assert not attempt.exists()

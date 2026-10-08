@@ -106,6 +106,21 @@ def kill_tree(pid: int) -> None:
     psutil.wait_procs(processes, timeout=10)
 
 
+def set_aside(directory: Path) -> Path | None:
+    """Rename a leftover artifact directory (e.g. from an interrupted attempt) so a new attempt
+    never reads or merges into old results. Nothing is deleted."""
+    if not directory.exists() or not any(directory.iterdir()):
+        return None
+    stamp = time.strftime("%Y%m%dT%H%M%S")
+    target = directory.with_name(f"{directory.name}.stale-{stamp}")
+    suffix = 1
+    while target.exists():
+        suffix += 1
+        target = directory.with_name(f"{directory.name}.stale-{stamp}-{suffix}")
+    directory.rename(target)
+    return target
+
+
 def junit_outcomes(path: Path) -> dict[str, str]:
     """Test name -> passed/failed/error/skipped from a pytest JUnit XML file."""
     if not path.exists():
@@ -153,6 +168,7 @@ def _attempt(
     select: str | None,
 ) -> Attempt:
     artifact_dir = context.artifact_dir
+    set_aside(artifact_dir)
     artifact_dir.mkdir(parents=True, exist_ok=True)
     workdir = Path(tempfile.mkdtemp(prefix="pg_run_"))
     try:
