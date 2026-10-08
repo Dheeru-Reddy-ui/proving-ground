@@ -56,6 +56,7 @@ def run_test_cmd(
     timeout: Annotated[float, typer.Option(help="Seconds per attempt.")] = DEFAULT_TIMEOUT_S,
     retries: Annotated[int, typer.Option(help="Retries of infra failures per execution.")] = 2,
     locator_tag: Annotated[str | None, typer.Option(help="Locator map tag.")] = None,
+    test: Annotated[str | None, typer.Option(help="Run only this test function.")] = None,
 ) -> None:
     """Run a test file through the sandboxed runner and print each execution's outcome."""
     args = device_context_args(Settings(), locator_tag)
@@ -68,7 +69,7 @@ def run_test_cmd(
             artifact_dir=RUNS_DIR / run_id / f"exec_{index}",
             **args,  # type: ignore[arg-type]
         )
-        record = run_test(test_file, context, timeout_s=timeout, max_retries=retries)
+        record = run_test(test_file, context, timeout_s=timeout, max_retries=retries, select=test)
         records.append(record)
         final = record.final
         typer.echo(
