@@ -5,6 +5,7 @@ from typing import Annotated
 
 import typer
 
+from pg_cli.agent import app as agent_app
 from pg_cli.api import app as api_app
 from pg_cli.bugs import app as bugs_app
 from pg_cli.pipeline import (
@@ -38,6 +39,7 @@ app.command("accept")(accept_cmd)
 app.command("reject")(reject_cmd)
 app.command("report")(report_cmd)
 app.add_typer(api_app, name="api")
+app.add_typer(agent_app, name="agent")
 
 worker_app = typer.Typer(help="The generation and scoring worker (Phase 2).", no_args_is_help=True)
 app.add_typer(worker_app, name="worker")

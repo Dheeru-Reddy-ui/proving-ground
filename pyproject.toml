@@ -80,6 +80,8 @@ select = [
 "tests/**" = [
   "S101",  # assert is how pytest checks things
   "ARG",   # fakes keep the real signatures, so some arguments go unused
+  "S105",  # tests use made-up tokens and secrets
+  "S106",
 ]
 "tests/unit/test_gate_static.py" = [
   "E501",  # one adversarial sample per table row reads better unwrapped

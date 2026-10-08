@@ -107,7 +107,9 @@ def _adb_failure(name: str, exc: AdbError) -> CheckResult:
     )
 
 
-def run_doctor(settings: Settings, deps: DoctorDeps) -> DoctorReport:
+def run_doctor(settings: Settings, deps: DoctorDeps, *, connect_app: bool = True) -> DoctorReport:
+    """Every check. With `connect_app=False` the app probe, which takes AltTester's only driver
+    slot for several seconds, is skipped: the device agent's cheap check before each claim."""
     host, port = settings.pg_alttester_host, settings.pg_alttester_port
     results: list[CheckResult] = [check_python(deps.python_version)]
 
@@ -157,6 +159,8 @@ def run_doctor(settings: Settings, deps: DoctorDeps) -> DoctorReport:
     blockers = [r.name for r in prerequisites if r.status is not Status.PASS]
     if blockers:
         results.append(skipped("app connects", f"needs {', '.join(blockers)}"))
+    elif not connect_app:
+        results.append(skipped("app connects", "not probed in the quick check"))
     else:
         results.append(check_app(deps.probe_app(host, port, APP_TIMEOUT_S)))
 

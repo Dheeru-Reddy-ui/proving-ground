@@ -38,6 +38,7 @@ class RegisterOut(BaseModel):
 class HealthCheck(Strict):
     name: str = Field(max_length=64)
     ok: bool
+    status: str = Field(default="", max_length=16)
     detail: str = Field(default="", max_length=500)
 
 

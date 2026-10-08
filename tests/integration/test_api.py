@@ -45,8 +45,8 @@ from pg_db.session import session_scope
 from tests.integration.fakes import Clock, run_result, worker_step
 
 ROOT = Path(__file__).resolve().parents[2]
-ADMIN_PASSWORD = "correct horse battery staple"  # noqa: S105 (a test value)
-WEBHOOK_SECRET = "webhook-secret-for-tests"  # noqa: S105 (a test value)
+ADMIN_PASSWORD = "correct horse battery staple"
+WEBHOOK_SECRET = "webhook-secret-for-tests"
 SESSION_SECRET = "s" * 40
 TAG = "87d396162a05"  # a locator map that exists in pg_sdk/locators/
 APK = b"fake apk bytes " * 100
@@ -275,7 +275,7 @@ def test_the_webhook_registers_one_build_and_rejects_forgeries(
     forged = client.post(
         "/v1/webhooks/github",
         content=body,
-        headers=signed(body, secret="wrong-secret"),  # noqa: S106
+        headers=signed(body, secret="wrong-secret"),
     )
     assert forged.status_code == 401
     assert forged.json()["error"]["message"] == "webhook rejected: bad_signature"

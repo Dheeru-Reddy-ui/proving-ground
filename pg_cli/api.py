@@ -71,3 +71,41 @@ def enrolment_token_cmd(
         token = create_enrolment_token(s, datetime.now(UTC), timedelta(hours=hours))
     typer.echo(token)
     typer.echo(f"Valid once, for {hours:g} h.", err=True)
+
+
+@app.command("rotate-agent-token")
+def rotate_agent_token_cmd(
+    agent: Annotated[str, typer.Option(help="The agent's name.")],
+) -> None:
+    """Revoke every token of an agent and print a new one (then `pg agent set-token`)."""
+    from sqlalchemy import select
+
+    from pg_api.auth import rotate_agent_token
+    from pg_db.models import Agent
+
+    with session_scope(_engine()) as s:
+        row = s.execute(select(Agent).where(Agent.name == agent)).scalar_one_or_none()
+        if row is None:
+            raise typer.BadParameter(f"no agent named {agent}")
+        token = rotate_agent_token(s, row, datetime.now(UTC))
+    typer.echo(token)
+    typer.echo(
+        "The old token stops working now; store this one with `pg agent set-token`.", err=True
+    )
+
+
+@app.command("revoke-agent")
+def revoke_agent_cmd(
+    agent: Annotated[str, typer.Option(help="The agent's name.")],
+) -> None:
+    """Revoke an agent: its tokens stop working at once (e.g. a leaked token)."""
+    from sqlalchemy import select
+
+    from pg_db.models import Agent
+
+    with session_scope(_engine()) as s:
+        row = s.execute(select(Agent).where(Agent.name == agent)).scalar_one_or_none()
+        if row is None:
+            raise typer.BadParameter(f"no agent named {agent}")
+        row.revoked_at = datetime.now(UTC)
+    typer.echo(f"agent {agent} revoked")

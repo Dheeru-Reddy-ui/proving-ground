@@ -38,11 +38,11 @@ from pg_db.models import (
 )
 from pg_db.session import session_scope
 from pg_db.sync import sync_specs_and_bugs
-from pg_generator.llm import LLMError, LLMResponse
+from pg_generator.llm import LLMError
 from pg_worker.handlers import WorkerContext
 from pg_worker.loop import WorkerLoop
 from pg_worker.settings import WorkerSettings
-from tests.integration.fakes import Clock, run_result
+from tests.integration.fakes import CODES, GOOD, Clock, FakeLLM, reply, run_result
 
 ROOT = Path(__file__).resolve().parents[2]
 SHA = "f" * 64
@@ -51,64 +51,6 @@ MANIFEST_SHA = hashlib.sha256((ROOT / "pg_sdk/manifest.json").read_bytes()).hexd
 SPEC_IDS = spec_ids_from_markdown(
     p.read_text(encoding="utf-8") for p in (ROOT / "specs").glob("*.md")
 )
-GOOD = (ROOT / "suites/accepted/test_buy_character_unlock_and_select_c13.py").read_text(
-    encoding="utf-8"
-)
-GOOD = "\n".join(line for line in GOOD.splitlines() if not line.startswith("# "))
-OTHER_SPEC = GOOD.replace('"STORE-5", "STORE-7", "STORE-10"', '"STORE-2"').replace(
-    "def test_buy_character_unlock_and_select", "def test_buy_raccoon_other_spec"
-)
-HALLUCINATED = GOOD.replace(
-    'res = game.store.characters.buy("Rubbish Raccoon")',
-    'res = game.store.characters.buy_everything("Rubbish Raccoon")',
-).replace("def test_buy_character_unlock_and_select", "def test_buy_everything")
-FLAKY = GOOD.replace("def test_buy_character_unlock_and_select", "def test_buy_flaky").replace(
-    '"STORE-5", "STORE-7", "STORE-10"', '"STORE-3"'
-)
-CODES = [GOOD, OTHER_SPEC, HALLUCINATED, FLAKY]
-
-
-def reply(codes: list[str]) -> str:
-    tests = []
-    for code in codes:
-        name = code.split("def ", 1)[1].split("(", 1)[0]
-        spec_ids = (
-            code.split("@pytest.mark.spec(", 1)[1].split(")", 1)[0].replace('"', "").split(", ")
-        )
-        tests.append(
-            {"name": name, "spec_ids": spec_ids, "intent": "buy a character", "code": code}
-        )
-    return json.dumps({"tests": tests})
-
-
-class FakeLLM:
-    provider = "fake"
-    model = "fake-model"
-    seed_supported = False
-
-    def __init__(
-        self, replies: list[str | LLMError], on_call: Callable[[], None] | None = None
-    ) -> None:
-        self.replies = list(replies)
-        self.prompts: list[str] = []
-        self.on_call = on_call
-
-    def complete(self, *, system: str, prompt: str, **_: Any) -> LLMResponse:
-        self.prompts.append(system + "\n" + prompt)
-        if self.on_call is not None:
-            self.on_call()
-        answer = self.replies.pop(0)
-        if isinstance(answer, LLMError):
-            raise answer
-        return LLMResponse(
-            text=answer,
-            model=self.model,
-            tokens_in=1200,
-            tokens_out=800,
-            latency_ms=7,
-            finish_reason="STOP",
-            attempts=1,
-        )
 
 
 @pytest.fixture(autouse=True)
@@ -343,7 +285,7 @@ def test_a_lost_lease_writes_only_the_paid_llm_call(engine: Engine, database_url
     def steal() -> None:  # the lease expires and another worker takes the job mid-call
         with session_scope(engine) as s:
             job = s.execute(select(Job).where(Job.type == "GENERATE")).scalar_one()
-            job.lease_token = "someone-else"  # noqa: S105 (not a credential)
+            job.lease_token = "someone-else"
 
     worker = make_worker(engine, database_url, clock, FakeLLM([reply(CODES)], on_call=steal))
     validate(engine, clock)

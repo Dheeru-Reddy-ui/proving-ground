@@ -10,6 +10,7 @@ from typing import IO
 
 DEFAULT_TIMEOUT_S = 15.0
 LAUNCH_TIMEOUT_S = 60.0
+INSTALL_TIMEOUT_S = 300.0
 
 
 class AdbError(RuntimeError):
@@ -95,6 +96,10 @@ class Adb:
         output = self.run("shell", "sha256sum", paths[0], serial=serial, timeout_s=60).stdout
         digest = output.split()[0] if output.split() else ""
         return digest if len(digest) == 64 else None
+
+    def install(self, apk: Path, serial: str | None) -> AdbResult:
+        """`adb install -r`: install the APK, replacing the existing app and keeping its data."""
+        return self.run("install", "-r", str(apk), serial=serial, timeout_s=INSTALL_TIMEOUT_S)
 
     def force_stop(self, package: str, serial: str | None) -> AdbResult:
         """Stop the app without touching its data (a player closing the game)."""

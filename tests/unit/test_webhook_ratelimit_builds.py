@@ -15,7 +15,7 @@ from pg_core.builds import (
 from pg_core.ratelimit import Limit, take
 from pg_core.webhook import WebhookCheck, signature, verify
 
-SECRET = "s3cret-for-tests"  # noqa: S105 (a test value, not a credential)
+SECRET = "s3cret-for-tests"
 BODY = b'{"sha256": "abc"}'
 NOW = 1_791_460_800.0  # 2026-10-08 12:00 UTC
 SHA = "a" * 64
