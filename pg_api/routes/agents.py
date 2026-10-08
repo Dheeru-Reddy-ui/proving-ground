@@ -99,6 +99,9 @@ def claim(body: ClaimIn, request: Request, state: State) -> ClaimedJob | Respons
         types = [t for t in body.types if t in DEVICE_JOB_TYPES]
         if not types:
             raise ApiError(422, "invalid_request", "agents claim INSTALL_BUILD and RUN_TEST only")
+        # Reap here as well as in the worker, so a crashed agent's job comes back even when no
+        # worker is running.
+        pipeline.expire_leases(s, now)
         concurrency = body.capabilities.get("max_concurrency", 1)
         max_concurrency = concurrency if isinstance(concurrency, int) and concurrency >= 1 else 1
         job = queue.claim(

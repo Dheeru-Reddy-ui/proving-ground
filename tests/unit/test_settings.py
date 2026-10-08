@@ -9,6 +9,7 @@ import pytest
 
 from pg_api.settings import ApiSettings
 from pg_cli.settings import Settings
+from pg_worker.settings import WorkerSettings
 
 
 def example_keys() -> set[str]:
@@ -21,7 +22,7 @@ def example_keys() -> set[str]:
 
 
 def test_env_example_documents_every_setting_and_nothing_else() -> None:
-    fields = {*Settings.model_fields, *ApiSettings.model_fields}
+    fields = {*Settings.model_fields, *ApiSettings.model_fields, *WorkerSettings.model_fields}
     assert example_keys() == {name.upper() for name in fields}
 
 

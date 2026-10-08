@@ -261,3 +261,16 @@ def of_validation(session: Session, validation_id: int) -> list[Job]:
 def counts_by_status(session: Session) -> dict[str, int]:
     rows = session.execute(select(Job.status, func.count()).group_by(Job.status)).all()
     return {str(status): int(count) for status, count in rows}
+
+
+def defer(job: Job, token: str, *, until: datetime, reason: str, now: datetime) -> bool:
+    """Put a leased job back until `until` without counting the attempt (e.g. the daily LLM
+    budget is spent). False when the lease is not current."""
+    if check_lease(JobStatus(job.status), job.lease_token, token) is not LeaseCheck.OK:
+        return False
+    job.status = JobStatus.QUEUED.value
+    job.attempts = max(job.attempts - 1, 0)
+    job.run_after = until
+    job.last_error = reason[-MAX_ERROR_CHARS:]
+    _end_lease(job, now)
+    return True

@@ -342,3 +342,50 @@ class WebhookDelivery(Base):
     body_sha256: Mapped[str] = mapped_column(String(64))
     build_id: Mapped[int | None] = mapped_column(ForeignKey("builds.id"))
     received_at: Mapped[datetime] = _now()
+
+
+class LlmCall(Base):
+    """One model call (or a final failure after retries), for tracing and budgets. Holds no
+    prompt text and no secrets: the prompt is identified by version and hash."""
+
+    __tablename__ = "llm_calls"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    job_id: Mapped[int | None] = mapped_column(ForeignKey("jobs.id"))
+    generation_run_id: Mapped[int | None] = mapped_column(ForeignKey("generation_runs.id"))
+    build_id: Mapped[int | None] = mapped_column(ForeignKey("builds.id"))
+    provider: Mapped[str] = mapped_column(String(32))
+    model: Mapped[str] = mapped_column(String(128))
+    prompt_version: Mapped[str] = mapped_column(String(32))
+    prompt_hash: Mapped[str] = mapped_column(String(64))
+    call_index: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(16))
+    tokens_in: Mapped[int] = mapped_column(Integer, default=0)
+    tokens_out: Mapped[int] = mapped_column(Integer, default=0)
+    cost_usd: Mapped[Decimal] = mapped_column(Numeric(12, 6), default=Decimal(0))
+    latency_ms: Mapped[int] = mapped_column(Integer, default=0)
+    attempts: Mapped[int] = mapped_column(Integer, default=1)
+    finish_reason: Mapped[str | None] = mapped_column(String(64))
+    returned_tests: Mapped[int] = mapped_column(Integer, default=0)
+    candidate_ids: Mapped[list[int]] = mapped_column(ARRAY(BigInteger), default=list)
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint("status IN ('ok', 'error')", name="llm_calls_status"),
+        Index("llm_calls_created", "created_at"),
+        Index("llm_calls_build", "build_id"),
+    )
+
+
+class Worker(Base):
+    """A pg_worker process: its last loop and whether generation is switched on (for the
+    dashboard's System page)."""
+
+    __tablename__ = "workers"
+
+    name: Mapped[str] = mapped_column(String(64), primary_key=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    generation_enabled: Mapped[bool]
+    info: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)

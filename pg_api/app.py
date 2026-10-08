@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import math
 import time
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Sequence
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
@@ -38,7 +38,7 @@ def create_app(
     root: Path = Path(),
     now: Callable[[], datetime] = utc_now,
     clock: Callable[[], float] = time.monotonic,
-    lifespan_hooks: list[Callable[[AppState], Callable[[], None]]] | None = None,
+    lifespan_hooks: Sequence[Callable[[AppState], Callable[[], None]]] = (),
 ) -> FastAPI:
     """`lifespan_hooks` start background work (the embedded worker) and return its stop."""
     state = AppState(
@@ -51,7 +51,7 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        stops = [hook(state) for hook in lifespan_hooks or []]
+        stops = [hook(state) for hook in lifespan_hooks]
         try:
             yield
         finally:
@@ -118,7 +118,13 @@ def _body_limit(settings: ApiSettings, storage: Storage) -> int:
 
 
 def app_from_env() -> FastAPI:
-    """Production factory: validated settings, JSON logs."""
+    """Production factory: validated settings, JSON logs, and the embedded worker when
+    PG_EMBEDDED_WORKER=true (ADR-0010)."""
     settings = load_settings()
     logs.configure()
-    return create_app(settings)
+    hooks: list[Callable[[AppState], Callable[[], None]]] = []
+    if settings.pg_embedded_worker:
+        from pg_worker.runtime import embedded_worker
+
+        hooks.append(embedded_worker)
+    return create_app(settings, lifespan_hooks=hooks)

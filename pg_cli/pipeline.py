@@ -29,7 +29,6 @@ from pg_core.gates.base import Execution as GateExecution
 from pg_core.gates.base import Outcome
 from pg_core.gates.runs import (
     BugRef,
-    SuiteEntry,
     check_cost,
     check_detection,
     check_determinism,
@@ -41,7 +40,8 @@ from pg_core.gates.static import StaticReport, check_static, spec_ids_from_markd
 from pg_core.spike import build_tag
 from pg_core.trust import Decision, Evidence, decide_batch
 from pg_db import repo, sync
-from pg_db.models import Bug, Build, Candidate, GenerationRun, Kill, SuiteTest
+from pg_db.models import Bug, Build, Candidate, GenerationRun, SuiteTest
+from pg_db.scoring import suite_entries
 from pg_db.session import make_engine, session_scope
 from pg_generator.generate import call_log, generate
 from pg_generator.llm import Rates, make_client
@@ -337,29 +337,6 @@ def prove_subject(
 
 def dev_bug_refs() -> list[BugRef]:
     return [BugRef(id=b.id, flag=b.flag, pages=b.pages) for b in load_catalog(Path()).dev]
-
-
-def suite_entries(session: Session, exclude_run: int | None = None) -> list[SuiteEntry]:
-    """Active suite tests with the dev bugs they killed in their latest proving run."""
-    codes = {b.id: b.code for b in session.execute(select(Bug)).scalars()}
-    entries = []
-    for test in repo.active_suite_tests(session):
-        if test.accepted_from_candidate_id is not None:
-            cand = session.get(Candidate, test.accepted_from_candidate_id)
-            if cand is not None and cand.generation_run_id == exclude_run:
-                continue
-            kills = session.execute(
-                select(Kill).where(Kill.candidate_id == test.accepted_from_candidate_id)
-            ).scalars()
-        else:
-            kills = session.execute(select(Kill).where(Kill.suite_test_id == test.id)).scalars()
-        latest: dict[int, Kill] = {}
-        for kill in kills:
-            if kill.bug_id not in latest or kill.id > latest[kill.bug_id].id:
-                latest[kill.bug_id] = kill
-        killed = frozenset(codes[k.bug_id] for k in latest.values() if k.killed)
-        entries.append(SuiteEntry(name=test.path, kills=killed, spec_ids=frozenset(test.spec_ids)))
-    return entries
 
 
 # --- commands -----------------------------------------------------------------------------

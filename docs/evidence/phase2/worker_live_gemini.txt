@@ -1,0 +1,20 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, jobs and validations (Phase 2, ADR-0006). Additive only: new tables and nullable columns.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, agents, tokens and webhook deliveries (Phase 2, M2.2). Additive only.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, llm_calls and workers (Phase 2, M2.3). Additive only.
+2026-10-08 18:24:14 [info     ] job_started                    job_id=2 job_type=GENERATE key=validation:1:generate:store
+2026-10-08 18:24:20 [info     ] generate_started               feature=store generation_run_id=1 job_id=2 job_type=GENERATE model=gemini-3.5-flash n=2
+2026-10-08 18:24:48 [info     ] generate_done                  candidates=2 generation_run_id=1 job_id=2 job_type=GENERATE status=succeeded
+handled: True
+2026-10-08 18:24:48 [info     ] job_started                    job_id=3 job_type=SCORE key=validation:1:score-static:1
+2026-10-08 18:24:48 [info     ] score_done                     g1_passed=2 g1_rejected=0 generation_run_id=1 job_id=3 job_type=SCORE stage=static
+handled: True
+generation run: status=succeeded provider=gemini model=gemini-3.5-flash prompt=generate_tests_v2 tokens=4845+8553 cost_usd=0.000000
+  candidate idx=0 test_store_power_up_purchase_from_main_menu spec_ids=['STORE-1', 'STORE-2', 'STORE-3', 'STORE-5', 'STORE-6', 'STORE-11'] G1=pass pages=['app', 'main_menu', 'player', 'setup', 'store']
+  candidate idx=1 test_store_character_purchase_and_affordability spec_ids=['STORE-1', 'STORE-4', 'STORE-7', 'STORE-8', 'STORE-9', 'STORE-10'] G1=pass pages=['game_over', 'main_menu', 'missions', 'run', 'setup', 'store']
+  llm_call status=ok tokens=4845+8553 latency_ms=27858 attempts=1 candidate_ids=2
+jobs: [('GENERATE', 'succeeded'), ('INSTALL_BUILD', 'queued'), ('SCORE', 'succeeded')]
+validation: running
+throwaway database dropped

@@ -39,6 +39,17 @@ app.command("reject")(reject_cmd)
 app.command("report")(report_cmd)
 app.add_typer(api_app, name="api")
 
+worker_app = typer.Typer(help="The generation and scoring worker (Phase 2).", no_args_is_help=True)
+app.add_typer(worker_app, name="worker")
+
+
+@worker_app.command("run")
+def worker_run() -> None:
+    """Run the worker loop until Ctrl+C (GENERATE and SCORE jobs, lease reaper)."""
+    from pg_worker.runtime import run_standalone
+
+    run_standalone()
+
 
 @app.callback()
 def main() -> None:
