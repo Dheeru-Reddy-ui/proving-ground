@@ -20,6 +20,12 @@ Started 2026-10-08. Plan approved by Dheeru on 2026-10-08 with every recommended
 - **Cloud resources:** Dheeru creates the Supabase project and the Render web service and enters the secrets. Secret locations as approved: `DATABASE_URL` in `.env`, Render env and a GitHub Actions secret; the Supabase service key in Render env only; agent and CLI tokens stored hashed on the server.
 - **Second build:** Dheeru makes a no-change rebuild of the hooked game (new sha256) so one build can be registered through the webhook path and one through the CLI path.
 
+### Milestones
+
+| Milestone | State | Evidence |
+|---|---|---|
+| M2.1 Jobs, leasing, orchestrator | Done (local): `jobs` and `validations` tables (migration 0002, additive); claim with `FOR UPDATE SKIP LOCKED` + per-owner `max_concurrency`; lease tokens, heartbeats, reaper, dead jobs, admin retry; idempotent enqueue and completion; pure DAG planner that reuses the Phase 1 gate rules; every job event advances its validation in the same transaction. Integration tests: 6 concurrent claimers over 40 jobs never share one; a locked job is skipped, not waited for; a killed agent's job is retried and stored once; infra every attempt → dead with the error; a whole validation runs with a fake worker and agent and never schedules a holdout or irrelevant bug. Unit: 135 parity cases show the planner makes the same runs as `pg prove` | `pg_core/jobs.py`, `pg_core/orchestrator.py`, `pg_db/jobs.py`, `pg_db/pipeline.py`; `tests/integration/test_jobs_queue.py`, `test_pipeline.py`; ADR-0006 |
+
 ## Phase 1: Core trust loop
 
 Started 2026-10-07. Plan approved by Dheeru on 2026-10-07. **Closed 2026-10-08** with one exit-gate item deferred to Phase 4 (human baseline, ADR-0009).
