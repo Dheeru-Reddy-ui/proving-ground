@@ -58,7 +58,15 @@ class RequestIdMiddleware:
                     path=scope["path"],
                     status=status,
                     ms=round((time.perf_counter() - started) * 1000, 1),
+                    forwarded=forwarded_count(scope),
                 )
+
+
+def forwarded_count(scope: Scope) -> int:
+    """How many entries X-Forwarded-For carries (never the addresses). Logged so the number of
+    proxies in front of the API can be measured, which sets `PG_TRUSTED_PROXY_HOPS`."""
+    forwarded = Headers(scope=scope).get("x-forwarded-for", "")
+    return len([e for e in forwarded.split(",") if e.strip()])
 
 
 def client_ip(scope: Scope, trusted_proxy_hops: int) -> str:

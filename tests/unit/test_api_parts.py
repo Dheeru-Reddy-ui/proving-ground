@@ -10,7 +10,7 @@ from typing import Any
 import httpx
 import pytest
 
-from pg_api.middleware import client_ip, route_class
+from pg_api.middleware import client_ip, forwarded_count, route_class
 from pg_api.settings import ApiSettings, ConfigError, load_settings
 from pg_api.storage import LocalStorage, StorageError, SupabaseStorage, check_key
 from pg_api.views import scrub
@@ -36,6 +36,15 @@ def scope(peer: str = "10.0.0.9", xff: str | None = None) -> dict[str, Any]:
 )
 def test_client_ip(hops: int, xff: str | None, expected: str) -> None:
     assert client_ip(scope(xff=xff), hops) == expected
+
+
+@pytest.mark.parametrize(
+    ("xff", "expected"),
+    [(None, 0), ("", 0), ("203.0.113.9", 1), ("1.1.1.1, 203.0.113.9", 2), ("a, , b,", 2)],
+)
+def test_forwarded_count(xff: str | None, expected: int) -> None:
+    headers = [(b"x-forwarded-for", xff.encode())] if xff is not None else []
+    assert forwarded_count({"type": "http", "headers": headers}) == expected
 
 
 def test_client_ip_without_a_peer() -> None:
