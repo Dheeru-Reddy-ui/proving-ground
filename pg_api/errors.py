@@ -15,6 +15,7 @@ from sqlalchemy.exc import InterfaceError, OperationalError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from pg_api import logs
+from pg_db.diagnostics import db_reason
 
 log = logs.get("pg_api.errors")
 
@@ -82,7 +83,7 @@ def install(app: FastAPI) -> None:
     @app.exception_handler(OperationalError)
     @app.exception_handler(InterfaceError)
     async def database_down(request: Request, exc: Exception) -> JSONResponse:
-        log.warning("database_unavailable", error=type(exc).__name__)
+        log.warning("database_unavailable", error=type(exc).__name__, reason=db_reason(exc))
         return respond(request, 503, "database_unavailable", "the database is unavailable")
 
     @app.exception_handler(Exception)

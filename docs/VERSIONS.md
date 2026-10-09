@@ -78,7 +78,18 @@ The adb serial is kept in the local `.env` (`PG_ADB_SERIAL`), not in the repo.
 
 ## Game build
 
-Current build: **build 2, with the seeded-bug hooks and telemetry** (M1.1), built by Dheeru on 2026-10-08 (`Build Finished, Result: Success.` at 11:47 local time) and installed with `adb install -r` the same day.
+**Build 3: a no-change rebuild of build 2** (Phase 2, for the webhook registration path), built by Dheeru on 2026-10-09 (16:05 local) from the same project and settings. Not installed by hand: the agent installs it through an INSTALL_BUILD job.
+
+| Field | Value |
+|---|---|
+| APK | `C:\Users\dheer\pg_game\Builds\TrashCat.apk`, 80,909,977 bytes (the same size as build 2) |
+| APK sha256 | `54cd88ab10aa4bd6a12fe35cfb6ffb77bcdbe7f1df875dec2c6d52c0a2f9449a` (build tag `54cd88ab10aa`) |
+| Checked | `aapt dump badging`: identical to build 2 on every line checked: package `com.DefaultCompany.TrashCat`, **versionCode 350, versionName 1.0** (the planned version bump did not take effect; the sha256 still differs because Unity builds are not byte-identical), `arm64-v8a` only, debuggable, INTERNET, launch activity `com.unity3d.player.UnityPlayerActivity` |
+| Locators | uses `87d396162a05` (same UI); no new locator map |
+
+Build 2's APK is kept at `artifacts/apks/TrashCat_build2_87d396162a05.apk` (gitignored; sha256 checked) because the rebuild overwrote `TrashCat.apk`.
+
+Build 2, **with the seeded-bug hooks and telemetry** (M1.1), still installed on the phone, built by Dheeru on 2026-10-08 (`Build Finished, Result: Success.` at 11:47 local time) and installed with `adb install -r` the same day.
 
 | Field | Value |
 |---|---|

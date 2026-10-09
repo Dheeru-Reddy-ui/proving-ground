@@ -14,9 +14,12 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from pg_api import logs
 from pg_api.state import AppState, app_state
+from pg_db.diagnostics import db_reason
 
 router = APIRouter(tags=["health"])
+log = logs.get("pg_api.health")
 State = Annotated[AppState, Depends(app_state)]
 
 
@@ -44,6 +47,7 @@ def readyz(state: State) -> JSONResponse:
         checks["migrations"] = "ok" if version == head else f"at {version}, code expects {head}"
     except SQLAlchemyError as exc:
         checks["database"] = f"unavailable ({type(exc).__name__})"
+        log.warning("readyz_database_unavailable", reason=db_reason(exc))
     if state.worker_alive is not None:
         checks["worker"] = "ok" if state.worker_alive() else "stopped"
     ready = all(v == "ok" for v in checks.values()) and "migrations" in checks

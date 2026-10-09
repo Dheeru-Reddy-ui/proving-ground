@@ -54,7 +54,7 @@ jobs:
           PG_API_URL: ${{ vars.PG_API_URL }}
         run: |
           for i in $(seq 1 40); do
-            if curl -sf --max-time 30 "$PG_API_URL/readyz"; then exit 0; fi
+            if curl -sf --max-time 30 "${PG_API_URL%/}/readyz"; then exit 0; fi
             sleep 15
           done
           echo "the service did not become ready" && exit 1

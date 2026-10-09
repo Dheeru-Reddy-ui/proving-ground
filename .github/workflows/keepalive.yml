@@ -23,7 +23,7 @@ jobs:
           PG_API_URL: ${{ vars.PG_API_URL }}
         run: |
           for i in 1 2 3 4 5; do
-            if curl -sf --max-time 120 "$PG_API_URL/readyz"; then exit 0; fi
+            if curl -sf --max-time 120 "${PG_API_URL%/}/readyz"; then exit 0; fi
             sleep 30
           done
           exit 1

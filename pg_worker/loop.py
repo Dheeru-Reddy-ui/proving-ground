@@ -15,6 +15,7 @@ from pg_api import logs
 from pg_core.jobs import JobType, LeaseCheck
 from pg_db import jobs as queue
 from pg_db import pipeline
+from pg_db.diagnostics import db_reason
 from pg_db.models import Worker
 from pg_db.session import session_scope
 from pg_worker.alerts import Poster, raise_alerts, webhook_poster
@@ -183,8 +184,10 @@ class WorkerLoop:
             try:
                 worked = self.run_once()
                 backoff = self.ctx.settings.pg_worker_poll_s
-            except OperationalError:
-                log.warning("worker_db_unavailable", retry_in_s=round(backoff, 1))
+            except OperationalError as exc:
+                log.warning(
+                    "worker_db_unavailable", retry_in_s=round(backoff, 1), reason=db_reason(exc)
+                )
                 worked = False
                 backoff = min(MAX_IDLE_BACKOFF_S, backoff * 2) + self.ctx.jitter()
             if not worked:

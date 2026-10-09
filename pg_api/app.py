@@ -25,6 +25,7 @@ from pg_api.storage import LocalStorage, Storage
 from pg_core.builds import PART_MAX_BYTES
 from pg_core.ratelimit import Limit
 from pg_dashboard import mount_dashboard
+from pg_db.diagnostics import db_target
 from pg_db.session import make_engine
 
 SESSION_MAX_AGE_S = 8 * 3600
@@ -124,6 +125,9 @@ def app_from_env() -> FastAPI:
     PG_EMBEDDED_WORKER=true (ADR-0010)."""
     settings = load_settings()
     logs.configure()
+    logs.get("pg_api").info(
+        "database_target", **db_target(settings.database_url.get_secret_value())
+    )
     hooks: list[Callable[[AppState], Callable[[], None]]] = []
     if settings.pg_embedded_worker:
         from pg_worker.runtime import embedded_worker
