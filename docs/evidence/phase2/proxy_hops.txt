@@ -1,0 +1,25 @@
+Proxies in front of the API on Render: how many X-Forwarded-For entries reach the app
+Measured 2026-10-09 17:30-17:31 UTC against https://proving-ground.onrender.com, deploy
+dep-db4i7eqd0e5s73celqtg (commit cbd6d95, which logs `forwarded` = the entry count, never the
+addresses). Requests sent from Dheeru's PC with curl to /healthz, each with its own X-Request-ID;
+lines below are the app's access log as returned by Render's log API (fields trimmed).
+
+no X-Forwarded-For sent by the client:
+  request_id=xffprobe-plain-173055     forwarded=3
+  request_id=xffprobe-repeat-1-173115  forwarded=3
+  request_id=xffprobe-repeat-2-173118  forwarded=3
+  request_id=xffprobe-repeat-3-173120  forwarded=3
+  request_id=xffprobe-repeat-4-173123  forwarded=3
+  request_id=xffprobe-repeat-5-173125  forwarded=3
+  request_id=xffprobe-repeat-6-173128  forwarded=3
+
+client sent "X-Forwarded-For: 198.51.100.7" (a documentation address):
+  request_id=xffprobe-spoof-173055     forwarded=4
+
+Reading: Render's proxies append to the header (the spoofed entry is kept and three are added),
+so the client's own address is the 3rd entry from the right and anything further left is
+client-controlled. PG_TRUSTED_PROXY_HOPS=3 (pg_api/middleware.py client_ip).
+
+Caveat: measured from one client network on one day. If Render's chain ever shrinks, a request
+with fewer than 3 entries falls back to the peer address (stricter, never looser); a spoofed
+entry could then be read as the client, so re-measure after Render changes its edge.

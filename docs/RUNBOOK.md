@@ -48,6 +48,7 @@ Run these two in Git Bash (PowerShell has no `<` redirection). `pg_dump --data-o
    | `PG_WEBHOOK_SECRET` | 32+ random characters (also a GitHub secret) |
    | `PG_PUBLIC_DEMO` | `true` |
    | `PG_SECURE_COOKIES` | `true` |
+   | `PG_TRUSTED_PROXY_HOPS` | `3` (measured: `docs/evidence/phase2/proxy_hops.txt`) |
    | `PG_PUBLIC_BASE_URL` | `https://<service>.onrender.com` |
    | `PG_STORAGE_BACKEND` | `supabase` |
    | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | from step 1 |

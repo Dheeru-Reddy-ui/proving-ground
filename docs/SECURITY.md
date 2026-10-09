@@ -98,6 +98,6 @@ A generated test could try to read files, open sockets, start processes or exfil
 ## Known gaps
 
 - The rate limiter keeps its state in memory: one Render instance is fine; several would each allow the full rate (ADR-0010).
-- How many proxies Render puts in `X-Forwarded-For` is not yet measured (`PG_TRUSTED_PROXY_HOPS`); until it is, rate limits key on the proxy's address.
+- Render's proxies add three `X-Forwarded-For` entries and keep whatever the client sent (measured 2026-10-09, `docs/evidence/phase2/proxy_hops.txt`), so `PG_TRUSTED_PROXY_HOPS=3`. While it is 0, rate limits key on the proxy's address and all clients share one bucket. If Render's chain changes, re-measure: the access log's `forwarded` field counts the entries.
 - The runner is not isolated from Dheeru's user account (threat 1).
 - AltTester Desktop's server is unencrypted and listens on all interfaces; keep the PC on a trusted network and allow it through the firewall for private networks only (ADR-0002).
