@@ -423,6 +423,33 @@ def test_a_lost_lease_during_an_upload_still_stops_the_job(tmp_path: Path) -> No
     assert not [c for c in api.calls if c[0] == "complete"]
 
 
+def test_large_text_artifacts_are_uploaded_gzipped_and_kept_locally(tmp_path: Path) -> None:
+    import gzip
+
+    from pg_agent.executor import packed
+
+    logcat = tmp_path / "attempt_1" / "logcat_0.txt"
+    logcat.parent.mkdir()
+    text_body = "".join(f"10-09 17:42:{i % 60:02d} I Unity : line {i}\n" for i in range(40_000))
+    body = text_body.encode()
+    logcat.write_bytes(body)
+    small = tmp_path / "attempt_1" / "junit.xml"
+    small.write_text("<testsuites/>")
+    shot = tmp_path / "attempt_1" / "failure.png"
+    shot.write_bytes(b"0" * 100_000)
+
+    out = tmp_path / "attempt_1.packed"
+    name, upload = packed(logcat, out)
+    assert name == "logcat_0.txt.gz"
+    assert upload.parent == out
+    assert upload.stat().st_size < logcat.stat().st_size / 5
+    digest = hashlib.sha256(body).hexdigest()  # compare digests: a 1.6 MB diff would never end
+    assert hashlib.sha256(gzip.decompress(upload.read_bytes())).hexdigest() == digest
+    assert hashlib.sha256(logcat.read_bytes()).hexdigest() == digest  # the local copy is untouched
+    assert packed(small, out) == ("junit.xml", small)  # small text: as it is
+    assert packed(shot, out) == ("failure.png", shot)  # images: never
+
+
 def test_artifact_names_are_safe() -> None:
     assert artifact_name(Path("logcat 0.txt")) == "logcat_0.txt"
     assert artifact_name(Path(".hidden")) == "a.hidden"

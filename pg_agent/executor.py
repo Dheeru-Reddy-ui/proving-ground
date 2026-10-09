@@ -13,6 +13,7 @@ result means (ADR-0006).
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 import re
@@ -38,6 +39,8 @@ LOCATORS = Path("pg_sdk/locators")
 SPECS = Path("specs")
 MAX_ARTIFACT_BYTES = 5 * 1024 * 1024
 MAX_ARTIFACTS_PER_ATTEMPT = 20
+COMPRESS_SUFFIXES = frozenset({".txt", ".log", ".jsonl", ".json", ".xml"})
+COMPRESS_OVER_BYTES = 64 * 1024
 UPLOAD_WORKERS = 4  # the API client's connection pool is thread-safe (httpcore locks it)
 _UNSAFE = re.compile(r"[^A-Za-z0-9._-]")
 
@@ -56,6 +59,20 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: handle.read(1 << 20), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def packed(path: Path, out_dir: Path) -> tuple[str, Path]:
+    """The name and file to upload for an artifact. Large text files (logcat runs to a megabyte
+    per test and compresses about tenfold) are gzipped into `out_dir` and uploaded as `<name>.gz`;
+    the local file is left as it is."""
+    name = artifact_name(path)
+    if path.suffix.lower() not in COMPRESS_SUFFIXES or path.stat().st_size <= COMPRESS_OVER_BYTES:
+        return name, path
+    out_dir.mkdir(parents=True, exist_ok=True)
+    target = out_dir / f"{name}.gz"
+    with path.open("rb") as source, gzip.open(target, "wb", compresslevel=6) as sink:
+        shutil.copyfileobj(source, sink)
+    return f"{name}.gz", target
 
 
 def artifact_name(path: Path) -> str:
@@ -227,9 +244,9 @@ class Executor:
         for path in files:
             if len(chosen) >= MAX_ARTIFACTS_PER_ATTEMPT:
                 break
-            name = artifact_name(path)
-            if name not in chosen and path.stat().st_size <= MAX_ARTIFACT_BYTES:
-                chosen[name] = path
+            name, upload_path = packed(path, directory.with_name(f"{directory.name}.packed"))
+            if name not in chosen and upload_path.stat().st_size <= MAX_ARTIFACT_BYTES:
+                chosen[name] = upload_path
 
         def upload(name: str, path: Path) -> str | None:
             try:
