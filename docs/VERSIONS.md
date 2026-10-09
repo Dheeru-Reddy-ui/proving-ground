@@ -86,6 +86,7 @@ The adb serial is kept in the local `.env` (`PG_ADB_SERIAL`), not in the repo.
 | APK sha256 | `54cd88ab10aa4bd6a12fe35cfb6ffb77bcdbe7f1df875dec2c6d52c0a2f9449a` (build tag `54cd88ab10aa`) |
 | Checked | `aapt dump badging`: identical to build 2 on every line checked: package `com.DefaultCompany.TrashCat`, **versionCode 350, versionName 1.0** (the planned version bump did not take effect; the sha256 still differs because Unity builds are not byte-identical), `arm64-v8a` only, debuggable, INTERNET, launch activity `com.unity3d.player.UnityPlayerActivity` |
 | Locators | uses `87d396162a05` (same UI); no new locator map |
+| Registered | through the signed webhook: GitHub release `build-3`, `release.yml` run 37942986479 (attempt 2), delivery `gh-37942986479`, `HTTP 200` on 2026-10-09 15:06 UTC. **Control-plane build id 4**, `source: webhook`, APK attached. Id 3 does not exist: registration is an `INSERT … ON CONFLICT DO NOTHING`, which uses up a sequence value even when it inserts nothing, and re-registering build 2 to attach its APK did that. The first attempt failed because the release asset was named `build-3.json`; `release.yml` now accepts any one `build*.json` (53ded9c). |
 
 Build 2's APK is kept at `artifacts/apks/TrashCat_build2_87d396162a05.apk` (gitignored; sha256 checked) because the rebuild overwrote `TrashCat.apk`.
 
