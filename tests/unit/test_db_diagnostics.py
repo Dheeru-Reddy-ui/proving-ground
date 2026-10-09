@@ -46,3 +46,20 @@ def test_the_target_names_the_host_but_not_the_password() -> None:
     assert direct["supabase_direct"] is True
     assert "pw" not in str(direct.values())
     assert db_target("::not a url::") == {"parse_error": True}
+
+
+def test_an_unencoded_at_sign_never_leaks_the_password_tail() -> None:
+    exc = operational(
+        "failed to resolve host '4959@aws-0-ap-south-1.pooler.supabase.com': "
+        "[Errno -2] Name or service not known"
+    )
+    reason = db_reason(exc)
+    assert "4959" not in reason
+    assert "pooler.supabase.com" not in reason
+    assert "Name or service not known" in reason
+    assert "unencoded '@'" in reason
+    target = db_target(
+        "postgresql://postgres.ref:pa@4959@aws-0-ap-south-1.pooler.supabase.com:5432/postgres"
+    )
+    assert target["host_has_at_sign"] is True
+    assert "4959" not in str(target)
