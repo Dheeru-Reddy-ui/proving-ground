@@ -18,6 +18,7 @@ import json
 import re
 import shutil
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -37,6 +38,7 @@ LOCATORS = Path("pg_sdk/locators")
 SPECS = Path("specs")
 MAX_ARTIFACT_BYTES = 5 * 1024 * 1024
 MAX_ARTIFACTS_PER_ATTEMPT = 20
+UPLOAD_WORKERS = 4  # the API client's connection pool is thread-safe (httpcore locks it)
 _UNSAFE = re.compile(r"[^A-Za-z0-9._-]")
 
 
@@ -216,17 +218,20 @@ class Executor:
         )
 
     def upload_artifacts(self, job: ClaimedJob, attempt: Attempt) -> dict[str, str]:
-        """Upload an attempt's files (screenshots, logs, JUnit, results). A failed upload loses
-        that file, not the run."""
-        keys: dict[str, str] = {}
+        """Upload an attempt's files (screenshots, logs, JUnit, results), a few at a time: each
+        file costs a signing call to the API and a transfer to storage, and one after another
+        they took several seconds per run. A failed upload loses that file, not the run."""
         directory = Path(attempt.artifact_dir)
         files = sorted(f for f in directory.rglob("*") if f.is_file()) if directory.is_dir() else []
+        chosen: dict[str, Path] = {}
         for path in files:
-            if len(keys) >= MAX_ARTIFACTS_PER_ATTEMPT:
+            if len(chosen) >= MAX_ARTIFACTS_PER_ATTEMPT:
                 break
             name = artifact_name(path)
-            if name in keys or path.stat().st_size > MAX_ARTIFACT_BYTES:
-                continue
+            if name not in chosen and path.stat().st_size <= MAX_ARTIFACT_BYTES:
+                chosen[name] = path
+
+        def upload(name: str, path: Path) -> str | None:
             try:
                 target = self.api.upload_url(job.job_id, job.lease_token, attempt.attempt, name)
                 self.api.upload(target, path)
@@ -234,6 +239,9 @@ class Executor:
                 raise
             except (ApiError, Unreachable, OSError) as exc:
                 log.warning("artifact_not_uploaded", name=name, error=str(exc))
-                continue
-            keys[name] = str(target["key"])
-        return keys
+                return None
+            return str(target["key"])
+
+        with ThreadPoolExecutor(max_workers=UPLOAD_WORKERS) as pool:
+            futures = {name: pool.submit(upload, name, path) for name, path in chosen.items()}
+        return {name: key for name, f in futures.items() if (key := f.result()) is not None}

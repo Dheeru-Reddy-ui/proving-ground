@@ -7,6 +7,8 @@ import hashlib
 import json
 import subprocess
 import sys
+import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -372,6 +374,53 @@ def test_a_run_reports_every_attempt_with_its_artifacts(tmp_path: Path) -> None:
     (result,) = [c[1] for c in api.calls if c[0] == "complete"]
     assert [a["outcome"] for a in result["attempts"]] == ["infra", "assertion"]
     assert set(result["attempts"][1]["artifacts"]) == {"pytest_output.txt", "failure.png"}
+
+
+class SlowUploadApi(FakeApi):
+    """Uploads take a while; records how many overlap and fails or loses the lease on request."""
+
+    def __init__(self, fail: str | None = None, lose_lease: bool = False) -> None:
+        super().__init__()
+        self.active = 0
+        self.peak = 0
+        self.lock = threading.Lock()
+        self.fail_name = fail
+        self.lose_lease = lose_lease
+
+    def upload(self, target: dict[str, Any], path: Path) -> None:
+        with self.lock:
+            self.active += 1
+            self.peak = max(self.peak, self.active)
+        try:
+            time.sleep(0.05)
+            if self.lose_lease:
+                raise LeaseLost(409, "lease_lost", "the lease expired")
+            if self.fail_name and str(target["key"]).endswith(self.fail_name):
+                raise Unreachable("storage down")
+            super().upload(target, path)
+        finally:
+            with self.lock:
+                self.active -= 1
+
+
+def test_artifacts_upload_concurrently_and_a_failed_one_loses_only_that_file(
+    tmp_path: Path,
+) -> None:
+    api = SlowUploadApi(fail="failure.png")
+    executor = make_executor(tmp_path, api, FakeAdb(), [Outcome.PASSED])
+    assert executor.handle(job()) is Outcome.PASSED
+    assert api.peak > 1
+    (result,) = [c[1] for c in api.calls if c[0] == "complete"]
+    assert result["attempts"][0]["artifacts"] == {
+        "pytest_output.txt": "artifacts/job-7/try-1/a1/pytest_output.txt"
+    }
+
+
+def test_a_lost_lease_during_an_upload_still_stops_the_job(tmp_path: Path) -> None:
+    api = SlowUploadApi(lose_lease=True)
+    executor = make_executor(tmp_path, api, FakeAdb(), [Outcome.PASSED])
+    executor.handle(job())
+    assert not [c for c in api.calls if c[0] == "complete"]
 
 
 def test_artifact_names_are_safe() -> None:
