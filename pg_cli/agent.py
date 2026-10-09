@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -54,19 +55,36 @@ def set_token() -> None:
     typer.echo(f"token updated in {path}")
 
 
-def health_check(settings: Settings) -> Any:
-    from pg_agent.loop import Health
+def health_check(
+    settings: Settings,
+    deps: Any = None,
+    restore_reverse: Callable[[], bool] | None = None,
+) -> Any:
+    """The agent's check before each claim: the device checks of `pg doctor`, never the app.
+
+    Full and quick checks are the same here. The app is not probed because between jobs the game
+    is not running (each test launches it from a reset), so "app connects" would always fail; a
+    launch failure inside a test is classified infra by the runner. A missing adb reverse forward
+    (a USB reconnect drops it) is restored first, as every test does when it starts
+    (`pg_sdk/pytest_plugin.py`).
+    """
+    from pg_agent.loop import Health, log
     from pg_cli.doctor import default_deps, run_doctor
     from pg_core.doctor import Status
+    from pg_runner.adb import Adb, AdbError
 
-    deps = default_deps()
+    doctor_deps = deps if deps is not None else default_deps()
+    port, serial = settings.pg_alttester_port, settings.pg_adb_serial
+    restore = restore_reverse or (lambda: Adb().ensure_reverse(port, serial))
 
     def check(full: bool) -> Health:
-        # Full and quick checks are the same here: the app is never probed, because between jobs
-        # the game is not running (each test launches it from a reset), so "app connects" would
-        # always fail. A launch failure inside a test is classified infra by the runner.
         del full
-        report = run_doctor(settings, deps, connect_app=False)
+        try:
+            if restore():
+                log.info("reverse_forward_restored", port=port)
+        except AdbError as exc:
+            log.warning("reverse_forward_not_restored", error=str(exc))  # the doctor says why
+        report = run_doctor(settings, doctor_deps, connect_app=False)
         checks = [
             {
                 "name": r.name,

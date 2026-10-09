@@ -465,3 +465,46 @@ def test_orphaned_runners_are_killed(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_claimed_job_payload_round_trip() -> None:
     assert json.loads(job().model_dump_json())["payload"]["run_group"] == "prove-1"
+
+
+# --- the health check behind `pg agent run` ------------------------------------------------------
+
+FORWARD = "UsbFfs tcp:13000 tcp:13000\n"
+
+
+def _agent_health(reverse_out: str, restore: Callable[[Any], bool]) -> tuple[Health, list[str]]:
+    from pg_cli.agent import health_check
+    from pg_cli.settings import Settings
+    from tests.unit.test_doctor_cli import FakeAdb, make_deps
+
+    adb = FakeAdb(reverse_out=reverse_out)
+    deps, probes = make_deps(adb)
+    settings = Settings(_env_file=None, pg_android_package="com.unity.trashdash")  # type: ignore[call-arg]
+    return health_check(settings, deps, lambda: restore(adb))(True), probes
+
+
+def test_agent_health_never_probes_the_app() -> None:
+    health, probes = _agent_health(FORWARD, lambda adb: False)
+    assert health.healthy
+    assert probes == []
+    assert {c["name"]: c["status"] for c in health.checks}["app connects"] == "SKIP"
+
+
+def test_agent_health_restores_a_dropped_reverse_forward_before_checking() -> None:
+    def restore(adb: Any) -> bool:
+        adb.reverse_out = FORWARD  # what `adb reverse tcp:13000 tcp:13000` does
+        return True
+
+    health, _ = _agent_health("", restore)
+    assert health.healthy
+
+
+def test_agent_health_reports_a_forward_that_cannot_be_restored() -> None:
+    from pg_runner.adb import AdbError
+
+    def restore(adb: Any) -> bool:
+        raise AdbError("could not create adb reverse tcp:13000: no devices")
+
+    health, _ = _agent_health("", restore)
+    assert not health.healthy
+    assert [c["name"] for c in health.checks if not c["ok"]] == ["reverse forward"]
