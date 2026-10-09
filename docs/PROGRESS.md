@@ -37,7 +37,7 @@ Started 2026-10-08. Plan approved by Dheeru on 2026-10-08 with every recommended
 
 | Item | State |
 |---|---|
-| Deployed API, worker and dashboard reachable; public demo shows a real build | ⏳ waits for the Supabase project and Render service (Dheeru). Everything runs locally; the image is built and smoke-tested |
+| Deployed API, worker and dashboard reachable; public demo shows a real build | ✅ 2026-10-09: https://proving-ground.onrender.com (Render Free, Singapore; Supabase Free, Mumbai session pooler). Migrations 0001-0005 run from the PC; the Phase 1 tables copied from the local database with matching row counts (builds 2, specs 58, bugs 16, generation runs 6, candidates 24, executions 169, kills 60, suite tests 1). `/readyz`: database, migrations and worker ok. The public build 2 page shows 1 accepted of 16, G2 14 of 15, 64.1 device minutes; run 5's matrix shows c13 killing SB02 2 of 2 |
 | A build registered through the webhook path and through the CLI path; full DAG completed by the Windows agent; verdict visible | ⏳ both registration paths rehearsed locally; the full DAG has run end to end over HTTP with a fake phone; the real phone run waits for the phone and the second APK |
 | All M2.7 failure-mode tests pass, with outputs saved | ⏳ 5 of 6; the live unplug drill waits for the phone |
 | Integration CI green; migrations run cleanly from empty | ✅ [integration run 37817875106](https://github.com/Dheeru-Reddy-ui/proving-ground/actions/runs/37817875106) on 2026-10-08: migrations up from empty, down to base and up again, `alembic check`, all integration tests, cloud image smoke test; `ci` green too |
