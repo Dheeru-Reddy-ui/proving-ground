@@ -79,6 +79,8 @@ A generated test could try to read files, open sockets, start processes or exfil
 - Secrets come only from the environment or `.env` (gitignored; `.env.example` lists every variable and is checked by a test).
 - The cloud image is built from an allow-list (`.dockerignore`): no `.env`, no artifacts, no device code, no AltTester driver. Checked in CI (`integration.yml`, job "cloud image").
 - Secrets are never logged: settings use `SecretStr`, error messages from storage never include headers, and the alert webhook URL is never printed.
+- Database connection failures are logged with libpq's reason so they can be fixed, never with the password: `user:password@` forms are masked, and any token containing `@` is redacted (`pg_db/diagnostics.py`).
+- **Incident, 2026-10-09:** the production database password contained an unencoded `@`, so the driver read the password's last characters as part of the host name, and the first version of those diagnostics logged that host to Render's logs (four characters of the password). The redaction above was deployed within minutes, and the password is being replaced with one of only URL-safe characters.
 - The test runner's scrubbed environment keeps secrets away from generated code.
 
 ### 8. Abuse and cost
