@@ -81,7 +81,7 @@ Run these two in Git Bash (PowerShell has no `<` redirection). `pg_dump --data-o
 ### 6. Register builds and validate
 
 - **CLI path:** `uv run pg build register --apk <apk> --label "<label>" --locator-tag 87d396162a05`
-- **Webhook path:** `uv run pg build upload --apk <apk> --label "<label>" --locator-tag 87d396162a05`, then create a GitHub release tagged `build-<n>` with the written `build.json` attached (never the APK); `release.yml` posts it, signed.
+- **Webhook path:** `uv run pg build upload --apk <apk> --label "<label>" --locator-tag 87d396162a05`, then create a GitHub release tagged `build-<n>` with the written `build.json` attached (any name matching `build*.json`, exactly one; never the APK); `release.yml` posts it, signed.
 - **Validate:** `uv run pg build validate --build <id> --feature store --feature run_and_gameover --n 8`, then watch it on the dashboard.
 
 ## Before any device work

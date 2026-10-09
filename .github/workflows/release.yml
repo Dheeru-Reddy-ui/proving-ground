@@ -3,7 +3,7 @@ name: release
 # Two kinds of release (ADR-0010):
 # - a code release, tag `v*`: build the image, run migrations against the production database,
 #   then call Render's deploy hook (auto-deploy is off, so code never runs ahead of its schema);
-# - a game build, a GitHub release tagged `build-*` with a `build.json` asset: post it to the
+# - a game build, a GitHub release tagged `build-*` with one `build*.json` asset: post it to the
 #   control plane's webhook, signed. The APK itself is never a release asset (public repo, Asset
 #   Store content); `pg build register` uploads it to private storage first.
 #
@@ -76,7 +76,16 @@ jobs:
       - name: Fetch build.json from the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release download "${{ github.event.release.tag_name }}" --pattern build.json
+          TAG: ${{ github.event.release.tag_name }}
+        # The asset may be named build.json or build-<n>.json; exactly one must match.
+        run: |
+          gh release download "$TAG" --pattern 'build*.json' --dir release-assets
+          shopt -s nullglob
+          files=(release-assets/build*.json)
+          if [ "${#files[@]}" -ne 1 ]; then
+            echo "expected one build*.json asset on $TAG, found ${#files[@]}" && exit 1
+          fi
+          mv "${files[0]}" build.json
 
       - name: Post the signed webhook
         env:
