@@ -62,7 +62,11 @@ def health_check(settings: Settings) -> Any:
     deps = default_deps()
 
     def check(full: bool) -> Health:
-        report = run_doctor(settings, deps, connect_app=full)
+        # Full and quick checks are the same here: the app is never probed, because between jobs
+        # the game is not running (each test launches it from a reset), so "app connects" would
+        # always fail. A launch failure inside a test is classified infra by the runner.
+        del full
+        report = run_doctor(settings, deps, connect_app=False)
         checks = [
             {
                 "name": r.name,

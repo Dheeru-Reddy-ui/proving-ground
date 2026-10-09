@@ -1,8 +1,9 @@
 """The agent loop (M2.4, ADR-0005): health check, claim, heartbeat, execute, report.
 
-- The full `pg doctor` (it connects to the app and holds AltTester's only driver slot for a few
-  seconds) runs at start-up and after any infra failure; before each claim only the quick
-  checks run. An unhealthy agent claims nothing and reports why.
+- Health is checked before every claim; `full=True` marks the checks at start-up, while
+  unhealthy and after an infra failure. The CLI runs the same device checks for both and never
+  probes the app, which is not running between jobs (ADR-0005). An unhealthy agent claims
+  nothing and reports why.
 - One job at a time (`max_concurrency: 1`).
 - Ctrl+C once: finish the current job, then stop. Twice: stop now; the job is reported as failed
   (retryable) so it runs again.
@@ -162,7 +163,7 @@ class AgentLoop:
             self.current = None
         self.installed = self.executor.installed_build()
         if outcome is Outcome.INFRA:
-            self.healthy = False  # the full doctor runs before the next claim
+            self.healthy = False  # re-checked as a full check before the next claim
         return True
 
     def run_forever(self) -> None:
