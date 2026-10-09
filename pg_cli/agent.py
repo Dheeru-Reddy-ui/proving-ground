@@ -17,12 +17,23 @@ app = typer.Typer(help="The device agent on this PC (Phase 2).", no_args_is_help
 def enroll(
     api: Annotated[str, typer.Option(help="The control plane's URL, e.g. https://….onrender.com")],
     name: Annotated[str, typer.Option(help="This agent's name, e.g. dheeru-pc.")],
+    token_env: Annotated[
+        str | None,
+        typer.Option(help="Read the enrolment token from this environment variable, not a prompt."),
+    ] = None,
 ) -> None:
     """Trade a one-time enrolment token for this agent's credentials (stored for this user only)."""
+    import os
+
     from pg_agent import config
     from pg_agent.client import AgentApi
 
-    enrolment = typer.prompt("Enrolment token", hide_input=True)
+    if token_env:
+        enrolment = os.environ.get(token_env, "")
+        if not enrolment:
+            raise typer.BadParameter(f"{token_env} is empty")
+    else:
+        enrolment = typer.prompt("Enrolment token", hide_input=True)
     client = AgentApi(api, None)
     try:
         answer = client.register(enrolment, name, {"platform": "android", "max_concurrency": 1})
