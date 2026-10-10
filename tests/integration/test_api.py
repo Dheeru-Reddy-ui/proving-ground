@@ -352,6 +352,32 @@ def test_tokens_are_scoped_and_revocable(make_client: ClientFactory, engine: Eng
 # --- a validation driven through the API --------------------------------------------------
 
 
+def test_status_keeps_when_an_agent_turned_unhealthy(
+    make_client: ClientFactory, engine: Engine
+) -> None:
+    clock = _real_clock()
+    client = make_client(clock=clock)
+    agent = enrol_agent(client, engine)
+    failing = [{"name": "adb device", "ok": False, "status": "FAIL", "detail": "x"}]
+    bad = {"healthy": False, "checks": failing}
+
+    def health() -> dict[str, Any]:
+        with session_scope(engine) as s:
+            return dict(s.execute(select(Agent)).scalar_one().health)
+
+    assert client.post("/v1/agents/status", json=bad, headers=agent).status_code == 204
+    first = health()["unhealthy_since"]
+    clock.now += timedelta(minutes=3)
+    assert client.post("/v1/agents/status", json=bad, headers=agent).status_code == 204
+    assert health()["unhealthy_since"] == first  # the same spell
+    good = {"healthy": True}
+    assert client.post("/v1/agents/status", json=good, headers=agent).status_code == 204
+    assert "unhealthy_since" not in health()
+    clock.now += timedelta(minutes=1)
+    assert client.post("/v1/agents/status", json=bad, headers=agent).status_code == 204
+    assert health()["unhealthy_since"] != first  # a new spell
+
+
 def test_an_agent_runs_a_validation_through_the_api(
     make_client: ClientFactory, engine: Engine
 ) -> None:

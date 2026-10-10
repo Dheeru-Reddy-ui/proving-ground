@@ -74,6 +74,62 @@ def test_alerts_are_raised_once_per_episode(engine: Engine) -> None:
         assert len(unsent) == 2  # the webhook refused them; they are recorded anyway
 
 
+def queued_device_job(engine: Engine, key: str) -> None:
+    with session_scope(engine) as s:
+        s.add(
+            Job(
+                type="RUN_TEST",
+                payload={},
+                requires={},
+                status="queued",
+                priority=0,
+                attempts=1,
+                max_attempts=3,
+                run_after=NOW,
+                idempotency_key=key,
+                last_error="InstallError: adb install failed: device 'X' not found",
+                created_at=NOW,
+                updated_at=NOW,
+            )
+        )
+
+
+def unhealthy(since: datetime) -> dict[str, object]:
+    return {
+        "healthy": False,
+        "checks": [
+            {"name": "adb device", "ok": False, "status": "FAIL", "detail": "no device"},
+            {"name": "python", "ok": True, "status": "PASS", "detail": "3.12"},
+        ],
+        "unhealthy_since": since.isoformat(),
+    }
+
+
+def test_an_agent_unhealthy_while_device_jobs_wait_raises_one_alert(engine: Engine) -> None:
+    reset(engine)
+    sent: list[str] = []
+    with session_scope(engine) as s:
+        for name, minutes in (("pc-1", 11), ("pc-2", 5)):
+            health = unhealthy(NOW - timedelta(minutes=minutes))
+            s.add(Agent(name=name, capabilities={}, health=health, last_seen_at=NOW))
+    assert raise_alerts(engine, NOW, lambda m: sent.append(m) or True) == []  # nothing waits
+    queued_device_job(engine, "q")
+    keys = raise_alerts(engine, NOW, lambda m: sent.append(m) or True)
+    assert [k.split(":")[0] for k in keys] == ["unhealthy-agent"]  # pc-2: only 5 min so far
+    assert sent == [
+        "Proving Ground: device agent pc-1 has been unhealthy for 11 min (failing: adb device) "
+        "while 1 device job(s) wait in the queue; it claims nothing until its checks pass."
+    ]
+    assert raise_alerts(engine, NOW + timedelta(minutes=3), lambda m: True) == []  # same spell
+    with session_scope(engine) as s:
+        for agent in s.execute(select(Agent)).scalars():
+            agent.last_seen_at = NOW + timedelta(minutes=20)  # both still report
+        pc1 = s.execute(select(Agent).where(Agent.name == "pc-1")).scalar_one()
+        pc1.health = {"healthy": True, "checks": []}
+    later = raise_alerts(engine, NOW + timedelta(minutes=20), lambda m: True)
+    assert later == [f"unhealthy-agent:pc-2:{(NOW - timedelta(minutes=5)).isoformat()}"]
+
+
 def test_metrics_need_the_admin_and_report_the_tables(
     engine: Engine, database_url: str, tmp_path: Path
 ) -> None:

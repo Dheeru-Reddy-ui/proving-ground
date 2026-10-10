@@ -1,10 +1,12 @@
-"""Operational alerts (M2.6): a job that went dead, or a device agent silent for over 10 minutes.
+"""Operational alerts (M2.6): a job that went dead; a device agent silent for over 10 minutes; a
+device agent that reports itself unhealthy for over 10 minutes while device jobs wait (it claims
+nothing then, so an unplugged phone leaves jobs queued rather than dead: ADR-0005).
 
 Each alert has a key naming its episode (the job and when it died; the agent and when it was last
-seen), so it is recorded once and sent once, whatever restarts happen. The worker loop checks
-every few seconds; when `PG_ALERT_WEBHOOK_URL` is set, new alerts are posted there as JSON with
-the text under both `text` and `content` (the fields Slack and Discord incoming webhooks read).
-The URL is a secret and is never logged.
+seen or turned unhealthy), so it is recorded once and sent once, whatever restarts happen. The
+worker loop checks every few seconds; when `PG_ALERT_WEBHOOK_URL` is set, new alerts are posted
+there as JSON with the text under both `text` and `content` (the fields Slack and Discord incoming
+webhooks read). The URL is a secret and is never logged.
 """
 
 from __future__ import annotations
@@ -12,9 +14,10 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 from datetime import datetime, timedelta
+from typing import Any
 
 import httpx
-from sqlalchemy import Engine, select
+from sqlalchemy import Engine, func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from pg_api import logs
@@ -23,6 +26,8 @@ from pg_db.session import session_scope
 
 log = logs.get("pg_worker.alerts")
 STALE_AGENT = timedelta(minutes=10)
+UNHEALTHY_AGENT = timedelta(minutes=10)
+DEVICE_JOB_TYPES = ("INSTALL_BUILD", "RUN_TEST")
 POST_TIMEOUT_S = 10.0
 POST_ATTEMPTS = 3
 
@@ -44,19 +49,52 @@ def due(engine: Engine, now: datetime) -> list[tuple[str, str, str]]:
                     f"attempts: {error}",
                 )
             )
+        waiting = s.execute(
+            select(func.count())
+            .select_from(Job)
+            .where(Job.status == "queued", Job.type.in_(DEVICE_JOB_TYPES))
+        ).scalar_one()
         for agent in s.execute(select(Agent).where(Agent.revoked_at.is_(None))).scalars():
-            if agent.last_seen_at is None or now - agent.last_seen_at <= STALE_AGENT:
+            if agent.last_seen_at is not None and now - agent.last_seen_at > STALE_AGENT:
+                minutes = int((now - agent.last_seen_at).total_seconds() // 60)
+                found.append(
+                    (
+                        f"stale-agent:{agent.name}:{agent.last_seen_at.isoformat()}",
+                        "stale_agent",
+                        f"Proving Ground: device agent {agent.name} has not been seen for "
+                        f"{minutes} min (last seen {agent.last_seen_at:%Y-%m-%d %H:%M} UTC).",
+                    )
+                )
                 continue
-            minutes = int((now - agent.last_seen_at).total_seconds() // 60)
+            since = unhealthy_since(agent.health)
+            if not waiting or since is None or now - since <= UNHEALTHY_AGENT:
+                continue
+            minutes = int((now - since).total_seconds() // 60)
+            failing = ", ".join(
+                str(c.get("name", "?"))
+                for c in agent.health.get("checks", [])
+                if isinstance(c, dict) and not c.get("ok", True)
+            )
             found.append(
                 (
-                    f"stale-agent:{agent.name}:{agent.last_seen_at.isoformat()}",
-                    "stale_agent",
-                    f"Proving Ground: device agent {agent.name} has not been seen for "
-                    f"{minutes} min (last seen {agent.last_seen_at:%Y-%m-%d %H:%M} UTC).",
+                    f"unhealthy-agent:{agent.name}:{since.isoformat()}",
+                    "unhealthy_agent",
+                    f"Proving Ground: device agent {agent.name} has been unhealthy for {minutes} "
+                    f"min (failing: {failing or 'not reported'}) while {waiting} device job(s) "
+                    "wait in the queue; it claims nothing until its checks pass.",
                 )
             )
     return found
+
+
+def unhealthy_since(health: dict[str, Any]) -> datetime | None:
+    """When the agent's current unhealthy spell began (set by the API's status route)."""
+    if health.get("healthy") is not False:
+        return None
+    try:
+        return datetime.fromisoformat(str(health.get("unhealthy_since")))
+    except ValueError:
+        return None
 
 
 def raise_alerts(engine: Engine, now: datetime, post: Poster | None) -> list[str]:

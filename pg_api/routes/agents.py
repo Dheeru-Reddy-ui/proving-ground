@@ -82,8 +82,15 @@ def status(body: StatusIn, request: Request, state: State) -> Response:
     """An agent reports its health, also when unhealthy and not claiming (ADR-0005)."""
     with session_scope(state.engine) as s:
         _, agent = _agent(s, request, state)
-        agent.last_seen_at = state.now()
-        agent.health = body.model_dump(mode="json", exclude={"capabilities"})
+        now = state.now()
+        agent.last_seen_at = now
+        health = body.model_dump(mode="json", exclude={"capabilities"})
+        if not body.healthy:
+            # When it turned unhealthy, kept across reports: an alert names the episode by it.
+            previous = agent.health or {}
+            since = previous.get("unhealthy_since") if previous.get("healthy") is False else None
+            health["unhealthy_since"] = since or now.isoformat()
+        agent.health = health
         if body.capabilities is not None:
             agent.capabilities = dict(body.capabilities)
     return Response(status_code=204)
