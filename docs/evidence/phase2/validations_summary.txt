@@ -1,0 +1,16 @@
+Validations on the deployed control plane, read from https://proving-ground.onrender.com/v1/validations/<id> on 2026-10-10 07:31 UTC
+(script output; times are request to finish; decisions are the stored gate decisions)
+
+ id key             build source   status     jobs                   decisions                          device min  wall min  LLM $
+  1 slo-1               2 cli      failed     dead 2, succeeded 1    none                                      0.0       1.1   0.00
+  2 slo-2               2 cli      succeeded  succeeded 97           accept 1, reject 3, review 12            40.9     182.4   0.00
+  3 slo-3               4 webhook  succeeded  succeeded 106          reject 1, review 15                      45.5     584.0   0.00
+  4 slo-4               2 cli      succeeded  succeeded 125          accept 1, review 15                      50.4      65.3   0.00
+  6 drill-unplug-1      2 cli      succeeded  succeeded 13           review 1                                  6.0      12.0   0.00
+  7 slo-5               4 webhook  succeeded  succeeded 108          reject 1, review 15                      41.2      54.6   0.00
+  8 slo-6               2 cli      succeeded  succeeded 118          accept 1, reject 1, review 14            49.6      65.6   0.00
+
+Builds:
+  build 1: e63240052d1b source=cli apk_in_storage=False registered 2026-10-08T05:24 UTC  ARM64 build without seeded-bug hooks (Phase 0)
+  build 2: 87d396162a05 source=cli apk_in_storage=True registered 2026-10-08T06:18 UTC  ARM64 build with seeded-bug hooks and telemetry (Phase 1)
+  build 4: 54cd88ab10aa source=webhook apk_in_storage=True registered 2026-10-09T15:06 UTC  No-change rebuild of build 2 (webhook path)
