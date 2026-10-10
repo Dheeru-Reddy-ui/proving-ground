@@ -1,0 +1,57 @@
+Live phone-unplug drill (M2.7), 2026-10-10, on the deployed control plane
+Validation 6 (build 2, feature store, n = 1, key drill-unplug-1), agent dheeru-pc, phone SM-S948B
+(serial RZGL12AFGGY) over USB. Dheeru pulled the USB cable twice. Times UTC. Excluded from the
+SLO report (a drill, not a measurement validation).
+
+Agent log events (artifacts/agent/agent-2026-10-09.log, fields trimmed):
+04:40:11 job_claimed job_id=332 type=INSTALL_BUILD attempts=1
+04:40:12 build_installed sha=87d396162a05
+04:40:29 job_claimed job_id=335 type=RUN_TEST attempts=1
+04:40:30 installing_build sha=87d396162a05
+04:40:30 job_failed job_id=335 error=adb install failed: adb.EXE: device 'RZGL12AFGGY' not found
+04:40:32 reverse_forward_not_restored error=could not create adb reverse tcp:13000: adb.EXE: device 'RZGL12AFGGY' not found
+04:40:33 agent_unhealthy full=True failing=['adb device']
+04:41:33 reverse_forward_not_restored error=could not create adb reverse tcp:13000: adb.EXE: device 'RZGL12AFGGY' not found
+04:41:34 agent_unhealthy full=True failing=['adb device']
+04:42:34 reverse_forward_not_restored error=could not create adb reverse tcp:13000: adb.EXE: device 'RZGL12AFGGY' not found
+04:42:35 agent_unhealthy full=True failing=['adb device']
+04:43:36 reverse_forward_restored port=13000
+04:43:38 job_claimed job_id=335 type=RUN_TEST attempts=2
+04:44:08 test_run job_id=335 outcome=passed rule=plugin_passed
+04:44:10 job_claimed job_id=336 type=RUN_TEST attempts=1
+04:47:12 test_run job_id=336 outcome=infra rule=plugin_infra
+04:47:13 reverse_forward_not_restored error=could not create adb reverse tcp:13000: adb.EXE: device 'RZGL12AFGGY' not found
+04:47:13 agent_unhealthy full=True failing=['adb device']
+04:48:14 reverse_forward_restored port=13000
+04:48:16 job_claimed job_id=336 type=RUN_TEST attempts=2
+04:48:44 test_run job_id=336 outcome=passed rule=plugin_passed
+04:48:46 job_claimed job_id=337 type=RUN_TEST attempts=1
+
+Executions and jobs (production database, after the validation finished):
+execution 478 job 335 attempt 1: passed (plugin_passed), wall 24.4 s, started 04:43:39
+execution 479 job 336 attempt 1: infra (plugin_infra), wall 148.1 s, started 04:44:11
+execution 480 job 336 attempt 2: infra (plugin_infra), wall 4.2 s, started 04:44:11
+execution 481 job 336 attempt 3: infra (plugin_infra), wall 3.8 s, started 04:44:11
+execution 482 job 336 attempt 4: passed (plugin_passed), wall 23.0 s, started 04:48:17
+job 335: succeeded, job attempts 2/3
+job 336: succeeded, job attempts 2/3
+validation 6: succeeded, 13 of 13 jobs succeeded, no dead jobs, decision: 1 review
+
+Unplug 1 (04:40, between claim and test start): the agent's install check could not reach the
+phone; job 335 failed retryable before the runner started (no execution row), went back to the
+queue with "adb install failed: ... device 'RZGL12AFGGY' not found", and the agent turned
+unhealthy (adb device) and claimed nothing for three minutes. /metrics showed
+pg_agent_healthy{agent="dheeru-pc"} 0 and one queued RUN_TEST. Plugged back in: the agent restored
+the adb reverse forward, re-claimed job 335 and it passed.
+
+Unplug 2 (04:44-04:47, during a test): the test had tapped "Buy on 'Magnet'" when the phone went;
+the next AltTester command timed out after 71.6 s (CommandResponseTimeoutException) and the
+runner classified the attempt infra; attempts 2 and 3 were infra in about 0.3 s each (setup
+could not recreate the reverse forward). The agent reported "infra on every attempt", the server
+put job 336 back in the queue (job attempt 1 of 3), the agent turned unhealthy. Plugged back in:
+job 336 re-claimed at 04:48:16 and passed.
+
+Against the expected behaviour in failure_modes.md: every step matched. No job went dead while the
+phone was missing: the unhealthy agent stops claiming, so the job waits queued with its error.
+Observed cost: detecting a phone lost mid-test took 148 s for the first attempt (the AltTester
+command timeout plus artifact collection), about 3 minutes per job in all; bounded, not a hang.
