@@ -30,7 +30,11 @@ Defined on 2026-10-08, **before** any measurement. Measured values come only fro
 
 ## Measured
 
-Report: [`results/phase2/slo_v1_2_3_4.md`](results/phase2/slo_v1_2_3_4.md), written by `pg slo report` from validations 1, 2, 3 and 4 (every validation requested in the window) and the probe file [`results/phase2/probes_2026-10-09.jsonl`](results/phase2/probes_2026-10-09.jsonl) (2026-10-09 13:57 UTC to 2026-10-10 04:32 UTC). The numbers are in the report only.
+Two reports. The numbers are in the reports only.
+
+### First window: validations 1-4 (2026-10-09/10)
+
+Report: [`results/phase2/slo_v1_2_3_4.md`](results/phase2/slo_v1_2_3_4.md), written by `pg slo report` from validations 1, 2, 3 and 4 (every validation requested in the window) and the probe file [`results/phase2/probes_2026-10-09.jsonl`](results/phase2/probes_2026-10-09.jsonl) (2026-10-09 13:57 UTC to 2026-10-10 04:32 UTC).
 
 | # | Service level | Against its target |
 |---|---|---|
@@ -47,3 +51,19 @@ What happened during the window (times UTC, from the agent log `artifacts/agent/
 - **The agent changed during the window**, each change because of what the live runs showed: the health check stopped probing the app (aa475dc) and started restoring a dropped `adb reverse` forward (b32fb87) before validation 2; artifact uploads became concurrent (caa3b33) before validation 3, and large text artifacts were gzipped (0193a78) from the restart inside validation 3. Validation 4 ran with all of them.
 - **Build registration to verdict** says little here: builds 2 and 4 were registered before the window and reused.
 - **Failed probes**, all on 2026-10-09 between 14:14 and 14:18: three failed in 16-156 ms, too fast to have reached Render, in the same minute the phone's USB connection reset (a PC-side network drop is suspected, not confirmed); two failed while Render restarted after the LLM key was changed.
+
+### Second window: the uninterrupted validations 4, 7 and 8 (2026-10-10)
+
+Asked for by Dheeru on 2026-10-10 after the first window, so that the time to verdict is measured on validations that ran without a pause. Validations 7 (build 4, `slo-5`) and 8 (build 2, `slo-6`) were run back to back with nobody touching the phone; validation 4 is the uninterrupted one from the first window. The first report stands as it is; this one is in addition to it.
+
+Report: [`results/phase2/slo_v4_7_8.md`](results/phase2/slo_v4_7_8.md), from validations 4, 7 and 8 and the probe files [`probes_2026-10-09.jsonl`](results/phase2/probes_2026-10-09.jsonl) and [`probes_2026-10-10.jsonl`](results/phase2/probes_2026-10-10.jsonl) (the second ran 2026-10-10 05:10 to 07:12 UTC).
+
+| # | Service level | Against its target |
+|---|---|---|
+| 1 | Time to verdict | Met by all three |
+| 2 | API availability | Met |
+| 3 | Device-job success | Met |
+
+- **Probe gap:** no probe ran from 04:32 to 05:10 UTC on 2026-10-10, between the end of validation 4 and the start of validation 7 (the phone-unplug drill, validation 6, and code changes happened then). Availability covers the probed part of the window only.
+- Validations 7 and 8 ran with the same agent and API code as validation 4; the fixes made in between (report generator, `unhealthy_agent` alert) were committed but not deployed until after validation 8.
+- The validation ids skip 5: a repeated `pg build validate` with an existing key returned validation 4 and used up a sequence value without inserting a row, as with build ids (`docs/VERSIONS.md`).
