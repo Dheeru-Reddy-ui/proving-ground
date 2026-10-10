@@ -4,7 +4,7 @@ Status of each phase: what works, what was verified (with evidence) and what is 
 
 ## Phase 2: Production platform
 
-Started 2026-10-08. Plan approved by Dheeru on 2026-10-08 with every recommended default. **Exit gate met on 2026-10-10**, awaiting Dheeru's sign-off: [`results/phase2/exit_report.md`](results/phase2/exit_report.md) (evidence, deviations, what is not verified).
+Started 2026-10-08. Plan approved by Dheeru on 2026-10-08 with every recommended default. **Closed 2026-10-10**: exit gate met and signed off by Dheeru the same day: [`results/phase2/exit_report.md`](results/phase2/exit_report.md) (evidence, deviations, what is not verified).
 
 ### Decisions (2026-10-08)
 

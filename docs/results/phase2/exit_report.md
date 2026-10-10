@@ -1,6 +1,6 @@
 # Phase 2 exit report: production platform
 
-Written 2026-10-10 by Claude for Dheeru's sign-off. Phase 2 started 2026-10-08 (plan approved the same day). Every number below is quoted from a linked evidence file or generated report; none is typed from memory.
+Written 2026-10-10 by Claude; **signed off by Dheeru on 2026-10-10**. Phase 2 started 2026-10-08 (plan approved the same day). Every number below is quoted from a linked evidence file or generated report; none is typed from memory.
 
 **Deployed:** https://proving-ground.onrender.com, Render deploy `dep-db4ubdijnfac738ipnq0` (commit `1bd1c4a`, live 2026-10-10 07:28 UTC), Supabase Free (Mumbai session pooler). Device agent `dheeru-pc` on the Windows PC with the SM-S948B over USB.
 
@@ -64,7 +64,7 @@ All were raised and approved, except where noted.
 
 ## For Dheeru
 
-1. Sign off the Phase 2 exit gate, or say what is missing.
+1. ~~Sign off the Phase 2 exit gate~~: signed off 2026-10-10.
 2. Optional: set `PG_ALERT_WEBHOOK_URL` on Render to a Discord or Slack incoming-webhook URL so alerts reach you.
 3. Optional: go through the review queue.
 4. Optional: measure registration to verdict on a fresh build, at your next game build.
