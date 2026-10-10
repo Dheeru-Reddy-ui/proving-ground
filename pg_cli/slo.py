@@ -19,7 +19,14 @@ import typer
 from sqlalchemy import select
 
 from pg_cli.settings import Settings
-from pg_core.slo import DeviceJob, Probe, SloReport, ValidationTiming, report
+from pg_core.slo import (
+    VERDICT_TARGET_MIN,
+    DeviceJob,
+    Probe,
+    SloReport,
+    ValidationTiming,
+    report,
+)
 from pg_db.models import Build, Job, Validation
 from pg_db.session import make_engine, session_scope
 
@@ -99,6 +106,10 @@ def render(r: SloReport, validation_ids: list[int], probe_files: list[Path]) -> 
     def mins(value: float | None) -> str:
         return "not measured" if value is None else f"{value} min"
 
+    def at(value: datetime | None) -> str:
+        return "still running" if value is None else f"{value:%Y-%m-%d %H:%M} UTC"
+
+    failed = ", ".join(str(v) for v in r.without_verdict)
     lines = [
         "# Phase 2 service levels (measured)",
         "",
@@ -107,21 +118,31 @@ def render(r: SloReport, validation_ids: list[int], probe_files: list[Path]) -> 
         + (f" and probe files {', '.join(p.name for p in probe_files)}" if probe_files else "")
         + ". Definitions: docs/SLO.md.",
         "",
+        f"Test window: {at(r.window_start)} (first validation requested) to {at(r.window_end)} "
+        "(last verdict).",
+        "",
         "| Service level | Measured |",
         "|---|---|",
+        f"| Validations with a verdict within {VERDICT_TARGET_MIN:g} min (target: all) | "
+        f"{r.within_target} of {r.validations}"
+        + (f"; validation(s) {failed} ended without a verdict" if failed else "")
+        + (f"; {r.unfinished} still running" if r.unfinished else "")
+        + " |",
         f"| Time from validation request to verdict, median | {mins(r.verdict_p50)} "
-        f"({r.finished} of {r.validations} validations finished) |",
+        f"({r.verdicts} of {r.validations} validations reached a verdict) |",
         f"| Time from validation request to verdict, worst | {mins(r.verdict_max)} |",
         f"| Time from build registration to verdict, per validation | "
         f"{', '.join(f'{m} min' for m in r.registration_minutes) or 'not measured'} |",
         f"| API availability during the test window | {pct(r.availability)} "
-        f"({r.probes_ok} of {r.probes} probes answered 200) |",
+        f"({r.probes_ok} of {r.probes} probes in the window answered 200"
+        + (f"; {r.probes_outside_window} outside it not counted" if r.probes_outside_window else "")
+        + ") |",
         f"| Device jobs that succeeded (product failures count as success) | "
         f"{pct(r.device_job_success)} ({r.device_jobs_ok} of {r.device_jobs}, "
         f"{r.device_attempts} attempts) |",
         "",
-        "Per validation (request to verdict): "
-        + (", ".join(f"{m} min" for m in r.verdict_minutes) or "none finished"),
+        "Per validation with a verdict (request to verdict): "
+        + (", ".join(f"{m} min" for m in r.verdict_minutes) or "none"),
         "",
     ]
     return "\n".join(lines)

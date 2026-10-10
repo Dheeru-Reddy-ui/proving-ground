@@ -21,14 +21,47 @@ def timing(vid: int, minutes: float | None, status: str = "succeeded") -> Valida
     )
 
 
-def test_time_to_verdict_counts_only_finished_validations() -> None:
-    r = report([timing(1, 70), timing(2, 90), timing(3, 110), timing(4, None, "running")], [], [])
-    assert r.validations == 4
-    assert r.finished == 3
-    assert r.verdict_minutes == (70.0, 90.0, 110.0)
-    assert r.registration_minutes == (100.0, 120.0, 140.0)
+def test_time_to_verdict_counts_only_validations_with_a_verdict() -> None:
+    r = report(
+        [
+            timing(1, 70),
+            timing(2, 90),
+            timing(3, 130),
+            timing(4, 1, "failed"),
+            timing(5, None, "running"),
+        ],
+        [],
+        [],
+    )
+    assert r.validations == 5
+    assert r.verdicts == 3
+    assert r.without_verdict == (4,)
+    assert r.unfinished == 1
+    assert r.verdict_minutes == (70.0, 90.0, 130.0)  # the failed one's minute is not a verdict
+    assert r.registration_minutes == (100.0, 120.0, 160.0)
     assert r.verdict_p50 == 90.0
-    assert r.verdict_max == 110.0
+    assert r.verdict_max == 130.0
+
+
+def test_a_validation_without_a_verdict_is_a_miss_against_the_target() -> None:
+    r = report([timing(1, 65), timing(2, 120), timing(3, 1, "failed"), timing(4, 121)], [], [])
+    assert r.within_target == 2  # 65 and 120 meet it; 121 does not; failed never does
+    assert r.validations == 4
+
+
+def test_availability_counts_only_probes_inside_the_window() -> None:
+    probes = [Probe(at=T + timedelta(minutes=m), ok=m != 50) for m in (-10, 0, 50, 90, 91)]
+    r = report([timing(1, 60), timing(2, 90)], probes, [])
+    assert (r.window_start, r.window_end) == (T, T + timedelta(minutes=90))
+    assert (r.probes, r.probes_ok, r.probes_outside_window) == (3, 2, 2)
+    assert r.availability == round(2 / 3, 4)
+
+
+def test_a_running_validation_leaves_the_window_open() -> None:
+    probes = [Probe(at=T + timedelta(minutes=m), ok=True) for m in (5, 500)]
+    r = report([timing(1, 60), timing(2, None, "running")], probes, [])
+    assert r.window_end is None
+    assert r.probes == 2
 
 
 def test_availability_and_device_job_success() -> None:
